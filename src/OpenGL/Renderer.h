@@ -17,7 +17,7 @@ public:
     virtual ~Renderer() = default;
 
     virtual void initialize();
-    virtual void renderScene(GUI& gui);
+    virtual void renderScene(std::shared_ptr<GUI> gui);
 
 protected:
     Shader shader;

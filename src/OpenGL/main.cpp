@@ -10,7 +10,6 @@
 #include <learnopengl/shader.h>
 #include <learnopengl/camera.h>
 #include <learnopengl/model.h>
-#include <learnopengl/control.h>
 #include <learnopengl/light.h>
 
 #include <iostream>
@@ -27,23 +26,17 @@
 constexpr unsigned int SCR_WIDTH = 1280;
 constexpr unsigned int SCR_HEIGHT = 720;
 
-// camera
-Camera camera(glm::vec3(0.0f, 10.0f, 30.0f));
-float lastX = 800.0f / 2.0;
-float lastY = 600.0 / 2.0;
-bool firstMouse = true;
-
-// timing
-float deltaTime = 0.0f;	
-float lastFrame = 0.0f;
-
-// control
-bool mouseControlEnabled = false;
-
 std::string modelFilePath = "resources/objects/YYB Symphony Miku by HB-Squiddy/yyb Symphony Miku by HB-Squiddy.pmx";
+// Initialize static member variables
+bool Window::firstMouse = true;
+Camera Window::camera(glm::vec3(0.0f, 10.0f, 30.0f));
+float Window::lastX = 800.0f / 2.0;
+float Window::lastY = 600.0f / 2.0;
 
 int main()
 {
+    auto gui = std::make_shared<GUI>();
+    Window::gui = gui;
     Window window(SCR_WIDTH, SCR_HEIGHT, "Rein Renderer GL");
 
     if (!window.init()) {
@@ -54,7 +47,7 @@ int main()
 
     // PBR Sphere
     auto object = std::make_unique<PBRObject>(SPHERE);
-    object->setMVP(camera, SCR_WIDTH, SCR_HEIGHT);
+    object->setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
     scene.addObject(std::move(object));
 
     // lights
@@ -70,46 +63,32 @@ int main()
     scene.addLight(light3);
 
     // Dear ImGui
-    GUI gui;
-    gui.init(window.getGLFWwindow());
+    gui->init(window.getGLFWwindow());
 
     // render loop
     // -----------
     while (!window.shouldClose())
     {
-        // per-frame time logic
-        // --------------------
-        float currentFrame = static_cast<float>(glfwGetTime());
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-
-        // input
-        // -----
-        processInput(window.getGLFWwindow());
-
-        // render
-        // ------
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        window.preRender();
 
         // render scene, supplying the convoluted irradiance map to the final shader.
         // ------------------------------------------------------------------------------------------
         for (auto& obj : scene.objects) {
-            obj->setMVP(camera, SCR_WIDTH, SCR_HEIGHT);
+            obj->setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
         }
 
         Renderer renderer(SCR_WIDTH, SCR_HEIGHT, scene);
         renderer.initialize();
         renderer.renderScene(gui);
 
-        if (gui.IsPBRActive()) {
+        if (gui->IsPBRActive()) {
             PBRRenderer pbrRenderer(SCR_WIDTH, SCR_HEIGHT, scene);
             pbrRenderer.initialize();
             pbrRenderer.renderScene(gui);
         }
 
         // Dear ImGui render
-        gui.render(camera, scene.objects, modelFilePath, scene.lights);
+        gui->render(window.getCamera(), scene.objects, modelFilePath, scene.lights);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

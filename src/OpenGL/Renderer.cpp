@@ -9,8 +9,8 @@ Renderer::Renderer(unsigned int SCR_WIDTH, unsigned int SCR_HEIGHT, Scene& scene
 
 void Renderer::initialize() {}
 
-void Renderer::renderScene(GUI& gui) {
-    if (gui.IsSkyBoxActive()) {
+void Renderer::renderScene(std::shared_ptr<GUI> gui) {
+    if (gui->IsSkyBoxActive()) {
         scene.skybox.drawSkybox(scene.getCamera(), SCR_WIDTH, SCR_HEIGHT);
     }
 

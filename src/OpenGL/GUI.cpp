@@ -5,7 +5,7 @@
 #include <learnopengl/filesystem.h>
 #include <stb_image.h>
 
-GUI::GUI() : pbrActive(true), wireframeMode(false) {
+GUI::GUI() : pbrActive(true), skyBoxActive(true), controlActive(false) {
     // 初始化其他参数
 }
 
@@ -14,6 +14,7 @@ GUI::~GUI() {
 }
 
 void GUI::init(GLFWwindow* window) {
+    // 初始化 ImGui
     const char* glsl_version = "#version 330";
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -35,6 +36,14 @@ void GUI::render(Camera& camera, std::vector<unique_ptr<Object>>& objects, std::
 
         // 显示帧率
         ImGui::Text("Framerate: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+        ImGui::Separator(); // 分隔线
+
+        // 控制鼠标和键盘开关
+        ImGui::Text("Control");
+        ImGui::Checkbox("Control", &controlActive);
+
+        ImGui::Separator(); // 分隔线
 
         // 显示和控制相机参数
         ImGui::Text("Camera Position");
@@ -65,9 +74,9 @@ void GUI::render(Camera& camera, std::vector<unique_ptr<Object>>& objects, std::
         ImGui::Separator(); // 分隔线
 
         ImGui::Text("EFFECTS");
+
         // 开关 PBR
         ImGui::Checkbox("PBR", &pbrActive);
-
         // 开关 SkyBox
         ImGui::Checkbox("SkyBox", &skyBoxActive);
 

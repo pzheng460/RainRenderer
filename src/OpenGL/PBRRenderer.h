@@ -7,7 +7,7 @@ class PBRRenderer : public Renderer {
 public:
     PBRRenderer(unsigned int SCR_WIDTH, unsigned int SCR_HEIGHT, Scene& scene);
     void initialize() override;
-    void renderScene(GUI& gui) override;
+    void renderScene(std::shared_ptr<GUI> gui) override;
 
 private:
     Shader pbrShader;

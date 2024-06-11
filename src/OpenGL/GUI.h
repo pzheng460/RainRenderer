@@ -3,12 +3,13 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "Object.h"
 
 #include <learnopengl/shader.h>
 #include <learnopengl/model.h>
 #include <learnopengl/camera.h>
 #include <learnopengl/light.h>
+
+#include "Object.h"
 
 class GUI {
 public:
@@ -22,16 +23,18 @@ public:
     bool IsSkyBoxActive() const {
         return skyBoxActive;
     }
-    bool IsWireframeMode() const {
-        return wireframeMode;
+    bool IsControlActive() const {
+        return controlActive;
     }
-    // 其他功能开关和参数的 getter
+
+    void ToggleControl() {
+        controlActive = !controlActive;
+    }
+
 private:
     bool pbrActive = true;
     bool skyBoxActive = true;
-
-    bool wireframeMode = false;
-    // 其他功能开关和参数
+    bool controlActive = false;
 };
 
 #endif // GUI_H

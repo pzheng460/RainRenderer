@@ -18,8 +18,8 @@ void PBRRenderer::initialize() {
     pbrShader.setInt("brdfLUT", 7);
 }
 
-void PBRRenderer::renderScene(GUI& gui) {
-    if (gui.IsSkyBoxActive()) {
+void PBRRenderer::renderScene(std::shared_ptr<GUI> gui) {
+    if (gui->IsSkyBoxActive()) {
         scene.skybox.drawSkybox(scene.getCamera(), SCR_WIDTH, SCR_HEIGHT);
     }
 
