@@ -106,7 +106,7 @@ int main()
         }
 
         // render Dear ImGui 渲染 Dear ImGui
-        gui->render(window.getCamera(), scene.objects, modelFilePath, scene.lights);
+        gui->render(window.getCamera(), modelFilePath, scene);
 
         // swap buffers and poll IO events (keys pressed/released, mouse moved etc.) 交换缓冲区并轮询IO事件（按键按下/释放、鼠标移动等）
         window.swapBuffersAndPollEvents();

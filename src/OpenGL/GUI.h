@@ -8,7 +8,7 @@
 #include <learnopengl/model.h>
 #include <learnopengl/camera.h>
 #include <learnopengl/light.h>
-
+#include "Scene.h"
 #include "Object.h"
 
 class GUI {
@@ -16,7 +16,7 @@ public:
     GUI();
     ~GUI();
     void init(GLFWwindow* window);
-    void render(Camera& camera, std::vector<unique_ptr<Object>>& objects, std::string& modelFilePath, std::vector<Light>& lights);
+    void render(Camera& camera, std::string& modelFilePath, Scene& scene);
     bool IsPBRActive() const {
         return pbrActive;
     }
