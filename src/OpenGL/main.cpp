@@ -73,13 +73,15 @@ int main()
         window.preRender();
 
         // update MVP 更新MVP
-        for (auto& obj : scene.objects) {
-            obj->setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
-        }
+        scene.skybox.setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
+
         for (auto& light : scene.lights) {
             light.setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
         }
-        scene.skybox.setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
+
+        for (auto& obj : scene.objects) {
+            obj->setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
+        }
 
         // render scene 渲染场景
         // render skybox 渲染天空盒
@@ -87,6 +89,7 @@ int main()
             scene.skybox.drawSkybox();
         }
 
+        // render lights 渲染光源
         for (int i = 0; i < scene.lights.size(); ++i) {
             scene.lights[i].draw();
         }
@@ -94,7 +97,9 @@ int main()
         // render objects 渲染物体
         for (auto& obj : scene.getObjects()) {
             if (auto pbrObj = dynamic_cast<PBRObject*>(obj.get())) {
-                pbrObj->draw(scene.lights, scene.skybox.getIrradianceMap(), scene.skybox.getPrefilterMap(), scene.skybox.getBRDFLUTTexture());
+                if (gui->IsPBRActive()) {
+                    pbrObj->draw(scene.lights, scene.skybox.getIrradianceMap(), scene.skybox.getPrefilterMap(), scene.skybox.getBRDFLUTTexture());
+                }
             } else {
                 obj->draw();
             }
