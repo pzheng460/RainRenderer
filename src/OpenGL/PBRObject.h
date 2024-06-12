@@ -3,13 +3,15 @@
 
 #include "Object.h"
 #include <learnopengl/filesystem.h>
+#include <learnopengl/light.h>
 
 class PBRObject : public Object {
 public:
-    PBRObject(const Model& model);
-    PBRObject(ImplicitGeometryType geometryType);
+    PBRObject(const Model& model, const Shader& shader);
+    PBRObject(ImplicitGeometryType geometryType, const Shader& shader);
 
     void loadPBRTextures();
+    void draw(std::vector<Light>& lights, unsigned int irradianceMap, unsigned int prefilterMap, unsigned int brdfLUTTexture);
 
     unsigned int getAlbedoMap() const override { return albedoMap; }
     unsigned int getNormalMap() const override { return normalMap; }

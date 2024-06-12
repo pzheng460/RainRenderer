@@ -15,7 +15,8 @@ public:
     Skybox(const Shader& shader, const std::vector<std::string>& faces);
     Skybox(const Shader& shader, const std::string& hdrPath);
 
-    void drawSkybox(Camera, float SCR_WIDTH, float SCR_HEIGHT);
+    void setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
+    void drawSkybox();
     void drawObjectGeometry(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
 
     unsigned int getIrradianceMap() const;
@@ -32,6 +33,7 @@ private:
     Shader skyboxShader;
     Shader equirectangularToCubemapShader, irradianceShader, prefilterShader, brdfShader;
     unsigned int envCubemap, irradianceMap, prefilterMap, brdfLUTTexture;
+    glm::vec3 position;
 
     // pbr: set up projection and view matrices for capturing data onto the 6 cubemap face directions
     // ----------------------------------------------------------------------------------------------

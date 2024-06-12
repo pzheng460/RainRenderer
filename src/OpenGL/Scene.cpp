@@ -27,11 +27,3 @@ const std::vector<std::unique_ptr<Object>>& Scene::getObjects() const {
 const std::vector<Light>& Scene::getLights() const {
     return lights;
 }
-
-void Scene::setCamera(const Camera& camera) {
-    this->camera = camera;
-}
-
-const Camera& Scene::getCamera() const {
-    return camera;
-}

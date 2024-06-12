@@ -66,22 +66,22 @@ public:
         unsigned int heightNr   = 1;
         for (unsigned int i = 0; i < textures.size(); i++)
         {
-            glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
-            // retrieve texture number (the N in diffuse_textureN)
+            glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding 激活正确的纹理单元，然后绑定纹理
+            // retrieve texture number (the N in diffuse_textureN) 获取纹理编号（diffuse_textureN中的N）
             string number;
             string name = textures[i].type;
             if (name == "texture_diffuse")
                 number = std::to_string(diffuseNr++);
             else if (name == "texture_specular")
-                number = std::to_string(specularNr++); // transfer unsigned int to string
+                number = std::to_string(specularNr++); // transfer unsigned int to string 将无符号整数转换为字符串
             else if (name == "texture_normal")
-                number = std::to_string(normalNr++); // transfer unsigned int to string
+                number = std::to_string(normalNr++); // transfer unsigned int to string 将无符号整数转换为字符串
             else if (name == "texture_height")
-                number = std::to_string(heightNr++); // transfer unsigned int to string
+                number = std::to_string(heightNr++); // transfer unsigned int to string 将无符号整数转换为字符串
 
-            // now set the sampler to the correct texture unit
+            // now set the sampler to the correct texture unit 现在将采样器设置为正确的纹理单元
             glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
-            // and finally bind the texture
+            // and finally bind the texture 并最终绑定纹理
             glBindTexture(GL_TEXTURE_2D, textures[i].id);
         }
         
@@ -101,11 +101,15 @@ private:
     // initializes all the buffer objects/arrays
     void setupMesh()
     {
-        // create buffers/arrays
+        // create buffers/arrays 创建缓冲区/数组
+        // create vertex array object 创建顶点数组对象
         glGenVertexArrays(1, &VAO);
+        // create vertex buffer object 创建顶点缓冲对象
         glGenBuffers(1, &VBO);
+        // create element buffer object 创建元素（索引）缓冲对象
         glGenBuffers(1, &EBO);
 
+        // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s). 绑定顶点数组对象，然后绑定和设置顶点缓冲区，然后配置顶点属性
         glBindVertexArray(VAO);
         // load data into vertex buffers
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -140,6 +144,8 @@ private:
 		// weights
 		glEnableVertexAttribArray(6);
 		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Weights));
+
+        // unbind VAO 解绑VAO
         glBindVertexArray(0);
     }
 };

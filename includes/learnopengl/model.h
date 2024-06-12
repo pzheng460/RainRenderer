@@ -220,9 +220,10 @@ inline unsigned int TextureFromFile(const char *path, const string &directory, b
     string filename = string(path);
     filename = directory + '/' + filename;
 
-    // 替换路径中的反斜杠为正斜杠
+    // replace '\' as '/' 替换路径中的反斜杠为正斜杠
     std::replace(filename.begin(), filename.end(), '\\', '/');
 
+    // generate texture ID 创建纹理对象
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
@@ -232,21 +233,29 @@ inline unsigned int TextureFromFile(const char *path, const string &directory, b
     {
         GLenum format;
         if (nrComponents == 1)
-            format = GL_RED;
+            format = GL_RED; // 灰度图
         else if (nrComponents == 3)
-            format = GL_RGB;
+            format = GL_RGB; // RGB图
         else if (nrComponents == 4)
-            format = GL_RGBA;
+            format = GL_RGBA; // RGBA图
 
+        // bind texture 绑定对象至当前上下文中的2D纹理
         glBindTexture(GL_TEXTURE_2D, textureID);
+
+        // load texture 加载纹理数据（即图片）至上下文（GPU）中的2D纹理
+        // 参数列表：
+        // target: 纹理目标，level: Mipmap级别，internalformat: 纹理存储格式，width: 纹理宽度，height: 纹理高度，border: 0，format: 像素数据格式，type: 像素数据类型，data: 图像数据
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        // generate Mipmap 生成多级渐远纹理Mipmap
         glGenerateMipmap(GL_TEXTURE_2D);
 
+        // set the texture wrapping parameters 设置纹理环绕及过滤模式
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+        // free memory 释放图像数据
         stbi_image_free(data);
     }
     else

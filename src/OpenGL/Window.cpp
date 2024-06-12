@@ -6,9 +6,9 @@ Window::Window(unsigned int width, unsigned int height, const std::string& title
         : width(width), height(height), title(title), window(nullptr) {}
 
 Window::~Window() {
-    // glfw: terminate, clearing all previously allocated GLFW resources.
+    // glfw: terminate, clearing all previously allocated GLFW resources. 清理所有之前分配的GLFW资源
     // ------------------------------------------------------------------
-    glfwTerminate(); // 清理所有之前分配的GLFW资源
+    glfwTerminate();
 }
 
 bool Window::init() {
@@ -39,7 +39,10 @@ bool Window::init() {
     // glfw window creation 创建窗口
     // --------------------
     window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+
+    // make window the current context 将窗口设置为OpenGL当前的上下文
     glfwMakeContextCurrent(window);
+
     if (!window) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -73,6 +76,8 @@ bool Window::init() {
     // then before rendering, configure the viewport to the original framebuffer's screen dimensions
     int scrWidth, scrHeight;
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
+    // set viewport to the size of the framebuffer 设置视口大小为帧缓冲区的大小
+    // 参数：左下角的横坐标x，左下角的纵坐标y，宽度，高度
     glViewport(0, 0, scrWidth, scrHeight);
 
     return true;

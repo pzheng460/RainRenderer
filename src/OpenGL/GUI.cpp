@@ -96,8 +96,8 @@ void GUI::render(Camera& camera, std::vector<unique_ptr<Object>>& objects, std::
             // load models
             stbi_set_flip_vertically_on_load(false); // tell stb_image.h to flip loaded texture's on the y-axis.
             Model ourModel(FileSystem::getPath(modelFilePath));
-
-            auto object = std::make_unique<Object>(ourModel, RenderMode::NORMAL);
+            Shader shader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
+            auto object = std::make_unique<Object>(ourModel, shader);
             objects.push_back(std::move(object));
         }
 

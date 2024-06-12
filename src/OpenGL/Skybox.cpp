@@ -131,15 +131,10 @@ void Skybox::convertHDRtoCubemap(unsigned int hdrTexture) {
     glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 }
 
-void Skybox::drawSkybox(Camera camera, float SCR_WIDTH, float SCR_HEIGHT) {
+void Skybox::drawSkybox() {
     skyboxShader.use();
 
     // MVP matrices
-    modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f)); // Translate it down so it's at the center of the scene
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f)); // Scale it down
-    viewMatrix = camera.GetViewMatrix();
-    projectionMatrix = glm::perspective(glm::radians(camera.Zoom), SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
-
     skyboxShader.setMat4("model", modelMatrix);
     skyboxShader.setMat4("view", viewMatrix);
     skyboxShader.setMat4("projection", projectionMatrix);
@@ -147,6 +142,12 @@ void Skybox::drawSkybox(Camera camera, float SCR_WIDTH, float SCR_HEIGHT) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
     renderCube();
+}
+
+void Skybox::setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT) {
+    modelMatrix = glm::translate(glm::mat4(1.0f), position);
+    viewMatrix = camera.GetViewMatrix();
+    projectionMatrix = glm::perspective(glm::radians(camera.Zoom), SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
 }
 
 void Skybox::drawObjectGeometry(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT) {
@@ -208,8 +209,7 @@ void Skybox::drawObjectGeometry(Camera& camera, float SCR_WIDTH, float SCR_HEIGH
     skyboxShader.use();
 
     // MVP matrices
-    modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f)); // Translate it down so it's at the center of the scene
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f)); // Scale it down
+    modelMatrix = glm::translate(glm::mat4(1.0f), position);
     viewMatrix = camera.GetViewMatrix();
     projectionMatrix = glm::perspective(glm::radians(camera.Zoom), SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
 
