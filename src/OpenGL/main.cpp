@@ -90,8 +90,10 @@ int main()
         }
 
         // render lights 渲染光源
-        for (int i = 0; i < scene.lights.size(); ++i) {
-            scene.lights[i].draw();
+        if (gui->IsLightActive()) {
+            for (int i = 0; i < scene.lights.size(); ++i) {
+                scene.lights[i].draw();
+            }
         }
 
         // render objects 渲染物体

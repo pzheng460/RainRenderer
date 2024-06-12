@@ -54,6 +54,8 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
         ImGui::SliderFloat("Yaw", &camera.Yaw, -180.0f, 180.0f);
         ImGui::Text("Camera Pitch");
         ImGui::SliderFloat("Pitch", &camera.Pitch, -89.0f, 89.0f);
+        ImGui::Text("Camera Roll");
+        ImGui::SliderFloat("Roll", &camera.Roll, -180.0f, 180.0f);
 
         // 更新相机的方向
         camera.updateCameraVectors();
@@ -75,10 +77,12 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
 
         ImGui::Text("EFFECTS");
 
-        // 开关 PBR
-        ImGui::Checkbox("PBR", &pbrActive);
         // 开关 SkyBox
         ImGui::Checkbox("SkyBox", &skyBoxActive);
+        // 开关 Light
+        ImGui::Checkbox("Light", &lightActive);
+        // 开关 PBR
+        ImGui::Checkbox("PBR", &pbrActive);
 
         ImGui::Separator(); // 分隔线
 

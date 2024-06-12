@@ -26,6 +26,9 @@ public:
     bool IsControlActive() const {
         return controlActive;
     }
+    bool IsLightActive() const {
+        return lightActive;
+    }
 
     void ToggleControl() {
         controlActive = !controlActive;
@@ -35,6 +38,7 @@ private:
     bool pbrActive = true;
     bool skyBoxActive = true;
     bool controlActive = false;
+    bool lightActive = true;
 };
 
 #endif // GUI_H
