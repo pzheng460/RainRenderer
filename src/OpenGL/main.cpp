@@ -53,10 +53,10 @@ int main()
     scene.addObject(std::move(object));
 
     // lights 光源
-    Light light0(glm::vec3(-10.0f,  10.0f, 10.0f), glm::vec3(300.0f, 300.0f, 300.0f));
-    Light light1(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(300.0f, 300.0f, 300.0f));
-    Light light2(glm::vec3(-10.0f, -10.0f, 10.0f), glm::vec3(300.0f, 300.0f, 300.0f));
-    Light light3(glm::vec3(10.0f, -10.0f, -10.0f), glm::vec3(300.0f, 300.0f, 300.0f));
+    Light light0(glm::vec3(-10.0f,  10.0f, 10.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    Light light1(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    Light light2(glm::vec3(-10.0f, -10.0f, 10.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    Light light3(glm::vec3(10.0f, -10.0f, -10.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
     scene.addLight(light0);
     scene.addLight(light1);
@@ -97,14 +97,27 @@ int main()
         }
 
         // render objects 渲染物体
-        for (auto& obj : scene.getObjects()) {
+        for (auto& obj : scene.objects) {
             if (auto pbrObj = dynamic_cast<PBRObject*>(obj.get())) {
                 if (gui->IsPBRActive()) {
-                    pbrObj->draw(scene.lights, scene.skybox.getIrradianceMap(), scene.skybox.getPrefilterMap(), scene.skybox.getBRDFLUTTexture());
+                    pbrObj->PBRShaderSetting(scene.lights, scene.skybox.getIrradianceMap(), scene.skybox.getPrefilterMap(), scene.skybox.getBRDFLUTTexture());
                 }
             } else {
-                obj->draw();
+                if (gui->getMode() == BASIC) {
+                    Shader basicShader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
+                    obj->setShader(basicShader);
+                    obj->basicShaderSetting();
+                } else if (gui->getMode() == PHONG) {
+                    Shader phongShader(FileSystem::getPath("src/OpenGL/shaders/phong.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/phong.fs").c_str());
+                    obj->setShader(phongShader);
+                    obj->phongShaderSetting(window.getCamera(), scene.lights);
+                } else if (gui->getMode() == DEPTH) {
+                    Shader depthShader(FileSystem::getPath("src/OpenGL/shaders/depth_testing.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/depth_testing.fs").c_str());
+                    obj->setShader(depthShader);
+                    obj->basicShaderSetting();
+                }
             }
+            obj->draw();
         }
 
         // render Dear ImGui 渲染 Dear ImGui

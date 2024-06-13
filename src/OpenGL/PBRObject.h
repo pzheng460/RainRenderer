@@ -11,7 +11,7 @@ public:
     PBRObject(ImplicitGeometryType geometryType, const Shader& shader);
 
     void loadPBRTextures();
-    void draw(std::vector<Light>& lights, unsigned int irradianceMap, unsigned int prefilterMap, unsigned int brdfLUTTexture);
+    void PBRShaderSetting(std::vector<Light>& lights, unsigned int irradianceMap, unsigned int prefilterMap, unsigned int brdfLUTTexture);
 
     unsigned int getAlbedoMap() const override { return albedoMap; }
     unsigned int getNormalMap() const override { return normalMap; }

@@ -21,7 +21,12 @@ class Object {
 public:
     Object(const Model& model, const Shader& shader);
     Object(ImplicitGeometryType geometryType, const Shader& shader);
+
     void setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
+    void setShader(const Shader& shader) { this->shader = shader; }  // 设置着色器（Shader）
+
+    void basicShaderSetting();
+    void phongShaderSetting(Camera& camera, std::vector<Light>& light);
     void draw();
 
     // 使用 std::variant 来存储 Model 或 ImplicitGeometryType

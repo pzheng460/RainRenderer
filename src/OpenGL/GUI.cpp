@@ -69,8 +69,10 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
             ImGui::SliderFloat(("X##" + std::to_string(i)).c_str(), &scene.lights[i].position.x, -20.0f, 20.0f);
             ImGui::SliderFloat(("Y##" + std::to_string(i)).c_str(), &scene.lights[i].position.y, -20.0f, 20.0f);
             ImGui::SliderFloat(("Z##" + std::to_string(i)).c_str(), &scene.lights[i].position.z, -20.0f, 20.0f);
+
             ImGui::Text("Light %d Color", i);
             ImGui::ColorEdit3(("Color##" + std::to_string(i)).c_str(), (float*)&scene.lights[i].color);
+            scene.lights[i].updateLightColor();
         }
 
         ImGui::Separator(); // 分隔线
@@ -83,6 +85,17 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
         ImGui::Checkbox("Light", &lightActive);
         // 开关 PBR
         ImGui::Checkbox("PBR", &pbrActive);
+
+        ImGui::Text("Render Mode");
+        if (ImGui::RadioButton("Basic", mode == BASIC)) {
+            mode = BASIC;
+        }
+        if (ImGui::RadioButton("Phong", mode == PHONG)) {
+            mode = PHONG;
+        }
+        if (ImGui::RadioButton("Depth", mode == DEPTH)) {
+            mode = DEPTH;
+        }
 
         ImGui::Separator(); // 分隔线
 

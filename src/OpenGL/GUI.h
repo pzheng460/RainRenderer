@@ -8,8 +8,14 @@
 #include <learnopengl/model.h>
 #include <learnopengl/camera.h>
 #include <learnopengl/light.h>
-#include "Scene.h"
 #include "Object.h"
+#include "Scene.h"
+
+enum renderMode {
+    BASIC,
+    PHONG,
+    DEPTH
+};
 
 class GUI {
 public:
@@ -17,6 +23,11 @@ public:
     ~GUI();
     void init(GLFWwindow* window);
     void render(Camera& camera, std::string& modelFilePath, Scene& scene);
+
+    renderMode getMode() const {
+        return mode;
+    }
+
     bool IsPBRActive() const {
         return pbrActive;
     }
@@ -35,6 +46,8 @@ public:
     }
 
 private:
+    renderMode mode = BASIC;
+
     bool pbrActive = true;
     bool skyBoxActive = true;
     bool controlActive = false;

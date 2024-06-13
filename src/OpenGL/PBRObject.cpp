@@ -1,7 +1,6 @@
 #include "PBRObject.h"
 #include <iostream>
 #include "render_implicit_geometry.h"
-#include <GLFW/glfw3.h>
 
 PBRObject::PBRObject(const Model& model, const Shader& shader)
         : Object(model, shader) {
@@ -22,7 +21,8 @@ void PBRObject::loadPBRTextures() {
     aoMap = loadTexture(FileSystem::getPath("resources/textures/pbr/rusted_iron/ao.png").c_str());
 }
 
-void PBRObject::draw(std::vector<Light>& lights, unsigned int irradianceMap, unsigned int prefilterMap, unsigned int brdfLUTTexture) {
+void PBRObject::PBRShaderSetting(std::vector<Light> &lights, unsigned int irradianceMap, unsigned int prefilterMap,
+                                 unsigned int brdfLUTTexture) {
     shader.use();
     shader.setInt("albedoMap", 0);
     shader.setInt("normalMap", 1);
@@ -33,14 +33,9 @@ void PBRObject::draw(std::vector<Light>& lights, unsigned int irradianceMap, uns
     shader.setInt("prefilterMap", 6);
     shader.setInt("brdfLUT", 7);
 
-    // render light source (simply re-render sphere at light positions)
-    // this looks a bit off as we use the same shader, but it'll make their positions obvious and
-    // keeps the codeprint small.
     for (unsigned int i = 0; i < lights.size(); ++i)
     {
-        glm::vec3 newPos = lights[i].getPosition() + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0);
-        newPos = lights[i].getPosition();
-        shader.setVec3("lightPositions[" + std::to_string(i) + "]", newPos);
+        shader.setVec3("lightPositions[" + std::to_string(i) + "]", lights[i].getPosition());
         shader.setVec3("lightColors[" + std::to_string(i) + "]", lights[i].getColor());
     }
 
@@ -69,12 +64,4 @@ void PBRObject::draw(std::vector<Light>& lights, unsigned int irradianceMap, uns
     glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
     glActiveTexture(GL_TEXTURE7);
     glBindTexture(GL_TEXTURE_2D, brdfLUTTexture);
-
-    // check types 进行类型检查
-    if (std::holds_alternative<Model>(data)) {
-        std::get<Model>(data).Draw(shader);
-    } else {
-        ImplicitGeometryType geometryType = std::get<ImplicitGeometryType>(data);
-        renderGeometry(geometryType);
-    }
 }

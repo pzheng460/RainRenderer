@@ -2,13 +2,13 @@
 #define SCENE_H
 
 #include <vector>
-#include "Object.h"
 #include "Skybox.h"
 #include <learnopengl/light.h>
 #include <learnopengl/shader.h>
 #include <learnopengl/camera.h>
 #include <glm/glm.hpp>
 #include <learnopengl/filesystem.h>
+#include "Object.h"
 
 class Scene {
 public:

@@ -5,11 +5,16 @@
 #include <learnopengl/filesystem.h>
 #include <learnopengl/camera.h>
 
+const glm::vec3 AMBIENT = glm::vec3(0.1);
+const glm::vec3 DIFFUSE = glm::vec3(0.5);
+const glm::vec3 SPECULAR = glm::vec3(1.0);
+
 class Light {
 public:
     Light(const glm::vec3& position, const glm::vec3& color)
-            : position(position), color(color),
+            : position(position), color(color), ambient(AMBIENT), diffuse(DIFFUSE), specular(SPECULAR),
               lightShader(FileSystem::getPath("src/OpenGL/shaders/light_cube.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/light_cube.fs").c_str()) {
+        updateLightColor();
         // set up vertex data (and buffer(s)) and configure vertex attributes
         // ------------------------------------------------------------------
         float vertices[] = {
@@ -85,10 +90,22 @@ public:
         projectionMatrix = glm::perspective(glm::radians(camera.Zoom), SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
     }
 
+    void updateLightColor() {
+        ambientColor = color * ambient;
+        diffuseColor = color * diffuse;
+        specularColor = color * specular;
+    }
+
     void setPosition(const glm::vec3& position) { this->position = position; }
-    void setColor(const glm::vec3& color) { this->color = color; }
+    void setColor(const glm::vec3& color) {
+        this->color = color;
+        updateLightColor();
+    }
     const glm::vec3& getPosition() const { return position; }
     const glm::vec3& getColor() const { return color; }
+    const glm::vec3& getAmbientColor() const { return ambientColor; }
+    const glm::vec3& getDiffuseColor() const { return diffuseColor; }
+    const glm::vec3& getSpecularColor() const { return specularColor; }
     friend class GUI;
 private:
     glm::mat4 modelMatrix = glm::mat4(1.0f);
@@ -99,6 +116,12 @@ private:
     unsigned int lightVAO, lightVBO;
     glm::vec3 position;
     glm::vec3 color;
+    glm::vec3 ambient;
+    glm::vec3 ambientColor;
+    glm::vec3 diffuse;
+    glm::vec3 diffuseColor;
+    glm::vec3 specular;
+    glm::vec3 specularColor;
 };
 
 #endif // LIGHT_H
