@@ -131,7 +131,7 @@ void Skybox::convertHDRtoCubemap(unsigned int hdrTexture) {
     glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 }
 
-void Skybox::drawSkybox() {
+void Skybox::draw() {
     skyboxShader.use();
 
     // MVP matrices

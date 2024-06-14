@@ -16,7 +16,7 @@ public:
     Skybox(const Shader& shader, const std::string& hdrPath);
 
     void setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
-    void drawSkybox();
+    void draw();
     void drawObjectGeometry(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
 
     unsigned int getIrradianceMap() const;

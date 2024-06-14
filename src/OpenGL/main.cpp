@@ -89,7 +89,7 @@ int main()
         // render scene 渲染场景
         // render skybox 渲染天空盒
         if (gui->IsSkyBoxActive()) {
-            scene.skybox.drawSkybox();
+            scene.skybox.draw();
         }
 
         // render lights 渲染光源
