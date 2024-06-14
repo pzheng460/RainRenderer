@@ -72,6 +72,8 @@ int main()
         // reprocess before rendering 在渲染之前的预处理
         window.preRender();
 
+        window.faceCulling(gui->IsFaceCullingActive());
+
         // update MVP 更新MVP
         scene.skybox.setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
         scene.floor.setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);

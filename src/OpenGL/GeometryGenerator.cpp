@@ -168,9 +168,7 @@ Model GeometryGenerator::generatePlane() {
             -50.0f, 0.0f, -50.0f, 0.0f, 2.0f,
             50.0f, 0.0f, -50.0f, 2.0f, 2.0f
     };
-    unsigned int indicesData[] = {
-            0, 1, 2, 3, 4, 5
-    };
+    unsigned int indicesData[] = {0, 2, 1, 3, 5, 4};
 
     for (unsigned int i = 0; i < 6; ++i) {
         Vertex vertex;

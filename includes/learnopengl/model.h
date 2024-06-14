@@ -237,7 +237,7 @@ inline unsigned int TextureFromFile(const char *path, const string &directory, b
         else if (nrComponents == 3)
             format = GL_RGB; // RGB图
         else if (nrComponents == 4)
-            format = GL_RGBA; // RGBA图
+            format = GL_RGBA; // RGBA图（带alpha值的透明通道）
 
         // bind texture 绑定对象至当前上下文中的2D纹理
         glBindTexture(GL_TEXTURE_2D, textureID);

@@ -27,6 +27,8 @@ public:
     void outlineSetting() const;
     void afterOutlineSetting() const;
 
+    void faceCulling(bool faceCullingActive) const;
+
     // GUI
     static std::shared_ptr<GUI> gui;
     // control

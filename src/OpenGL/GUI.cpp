@@ -85,6 +85,8 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
         ImGui::Checkbox("Light", &lightActive);
         // 开关 Outline
         ImGui::Checkbox("Outline", &outlineActive);
+        // 开关 面剔除
+        ImGui::Checkbox("Face Culling", &faceCullingActive);
         // 开关 Floor
         ImGui::Checkbox("Floor", &floorActive);
         // 开关 PBR

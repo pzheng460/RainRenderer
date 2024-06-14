@@ -142,10 +142,21 @@ void Window::outlineSetting() const {
 }
 
 void Window::afterOutlineSetting() const {
-    // reset stencil test
+    // reset stencil test 重置模板测试
     glStencilMask(0xFF);
     glStencilFunc(GL_ALWAYS, 0, 0xFF);
-    glEnable(GL_DEPTH_TEST); // 重新启用深度测试
+    // reset depth test 再次启用深度测试
+    glEnable(GL_DEPTH_TEST);
+}
+
+void Window::faceCulling(bool faceCullingActive) const {
+    if (faceCullingActive) {
+        glEnable(GL_CULL_FACE); // enable face culling 启用面剔除
+        glCullFace(GL_BACK); // cull back face 剔除背面
+        glFrontFace(GL_CCW); // GL_CCW for counter clock-wise 逆时针
+    } else {
+        glDisable(GL_CULL_FACE);
+    }
 }
 
 // whenever the window size changed (by OS or user resize) this callback function executes

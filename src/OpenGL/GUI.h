@@ -28,23 +28,28 @@ public:
         return mode;
     }
 
-    bool IsPBRActive() const {
-        return pbrActive;
-    }
     bool IsSkyBoxActive() const {
         return skyBoxActive;
-    }
-    bool IsControlActive() const {
-        return controlActive;
     }
     bool IsLightActive() const {
         return lightActive;
     }
+    bool IsFloorActive() const {
+        return floorActive;
+    }
+
+    bool IsPBRActive() const {
+        return pbrActive;
+    }
+
+    bool IsControlActive() const {
+        return controlActive;
+    }
     bool IsOutlineActive() const {
         return outlineActive;
     }
-    bool IsFloorActive() const {
-        return floorActive;
+    bool IsFaceCullingActive() const {
+        return faceCullingActive;
     }
 
     void ToggleControl() {
@@ -59,6 +64,7 @@ private:
     bool controlActive = false;
     bool lightActive = true;
     bool outlineActive = false;
+    bool faceCullingActive = false;
     bool floorActive = true;
 };
 
