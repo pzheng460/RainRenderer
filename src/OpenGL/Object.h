@@ -28,6 +28,7 @@ public:
 
     void setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
     void setShader(const Shader& shader) { this->shader = shader; }  // 设置着色器（Shader）
+    void setScale(float scale) { this->scale = scale; }  // 设置缩放
 
     void basicShaderSetting();
     void phongShaderSetting(Camera& camera, std::vector<Light>& light);

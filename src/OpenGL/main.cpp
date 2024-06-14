@@ -97,6 +97,7 @@ int main()
             }
         }
 
+        // render floor 渲染地板
         if (gui->IsFloorActive()) {
             scene.floor.basicShaderSetting();
             scene.floor.draw();
@@ -111,8 +112,9 @@ int main()
                 }
             } else {
                 if (gui->IsOutlineActive()) {
-
+                    window.preOutlineSetting();
                 }
+
                 if (gui->getMode() == BASIC) {
                     Shader basicShader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
                     obj->setShader(basicShader);
@@ -127,6 +129,18 @@ int main()
                     obj->basicShaderSetting();
                 }
                 obj->draw();
+
+                if (gui->IsOutlineActive()) {
+                    window.outlineSetting();
+                    Shader outlineShader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/stencil_single_color.fs").c_str());
+                    obj->setShader(outlineShader);
+                    obj->setScale(1.01f);
+                    obj->setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
+                    obj->basicShaderSetting();
+                    obj->draw();
+                    obj->setScale(1.0f);
+                    window.afterOutlineSetting();
+                }
             }
         }
 

@@ -133,9 +133,19 @@ void Window::preOutlineSetting() const {
 }
 
 void Window::outlineSetting() const {
-    // update stencil buffer
+    // only the stencil value who is not equal to 1 can pass 只有模板缓冲区的值不等于1的片段才会通过，可以绘制
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    // 禁止写入模板缓冲区，防止preOutlineSetting中已经写入的模板缓冲区被修改，因为GL_REPLACE会将模板缓冲区的值设置为ref的1
     glStencilMask(0x00);
+    // 禁用深度测试，防止有物体遮挡轮廓
+    glDisable(GL_DEPTH_TEST);
+}
+
+void Window::afterOutlineSetting() const {
+    // reset stencil test
+    glStencilMask(0xFF);
+    glStencilFunc(GL_ALWAYS, 0, 0xFF);
+    glEnable(GL_DEPTH_TEST); // 重新启用深度测试
 }
 
 // whenever the window size changed (by OS or user resize) this callback function executes

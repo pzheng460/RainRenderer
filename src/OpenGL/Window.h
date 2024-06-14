@@ -25,6 +25,7 @@ public:
 
     void preOutlineSetting() const;
     void outlineSetting() const;
+    void afterOutlineSetting() const;
 
     // GUI
     static std::shared_ptr<GUI> gui;
