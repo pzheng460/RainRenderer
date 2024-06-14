@@ -67,13 +67,24 @@ bool Window::init() {
 
     // configure global opengl state 设置全局opengl状态
     // -----------------------------
-    glEnable(GL_DEPTH_TEST); // 深度测试
-    // set depth function to less than AND equal for skybox depth trick.
-    glDepthFunc(GL_LEQUAL); // 深度测试函数
+    // depth test 深度测试
+    glEnable(GL_DEPTH_TEST);
+    // set depth function to less than AND equal for skybox depth trick. 设置深度函数为小于等于，用于天空盒深度技巧
+    glDepthFunc(GL_LEQUAL);
+
+    // stencil testing 启动模板测试
+    glEnable(GL_STENCIL_TEST);
+    // stencil function 模版函数
+    // 不等于1的片段通过，这里所有的模版值默认都是0，所以所有片段都会通过
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    // stencil operation 模板操作
+    // 模版测试失败时，保持模版缓冲区的内容；模版测试通过但深度测试失败，保持模版缓冲区的内容；模版测试和深度测试都通过时，也将模版缓冲区的值设置为ref的1
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
     // enable seamless cubemap sampling for lower mip levels in the pre-filter map.
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); // 立方体贴图无缝采样
 
-    // then before rendering, configure the viewport to the original framebuffer's screen dimensions
+    // then before rendering, configure the viewport to the original framebuffer's screen dimensions 然后在渲染之前，将视口配置为原始帧缓冲区的屏幕尺寸
     int scrWidth, scrHeight;
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
     // set viewport to the size of the framebuffer 设置视口大小为帧缓冲区的大小
@@ -100,8 +111,11 @@ void Window::preRender() {
 
     // 设置清屏颜色
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    // 清空颜色缓冲和深度缓冲
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // 清空颜色缓冲、深度缓冲、模板缓冲
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    // update stencil buffer 保证默认情况下，不会更新模板缓冲区
+    glStencilMask(0x00);
 }
 
 // swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -110,6 +124,18 @@ void Window::swapBuffersAndPollEvents() const {
     glfwSwapBuffers(window);
     // 检查触发事件（如键盘输入、鼠标移动、窗口更新等）
     glfwPollEvents();
+}
+
+void Window::preOutlineSetting() const {
+    // update stencil buffer
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilMask(0xFF);
+}
+
+void Window::outlineSetting() const {
+    // update stencil buffer
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilMask(0x00);
 }
 
 // whenever the window size changed (by OS or user resize) this callback function executes

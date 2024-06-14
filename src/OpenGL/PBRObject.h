@@ -10,21 +10,11 @@ public:
     PBRObject(const Model& model, const Shader& shader);
     PBRObject(ImplicitGeometryType geometryType, const Shader& shader);
 
-    void loadPBRTextures();
     void PBRShaderSetting(std::vector<Light>& lights, unsigned int irradianceMap, unsigned int prefilterMap, unsigned int brdfLUTTexture);
-
-    unsigned int getAlbedoMap() const override { return albedoMap; }
-    unsigned int getNormalMap() const override { return normalMap; }
-    unsigned int getMetallicMap() const override { return metallicMap; }
-    unsigned int getRoughnessMap() const override { return roughnessMap; }
-    unsigned int getAOMap() const override { return aoMap; }
+    void draw() override;
 
 private:
-    unsigned int albedoMap;
-    unsigned int normalMap;
-    unsigned int metallicMap;
-    unsigned int roughnessMap;
-    unsigned int aoMap;
+    void loadPBRTextures(std::vector<Texture>& textures, const std::string& albedoPath, const std::string& normalPath, const std::string& metallicPath, const std::string& roughnessPath, const std::string& aoPath);
 };
 
 #endif // PBROBJECT_H

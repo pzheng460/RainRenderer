@@ -23,6 +23,9 @@ public:
     void processInput(GLFWwindow *window);
     void swapBuffersAndPollEvents() const;
 
+    void preOutlineSetting() const;
+    void outlineSetting() const;
+
     // GUI
     static std::shared_ptr<GUI> gui;
     // control

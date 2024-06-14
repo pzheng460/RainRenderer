@@ -4,21 +4,26 @@
 
 PBRObject::PBRObject(const Model& model, const Shader& shader)
         : Object(model, shader) {
-    loadPBRTextures();
+//    loadPBRTextures();
 }
 
 PBRObject::PBRObject(ImplicitGeometryType geometryType, const Shader& shader)
-        : Object(geometryType, shader) {
-    loadPBRTextures();
+        : Object(geometryType, shader, false) {
+    loadPBRTextures(model.meshes[0].textures,
+                    FileSystem::getPath("resources/textures/pbr/rusted_iron/albedo.png"),
+                    FileSystem::getPath("resources/textures/pbr/rusted_iron/normal.png"),
+                    FileSystem::getPath("resources/textures/pbr/rusted_iron/metallic.png"),
+                    FileSystem::getPath("resources/textures/pbr/rusted_iron/roughness.png"),
+                    FileSystem::getPath("resources/textures/pbr/rusted_iron/ao.png"));
 }
 
-void PBRObject::loadPBRTextures() {
+void PBRObject::loadPBRTextures(std::vector<Texture>& textures, const std::string& albedoPath, const std::string& normalPath, const std::string& metallicPath, const std::string& roughnessPath, const std::string& aoPath) {
     // Load PBR textures
-    albedoMap = loadTexture(FileSystem::getPath("resources/textures/pbr/rusted_iron/albedo.png").c_str());
-    normalMap = loadTexture(FileSystem::getPath("resources/textures/pbr/rusted_iron/normal.png").c_str());
-    metallicMap = loadTexture(FileSystem::getPath("resources/textures/pbr/rusted_iron/metallic.png").c_str());
-    roughnessMap = loadTexture(FileSystem::getPath("resources/textures/pbr/rusted_iron/roughness.png").c_str());
-    aoMap = loadTexture(FileSystem::getPath("resources/textures/pbr/rusted_iron/ao.png").c_str());
+    textures.push_back(loadTexture(albedoPath, "albedoMap"));
+    textures.push_back(loadTexture(normalPath, "normalMap"));
+    textures.push_back(loadTexture(metallicPath, "metallicMap"));
+    textures.push_back(loadTexture(roughnessPath, "roughnessMap"));
+    textures.push_back(loadTexture(aoPath, "aoMap"));
 }
 
 void PBRObject::PBRShaderSetting(std::vector<Light> &lights, unsigned int irradianceMap, unsigned int prefilterMap,
@@ -45,18 +50,6 @@ void PBRObject::PBRShaderSetting(std::vector<Light> &lights, unsigned int irradi
     shader.setMat4("projection", projectionMatrix);
     shader.setMat3("normalMatrix", glm::transpose(glm::inverse(modelMatrix)));
 
-    // bind pre-computed PBR data
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, albedoMap);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, normalMap);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, metallicMap);
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, roughnessMap);
-    glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_2D, albedoMap);
-
     // bind pre-computed IBL data
     glActiveTexture(GL_TEXTURE5);
     glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
@@ -64,4 +57,8 @@ void PBRObject::PBRShaderSetting(std::vector<Light> &lights, unsigned int irradi
     glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
     glActiveTexture(GL_TEXTURE7);
     glBindTexture(GL_TEXTURE_2D, brdfLUTTexture);
+}
+
+void PBRObject::draw() {
+    model.Draw(shader, GL_TRIANGLE_STRIP);
 }

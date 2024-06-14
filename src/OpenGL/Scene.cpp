@@ -12,6 +12,10 @@ void Scene::addLight(const Light& light) {
     lights.push_back(light);
 }
 
+void Scene::addFloor(const Object& floor) {
+    this->floor = floor;
+}
+
 void Scene::setSkybox(const Skybox& skybox) {
     this->skybox = skybox;
 }

@@ -5,7 +5,7 @@
 #include <learnopengl/filesystem.h>
 #include <stb_image.h>
 
-GUI::GUI() : pbrActive(true), skyBoxActive(true), controlActive(false) {
+GUI::GUI() {
     // 初始化其他参数
 }
 
@@ -83,6 +83,10 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
         ImGui::Checkbox("SkyBox", &skyBoxActive);
         // 开关 Light
         ImGui::Checkbox("Light", &lightActive);
+        // 开关 Outline
+        ImGui::Checkbox("Outline", &outlineActive);
+        // 开关 Floor
+        ImGui::Checkbox("Floor", &floorActive);
         // 开关 PBR
         ImGui::Checkbox("PBR", &pbrActive);
 

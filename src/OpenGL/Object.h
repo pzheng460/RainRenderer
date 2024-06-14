@@ -12,31 +12,26 @@
 #include <string>
 
 enum ImplicitGeometryType {
+    MODEL,
     SPHERE,
     CUBE,
-    QUAD
+    QUAD,
+    PLANE
 };
 
 class Object {
 public:
+    Object() = default;
     Object(const Model& model, const Shader& shader);
-    Object(ImplicitGeometryType geometryType, const Shader& shader);
+    Object(ImplicitGeometryType geometryType, const Shader& shader, bool initializeTextures = true);
+    virtual ~Object() = default;
 
     void setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
     void setShader(const Shader& shader) { this->shader = shader; }  // 设置着色器（Shader）
 
     void basicShaderSetting();
     void phongShaderSetting(Camera& camera, std::vector<Light>& light);
-    void draw();
-
-    // 使用 std::variant 来存储 Model 或 ImplicitGeometryType
-    std::variant<Model, ImplicitGeometryType> data;
-
-    virtual unsigned int getAlbedoMap() const { return 0; }  // 虚函数
-    virtual unsigned int getNormalMap() const { return 0; }
-    virtual unsigned int getMetallicMap() const { return 0; }
-    virtual unsigned int getRoughnessMap() const { return 0; }
-    virtual unsigned int getAOMap() const { return 0; }
+    virtual void draw();
 
     const glm::mat4 getModelMatrix() const {
         return modelMatrix;
@@ -51,14 +46,20 @@ public:
     }
 
 protected:
-    void renderGeometry(ImplicitGeometryType geometryType);
+    void generateModel(ImplicitGeometryType geometryType);
+    void loadTextures(std::vector<Texture>& textures,
+                      const std::string& diffusePath);
+    Texture loadTexture(const std::string& path, const std::string& typeName);
     Shader shader;
+    Model model;
+    ImplicitGeometryType geometryType;
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     glm::mat4 viewMatrix {};
     glm::mat4 projectionMatrix {};
 
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
+    float scale = 1.0f;
 };
 
 #endif // OBJECT_H

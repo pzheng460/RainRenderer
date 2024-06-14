@@ -74,6 +74,7 @@ int main()
 
         // update MVP 更新MVP
         scene.skybox.setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
+        scene.floor.setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
 
         for (auto& light : scene.lights) {
             light.setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
@@ -96,13 +97,22 @@ int main()
             }
         }
 
+        if (gui->IsFloorActive()) {
+            scene.floor.basicShaderSetting();
+            scene.floor.draw();
+        }
+
         // render objects 渲染物体
         for (auto& obj : scene.objects) {
             if (auto pbrObj = dynamic_cast<PBRObject*>(obj.get())) {
                 if (gui->IsPBRActive()) {
                     pbrObj->PBRShaderSetting(scene.lights, scene.skybox.getIrradianceMap(), scene.skybox.getPrefilterMap(), scene.skybox.getBRDFLUTTexture());
+                    pbrObj->draw();
                 }
             } else {
+                if (gui->IsOutlineActive()) {
+
+                }
                 if (gui->getMode() == BASIC) {
                     Shader basicShader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
                     obj->setShader(basicShader);
@@ -116,8 +126,8 @@ int main()
                     obj->setShader(depthShader);
                     obj->basicShaderSetting();
                 }
+                obj->draw();
             }
-            obj->draw();
         }
 
         // render Dear ImGui 渲染 Dear ImGui

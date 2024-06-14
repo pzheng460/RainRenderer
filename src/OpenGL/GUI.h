@@ -40,6 +40,12 @@ public:
     bool IsLightActive() const {
         return lightActive;
     }
+    bool IsOutlineActive() const {
+        return outlineActive;
+    }
+    bool IsFloorActive() const {
+        return floorActive;
+    }
 
     void ToggleControl() {
         controlActive = !controlActive;
@@ -48,10 +54,12 @@ public:
 private:
     renderMode mode = BASIC;
 
-    bool pbrActive = true;
-    bool skyBoxActive = true;
+    bool pbrActive = false;
+    bool skyBoxActive = false;
     bool controlActive = false;
     bool lightActive = true;
+    bool outlineActive = false;
+    bool floorActive = true;
 };
 
 #endif // GUI_H

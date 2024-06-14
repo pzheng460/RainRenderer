@@ -1,30 +1,30 @@
 #include "Object.h"
-#include "render_implicit_geometry.h"
+#include "GeometryGenerator.h"
 
 Object::Object(const Model& model, const Shader& shader)
-        : data(model), shader(shader) {
+        : model(model), shader(shader), geometryType(MODEL) {
 }
 
-Object::Object(ImplicitGeometryType geometryType, const Shader& shader)
-        : data(geometryType), shader(shader) {
+Object::Object(ImplicitGeometryType geometryType, const Shader& shader, bool initializeTextures)
+        : model(), shader(shader), geometryType(geometryType) {
+    generateModel(geometryType);
+    if (initializeTextures) {
+        loadTextures(model.meshes[0].textures,
+                     FileSystem::getPath("resources/textures/metal.png"));
+    }
 }
 
 void Object::setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT) {
     // MVP matrices
     modelMatrix = glm::translate(glm::mat4(1.0f), position);
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(scale));
     viewMatrix = camera.GetViewMatrix();
     // 参数：fov视野，aspect宽高比，zNear近平面，zFar远平面
     projectionMatrix = glm::perspective(glm::radians(camera.Zoom), SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
 }
 
 void Object::draw() {
-    // check types 进行类型检查
-    if (std::holds_alternative<Model>(data)) {
-        std::get<Model>(data).Draw(shader);
-    } else {
-        ImplicitGeometryType geometryType = std::get<ImplicitGeometryType>(data);
-        renderGeometry(geometryType);
-    }
+    model.Draw(shader);
 }
 
 void Object::basicShaderSetting() {
@@ -36,24 +36,6 @@ void Object::basicShaderSetting() {
 
 void Object::phongShaderSetting(Camera& camera, std::vector<Light>& lights) {
     shader.use();
-
-//    // directional light
-//    shader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-//    shader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-//    shader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-//    shader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-//
-//    // spotLight
-//    shader.setVec3("spotLight.position", camera.Position);
-//    shader.setVec3("spotLight.direction", camera.Front);
-//    shader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
-//    shader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-//    shader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
-//    shader.setFloat("spotLight.constant", 1.0f);
-//    shader.setFloat("spotLight.linear", 0.09f);
-//    shader.setFloat("spotLight.quadratic", 0.032f);
-//    shader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-//    shader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 
     for (unsigned int i = 0; i < lights.size(); ++i)
     {
@@ -75,19 +57,42 @@ void Object::phongShaderSetting(Camera& camera, std::vector<Light>& lights) {
     shader.setMat4("projection", projectionMatrix);
 }
 
-void Object::renderGeometry(ImplicitGeometryType geometryType) {
+void Object::generateModel(ImplicitGeometryType geometryType) {
     switch (geometryType) {
         case SPHERE:
-            renderSphere();
+            model = std::move(GeometryGenerator::generateSphere());
             break;
         case CUBE:
-            renderCube();
+            model = GeometryGenerator::generateCube();
             break;
         case QUAD:
-            renderQuad();
+            model = GeometryGenerator::generateQuad();
+            break;
+        case PLANE:
+            model = GeometryGenerator::generatePlane();
             break;
         default:
             std::cerr << "Unknown geometry type" << std::endl;
             break;
     }
+}
+
+void Object::loadTextures(std::vector<Texture>& textures,
+                                           const std::string& diffusePath) {
+    std::cout << "Loading texture from path: " << diffusePath << std::endl;
+    Texture texture = loadTexture(diffusePath, "texture_diffuse");
+    if (texture.id != 0) { // 检查纹理是否加载成功
+        textures.push_back(texture);
+        std::cout << "Texture loaded successfully." << std::endl;
+    } else {
+        std::cerr << "Texture failed to load." << std::endl;
+    }
+}
+
+Texture Object::loadTexture(const std::string& path, const std::string& typeName) {
+    Texture texture;
+    texture.id = TextureFromFile(path.c_str(), "");
+    texture.type = typeName;
+    texture.path = path.c_str();
+    return texture;
 }
