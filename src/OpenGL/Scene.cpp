@@ -1,9 +1,5 @@
 #include "Scene.h"
 
-Scene::Scene() {}
-
-Scene::~Scene() {}
-
 void Scene::addObject(std::unique_ptr<Object>&& object) {
     objects.push_back(std::move(object));
 }
@@ -12,7 +8,7 @@ void Scene::addLight(const Light& light) {
     lights.push_back(light);
 }
 
-void Scene::addFloor(const Object& floor) {
+void Scene::setFloor(const Object& floor) {
     this->floor = floor;
 }
 

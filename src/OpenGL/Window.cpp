@@ -70,7 +70,8 @@ bool Window::init() {
     // depth test 深度测试
     glEnable(GL_DEPTH_TEST);
     // set depth function to less than AND equal for skybox depth trick. 设置深度函数为小于等于，用于天空盒深度技巧
-    glDepthFunc(GL_LEQUAL);
+    glDepthFunc(GL_LESS); // default value 默认值，这一行可有可无，使用less可以确保early-z测试
+//    glDepthFunc(GL_LEQUAL);
 
     // stencil testing 启动模板测试
     glEnable(GL_STENCIL_TEST);
@@ -83,13 +84,6 @@ bool Window::init() {
 
     // enable seamless cubemap sampling for lower mip levels in the pre-filter map.
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); // 立方体贴图无缝采样
-
-    // then before rendering, configure the viewport to the original framebuffer's screen dimensions 然后在渲染之前，将视口配置为原始帧缓冲区的屏幕尺寸
-    int scrWidth, scrHeight;
-    glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
-    // set viewport to the size of the framebuffer 设置视口大小为帧缓冲区的大小
-    // 参数：左下角的横坐标x，左下角的纵坐标y，宽度，高度
-    glViewport(0, 0, scrWidth, scrHeight);
 
     return true;
 }
@@ -116,6 +110,13 @@ void Window::preRender() {
 
     // update stencil buffer 保证默认情况下，不会更新模板缓冲区
     glStencilMask(0x00);
+
+    // then before rendering, configure the viewport to the original framebuffer's screen dimensions 然后在渲染之前，将视口配置为原始帧缓冲区的屏幕尺寸
+    int scrWidth, scrHeight;
+    glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
+    // set viewport to the size of the framebuffer 设置视口大小为帧缓冲区的大小
+    // 参数：左下角的横坐标x，左下角的纵坐标y，宽度，高度
+    glViewport(0, 0, scrWidth, scrHeight);
 }
 
 // swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

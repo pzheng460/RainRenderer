@@ -1,17 +1,29 @@
 #include "Skybox.h"
 #include <stb_image.h>
 #include "render_implicit_geometry.h"
-#include <learnopengl/filesystem.h>
 
 Skybox::Skybox(const Shader& shader, const std::vector<std::string>& faces)
-        : skyboxShader(shader),
-          equirectangularToCubemapShader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/equirectangular_to_cubemap.fs").c_str()),
-          irradianceShader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/irradiance_convolution.fs").c_str()),
-          prefilterShader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/prefilter.fs").c_str()),
-          brdfShader(FileSystem::getPath("src/OpenGL/shaders/brdf.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/brdf.fs").c_str()) {
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+        : skyboxShader(shader) {
+    loadCubemap(faces);
+}
+
+Skybox::Skybox(const Shader& shader, const std::string& hdrPath) : skyboxShader(shader) {
+    skyboxShader.use();
+    skyboxShader.setInt("environmentMap", 0);
+    setupFramebuffers();
+
+    loadSphereMap(hdrPath);
+
+    convertSphereMapToCubeMap(cubemapTexture);
+    createIrradianceMap();
+    createPrefilterMap();
+    generateBRDFLUTTexture();
+}
+
+void Skybox::loadCubemap(const std::vector<std::string> &faces) {
+    stbi_set_flip_vertically_on_load(false);
+    glGenTextures(1, &cubemapTexture);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 
     int width, height, nrChannels;
     for (unsigned int i = 0; i < faces.size(); i++)
@@ -33,25 +45,6 @@ Skybox::Skybox(const Shader& shader, const std::vector<std::string>& faces)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    cubemapTexture = textureID;
-}
-
-Skybox::Skybox(const Shader& shader, const std::string& hdrPath) : skyboxShader(shader),
-                                                                   equirectangularToCubemapShader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/equirectangular_to_cubemap.fs").c_str()),
-                                                                   irradianceShader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/irradiance_convolution.fs").c_str()),
-                                                                   prefilterShader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/prefilter.fs").c_str()),
-                                                                   brdfShader(FileSystem::getPath("src/OpenGL/shaders/brdf.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/brdf.fs").c_str()) {
-    skyboxShader.use();
-    skyboxShader.setInt("environmentMap", 0);
-    setupFramebuffers();
-
-    loadHDRtexture(hdrPath);
-
-    convertHDRtoCubemap(cubemapTexture);
-    createIrradianceMap();
-    createPrefilterMap();
-    generateBRDFLUTTexture();
 }
 
 void Skybox::setupFramebuffers() {
@@ -67,7 +60,7 @@ void Skybox::setupFramebuffers() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Skybox::loadHDRtexture(const std::string &hdrPath) {
+void Skybox::loadSphereMap(const std::string &hdrPath) {
     stbi_set_flip_vertically_on_load(true);
     int width, height, nrComponents;
     float *data = stbi_loadf(hdrPath.c_str(), &width, &height, &nrComponents, 0);
@@ -91,7 +84,7 @@ void Skybox::loadHDRtexture(const std::string &hdrPath) {
     cubemapTexture = hdrTexture;
 }
 
-void Skybox::convertHDRtoCubemap(unsigned int hdrTexture) {
+void Skybox::convertSphereMapToCubeMap(unsigned int hdrTexture) {
     // pbr: setup cubemap to render to and attach to framebuffer
     // ---------------------------------------------------------
     glGenTextures(1, &envCubemap);
@@ -132,6 +125,7 @@ void Skybox::convertHDRtoCubemap(unsigned int hdrTexture) {
 }
 
 void Skybox::draw() {
+    glDepthFunc(GL_LEQUAL);
     skyboxShader.use();
 
     // MVP matrices
@@ -142,6 +136,7 @@ void Skybox::draw() {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
     renderCube();
+    glDepthFunc(GL_LESS); // set depth function back to default
 }
 
 void Skybox::setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT) {
@@ -150,7 +145,7 @@ void Skybox::setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT) {
     projectionMatrix = glm::perspective(glm::radians(camera.Zoom), SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
 }
 
-void Skybox::drawObjectGeometry(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT) {
+void Skybox::drawGeometry() {
     float skyboxVertices[] = {
             // positions
             -1.0f,  1.0f, -1.0f,
@@ -206,14 +201,12 @@ void Skybox::drawObjectGeometry(Camera& camera, float SCR_WIDTH, float SCR_HEIGH
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
+    // draw skybox as last
+    glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
     skyboxShader.use();
 
     // MVP matrices
-    modelMatrix = glm::translate(glm::mat4(1.0f), position);
-    viewMatrix = camera.GetViewMatrix();
-    projectionMatrix = glm::perspective(glm::radians(camera.Zoom), SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
-
-    skyboxShader.setMat4("model", modelMatrix);
+    viewMatrix = glm::mat4(glm::mat3(viewMatrix)); // remove translation from the view matrix
     skyboxShader.setMat4("view", viewMatrix);
     skyboxShader.setMat4("projection", projectionMatrix);
 

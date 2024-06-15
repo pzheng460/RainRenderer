@@ -7,17 +7,19 @@
 #include <learnopengl/shader.h>
 #include <learnopengl/camera.h>
 #include <learnopengl/model.h>
+#include <learnopengl/filesystem.h>
 #include <vector>
 #include <string>
 
 class Skybox {
 public:
+    Skybox() = default;
     Skybox(const Shader& shader, const std::vector<std::string>& faces);
     Skybox(const Shader& shader, const std::string& hdrPath);
 
     void setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
     void draw();
-    void drawObjectGeometry(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
+    void drawGeometry();
 
     unsigned int getIrradianceMap() const;
     unsigned int getPrefilterMap() const;
@@ -31,7 +33,10 @@ private:
     unsigned int cubemapTexture;
 
     Shader skyboxShader;
-    Shader equirectangularToCubemapShader, irradianceShader, prefilterShader, brdfShader;
+    Shader equirectangularToCubemapShader = Shader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/equirectangular_to_cubemap.fs").c_str());
+    Shader irradianceShader = Shader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/irradiance_convolution.fs").c_str());
+    Shader prefilterShader = Shader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/prefilter.fs").c_str());
+    Shader brdfShader = Shader(FileSystem::getPath("src/OpenGL/shaders/brdf.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/brdf.fs").c_str());
     unsigned int envCubemap, irradianceMap, prefilterMap, brdfLUTTexture;
     glm::vec3 position;
 
@@ -49,9 +54,11 @@ private:
             };
 
     unsigned int captureFBO, captureRBO;
+    void loadCubemap(const std::vector<std::string>& faces);
+
     void setupFramebuffers();
-    void loadHDRtexture(const std::string& hdrPath);
-    void convertHDRtoCubemap(unsigned int hdrTexture);
+    void loadSphereMap(const std::string& hdrPath);
+    void convertSphereMapToCubeMap(unsigned int hdrTexture);
     void createIrradianceMap();
     void createPrefilterMap();
     void generateBRDFLUTTexture();

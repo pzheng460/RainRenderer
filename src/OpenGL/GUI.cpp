@@ -80,7 +80,36 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
         ImGui::Text("EFFECTS");
 
         // 开关 SkyBox
-        ImGui::Checkbox("SkyBox", &skyBoxActive);
+        ImGui::Checkbox("Skybox", &skyBoxActive);
+        if (!skyBoxActive) { ImGui::BeginDisabled(); }
+        {
+            ImGui::Text("Skybox Load Mode");
+            if (ImGui::RadioButton("Cube Map", skyboxMode == CUBEMAP)) {
+                skyboxMode = CUBEMAP;
+                Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/skybox.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/skybox.fs").c_str());
+                vector<std::string> faces =
+                        {
+                                FileSystem::getPath("resources/textures/skybox/right.jpg"),
+                                FileSystem::getPath("resources/textures/skybox/left.jpg"),
+                                FileSystem::getPath("resources/textures/skybox/top.jpg"),
+                                FileSystem::getPath("resources/textures/skybox/bottom.jpg"),
+                                FileSystem::getPath("resources/textures/skybox/front.jpg"),
+                                FileSystem::getPath("resources/textures/skybox/back.jpg")
+                        };
+                Skybox skybox(skyboxShader, faces);
+                scene.setSkybox(skybox);
+            }
+            ImGui::SameLine();
+            if (ImGui::RadioButton("Sphere Map", skyboxMode == SPHEREMAP)) {
+                skyboxMode = SPHEREMAP;
+                Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/background.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/background.fs").c_str());
+                Skybox skybox(skyboxShader, FileSystem::getPath("resources/textures/hdr/newport_loft.hdr"));
+                scene.setSkybox(skybox);
+            }
+        }
+        if (!skyBoxActive) { ImGui::EndDisabled(); }
+
+
         // 开关 Light
         ImGui::Checkbox("Light", &lightActive);
         // 开关 Outline

@@ -8,13 +8,18 @@
 #include <learnopengl/model.h>
 #include <learnopengl/camera.h>
 #include <learnopengl/light.h>
-#include "Object.h"
+//#include "Object.h"
 #include "Scene.h"
 
 enum renderMode {
     BASIC,
     PHONG,
     DEPTH
+};
+
+enum skyboxLoadMode {
+    CUBEMAP,
+    SPHEREMAP
 };
 
 class GUI {
@@ -26,6 +31,10 @@ public:
 
     renderMode getMode() const {
         return mode;
+    }
+
+    skyboxLoadMode getSkyboxLoadMode() const {
+        return skyboxMode;
     }
 
     bool IsSkyBoxActive() const {
@@ -58,14 +67,15 @@ public:
 
 private:
     renderMode mode = BASIC;
+    skyboxLoadMode skyboxMode = SPHEREMAP;
 
     bool pbrActive = false;
-    bool skyBoxActive = false;
+    bool skyBoxActive = true;
     bool controlActive = false;
     bool lightActive = true;
     bool outlineActive = false;
     bool faceCullingActive = false;
-    bool floorActive = true;
+    bool floorActive = false;
 };
 
 #endif // GUI_H

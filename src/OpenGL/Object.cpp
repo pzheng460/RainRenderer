@@ -5,12 +5,12 @@ Object::Object(const Model& model, const Shader& shader)
         : model(model), shader(shader), geometryType(MODEL) {
 }
 
-Object::Object(ImplicitGeometryType geometryType, const Shader& shader, bool initializeTextures)
+Object::Object(ImplicitGeometryType geometryType, const Shader& shader, bool initializeTextures, std::string texturePath)
         : model(), shader(shader), geometryType(geometryType) {
     generateModel(geometryType);
     if (initializeTextures) {
         loadTextures(model.meshes[0].textures,
-                     FileSystem::getPath("resources/textures/metal.png"));
+                     FileSystem::getPath(texturePath.c_str()));
     }
 }
 

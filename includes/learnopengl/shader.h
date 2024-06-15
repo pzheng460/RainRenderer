@@ -13,6 +13,8 @@ class Shader
 {
 public:
     unsigned int ID;
+
+    Shader() = default;
     // constructor generates the shader on the fly 构造函数在运行时生成着色器
     // ------------------------------------------------------------------------
     Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr)

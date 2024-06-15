@@ -27,8 +27,8 @@ constexpr unsigned int SCR_HEIGHT = 720;
 std::string modelFilePath = "resources/objects/YYB Symphony Miku by HB-Squiddy/yyb Symphony Miku by HB-Squiddy.pmx";
 bool Window::firstMouse = true;
 Camera Window::camera(glm::vec3(0.0f, 10.0f, 30.0f));
-float Window::lastX = 800.0f / 2.0;
-float Window::lastY = 600.0f / 2.0;
+float Window::lastX = (float) SCR_WIDTH / 2.0;
+float Window::lastY = (float) SCR_HEIGHT / 2.0;
 
 int main()
 {
@@ -46,13 +46,38 @@ int main()
     // initialize scene 初始化scene类
     Scene scene;
 
-    // PBR Sphere PBR球体
+    // load skybox 加载天空盒
+    if (gui->getSkyboxLoadMode() == CUBEMAP) {
+        Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/skybox.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/skybox.fs").c_str());
+        vector<std::string> faces =
+                {
+                        FileSystem::getPath("resources/textures/skybox/right.jpg"),
+                        FileSystem::getPath("resources/textures/skybox/left.jpg"),
+                        FileSystem::getPath("resources/textures/skybox/top.jpg"),
+                        FileSystem::getPath("resources/textures/skybox/bottom.jpg"),
+                        FileSystem::getPath("resources/textures/skybox/front.jpg"),
+                        FileSystem::getPath("resources/textures/skybox/back.jpg")
+                };
+        Skybox skybox(skyboxShader, faces);
+        scene.setSkybox(skybox);
+    } else if (gui->getSkyboxLoadMode() == SPHEREMAP) {
+        Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/background.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/background.fs").c_str());
+        Skybox skybox(skyboxShader, FileSystem::getPath("resources/textures/hdr/newport_loft.hdr"));
+        scene.setSkybox(skybox);
+    }
+
+    // load floor 加载地板
+    Shader floorShader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
+    Object floor(PLANE, floorShader, true, "resources/textures/metal.png");
+    scene.setFloor(floor);
+
+    // load PBR Sphere 加载PBR球体
     Shader pbrShader(FileSystem::getPath("src/OpenGL/shaders/pbr.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/pbr.fs").c_str());
     auto object = std::make_unique<PBRObject>(SPHERE, pbrShader);
     object->setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
     scene.addObject(std::move(object));
 
-    // lights 光源
+    // load lights 加载光源
     Light light0(glm::vec3(-10.0f,  10.0f, 10.0f), glm::vec3(1.0f, 1.0f, 1.0f));
     Light light1(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(1.0f, 1.0f, 1.0f));
     Light light2(glm::vec3(-10.0f, -10.0f, 10.0f), glm::vec3(1.0f, 1.0f, 1.0f));
@@ -72,6 +97,7 @@ int main()
         // reprocess before rendering 在渲染之前的预处理
         window.preRender();
 
+        // face culling 面剔除
         window.faceCulling(gui->IsFaceCullingActive());
 
         // update MVP 更新MVP
@@ -84,12 +110,6 @@ int main()
 
         for (auto& obj : scene.objects) {
             obj->setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
-        }
-
-        // render scene 渲染场景
-        // render skybox 渲染天空盒
-        if (gui->IsSkyBoxActive()) {
-            scene.skybox.draw();
         }
 
         // render lights 渲染光源
@@ -143,6 +163,15 @@ int main()
                     obj->setScale(1.0f);
                     window.afterOutlineSetting();
                 }
+            }
+        }
+
+        // render skybox 渲染天空盒，放在最后渲染保证early-z测试
+        if (gui->IsSkyBoxActive()) {
+            if (gui->getSkyboxLoadMode() == CUBEMAP) {
+                scene.skybox.drawGeometry();
+            } else if (gui->getSkyboxLoadMode() == SPHEREMAP) {
+                scene.skybox.draw();
             }
         }
 

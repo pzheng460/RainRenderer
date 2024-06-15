@@ -23,7 +23,7 @@ class Object {
 public:
     Object() = default;
     Object(const Model& model, const Shader& shader);
-    Object(ImplicitGeometryType geometryType, const Shader& shader, bool initializeTextures = true);
+    Object(ImplicitGeometryType geometryType, const Shader& shader, bool initializeTextures = true, std::string texturePath = "");
     virtual ~Object() = default;
 
     void setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
