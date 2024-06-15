@@ -131,6 +131,9 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
         if (ImGui::RadioButton("Depth", mode == DEPTH)) {
             mode = DEPTH;
         }
+        if (ImGui::RadioButton("Environment Mapping", mode == ENVIRONMENTMAPPING)) {
+            mode = ENVIRONMENTMAPPING;
+        }
 
         ImGui::Separator(); // 分隔线
 

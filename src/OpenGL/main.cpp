@@ -149,6 +149,10 @@ int main()
                     Shader depthShader(FileSystem::getPath("src/OpenGL/shaders/depth_testing.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/depth_testing.fs").c_str());
                     obj->setShader(depthShader);
                     obj->basicShaderSetting();
+                } else if (gui->getMode() == ENVIRONMENTMAPPING) {
+                    Shader environmentMappingShader(FileSystem::getPath("src/OpenGL/shaders/environment_mapping.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/environment_mapping.fs").c_str());
+                    obj->setShader(environmentMappingShader);
+                    obj->phongShaderSetting(window.getCamera(), scene.lights);
                 }
                 obj->draw();
 

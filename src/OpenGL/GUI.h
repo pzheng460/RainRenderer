@@ -14,7 +14,8 @@
 enum renderMode {
     BASIC,
     PHONG,
-    DEPTH
+    DEPTH,
+    ENVIRONMENTMAPPING
 };
 
 enum skyboxLoadMode {
@@ -69,13 +70,16 @@ private:
     renderMode mode = BASIC;
     skyboxLoadMode skyboxMode = SPHEREMAP;
 
-    bool pbrActive = false;
-    bool skyBoxActive = true;
     bool controlActive = false;
+
+    bool pbrActive = false;
+
+    bool skyBoxActive = true;
     bool lightActive = true;
+    bool floorActive = false;
+
     bool outlineActive = false;
     bool faceCullingActive = false;
-    bool floorActive = false;
 };
 
 #endif // GUI_H
