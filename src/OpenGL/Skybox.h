@@ -21,9 +21,17 @@ public:
     void draw();
     void drawGeometry();
 
-    unsigned int getIrradianceMap() const;
-    unsigned int getPrefilterMap() const;
-    unsigned int getBRDFLUTTexture() const;
+    unsigned int getIrradianceMap() const {
+      return irradianceMap;
+    }
+
+    unsigned int getPrefilterMap() const {
+      return prefilterMap;
+    }
+
+    unsigned int getBRDFLUTTexture() const {
+      return brdfLUTTexture;
+    }
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     glm::mat4 viewMatrix {};

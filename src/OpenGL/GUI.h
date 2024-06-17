@@ -58,6 +58,9 @@ public:
     bool IsOutlineActive() const {
         return outlineActive;
     }
+    bool IsNormalVisualizationActive() const {
+        return normalVisualizationActive;
+    }
     bool IsFaceCullingActive() const {
         return faceCullingActive;
     }
@@ -79,6 +82,7 @@ private:
     bool floorActive = false;
 
     bool outlineActive = false;
+    bool normalVisualizationActive = false;
     bool faceCullingActive = false;
 };
 

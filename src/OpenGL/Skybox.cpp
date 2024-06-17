@@ -8,8 +8,6 @@ Skybox::Skybox(const Shader& shader, const std::vector<std::string>& faces)
 }
 
 Skybox::Skybox(const Shader& shader, const std::string& hdrPath) : skyboxShader(shader) {
-    skyboxShader.use();
-    skyboxShader.setInt("environmentMap", 0);
     setupFramebuffers();
 
     loadSphereMap(hdrPath);
@@ -127,6 +125,8 @@ void Skybox::convertSphereMapToCubeMap(unsigned int hdrTexture) {
 void Skybox::draw() {
     glDepthFunc(GL_LEQUAL);
     skyboxShader.use();
+
+    skyboxShader.setInt("environmentMap", 0);
 
     // MVP matrices
     skyboxShader.setMat4("model", modelMatrix);
@@ -336,16 +336,4 @@ void Skybox::generateBRDFLUTTexture() {
     renderQuad();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-unsigned int Skybox::getIrradianceMap() const {
-    return irradianceMap;
-}
-
-unsigned int Skybox::getPrefilterMap() const {
-    return prefilterMap;
-}
-
-unsigned int Skybox::getBRDFLUTTexture() const {
-    return brdfLUTTexture;
 }

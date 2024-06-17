@@ -110,15 +110,17 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
         if (!skyBoxActive) { ImGui::EndDisabled(); }
 
 
-        // 开关 Light
+        // Light 光源
         ImGui::Checkbox("Light", &lightActive);
-        // 开关 Outline
+        // Outline 轮廓
         ImGui::Checkbox("Outline", &outlineActive);
-        // 开关 面剔除
+        // normal visualization 法线可视化
+        ImGui::Checkbox("Normal", &normalVisualizationActive);
+        // face culling 面剔除
         ImGui::Checkbox("Face Culling", &faceCullingActive);
-        // 开关 Floor
+        // Floor 地板
         ImGui::Checkbox("Floor", &floorActive);
-        // 开关 PBR
+        // PBR
         ImGui::Checkbox("PBR", &pbrActive);
 
         ImGui::Text("Render Mode");

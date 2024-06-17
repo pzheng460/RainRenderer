@@ -156,6 +156,7 @@ int main()
                 }
                 obj->draw();
 
+                // render outline 渲染轮廓
                 if (gui->IsOutlineActive()) {
                     window.outlineSetting();
                     Shader outlineShader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/stencil_single_color.fs").c_str());
@@ -166,6 +167,14 @@ int main()
                     obj->draw();
                     obj->setScale(1.0f);
                     window.afterOutlineSetting();
+                }
+
+                // render normal visualization 渲染法线可视化
+                if (gui->IsNormalVisualizationActive()) {
+                    Shader normalShader(FileSystem::getPath("src/OpenGL/shaders/normal_visualization.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.fs").c_str(), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.gs").c_str());
+                    obj->setShader(normalShader);
+                    obj->basicShaderSetting();
+                    obj->draw();
                 }
             }
         }
