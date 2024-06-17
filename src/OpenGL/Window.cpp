@@ -71,7 +71,6 @@ bool Window::init() {
     glEnable(GL_DEPTH_TEST);
     // set depth function to less than AND equal for skybox depth trick. 设置深度函数为小于等于，用于天空盒深度技巧
     glDepthFunc(GL_LESS); // default value 默认值，这一行可有可无，使用less可以确保early-z测试
-//    glDepthFunc(GL_LEQUAL);
 
     // stencil testing 启动模板测试
     glEnable(GL_STENCIL_TEST);
@@ -157,6 +156,22 @@ void Window::faceCulling(bool faceCullingActive) const {
         glFrontFace(GL_CCW); // GL_CCW for counter clock-wise 逆时针
     } else {
         glDisable(GL_CULL_FACE);
+    }
+}
+
+void Window::MSAA(bool MSAAActive) const {
+    if (MSAAActive) {
+        glEnable(GL_MULTISAMPLE);
+    } else {
+        glDisable(GL_MULTISAMPLE);
+    }
+}
+
+void Window::gammaCorrection(bool gammaActive) const {
+    if (gammaActive) {
+        glEnable(GL_FRAMEBUFFER_SRGB);
+    } else {
+        glDisable(GL_FRAMEBUFFER_SRGB);
     }
 }
 

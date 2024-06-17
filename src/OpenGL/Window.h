@@ -28,6 +28,8 @@ public:
     void afterOutlineSetting() const;
 
     void faceCulling(bool faceCullingActive) const;
+    void MSAA(bool MSAAActive) const;
+    void gammaCorrection(bool gammaActive) const;
 
     // GUI
     static std::shared_ptr<GUI> gui;

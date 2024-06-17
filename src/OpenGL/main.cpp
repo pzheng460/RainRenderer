@@ -68,7 +68,7 @@ int main()
 
     // load floor 加载地板
     Shader floorShader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
-    Object floor(PLANE, floorShader, true, "resources/textures/metal.png");
+    Object floor(PLANE, floorShader, true, "resources/textures/wood.png");
     scene.setFloor(floor);
 
     // load PBR Sphere 加载PBR球体
@@ -99,6 +99,12 @@ int main()
 
         // face culling 面剔除
         window.faceCulling(gui->IsFaceCullingActive());
+
+        // MSAA 抗锯齿
+        window.MSAA(gui->IsMSAAActive());
+
+        // Gamma Correction 伽马校正
+        window.gammaCorrection(gui->IsGammaCorrectionActive());
 
         // update MVP 更新MVP
         scene.skybox.setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
@@ -144,6 +150,10 @@ int main()
                 } else if (gui->getMode() == PHONG) {
                     Shader phongShader(FileSystem::getPath("src/OpenGL/shaders/phong.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/phong.fs").c_str());
                     obj->setShader(phongShader);
+                    obj->phongShaderSetting(window.getCamera(), scene.lights);
+                } else if (gui->getMode() == BLINNPHONG) {
+                    Shader blinnPhongShader(FileSystem::getPath("src/OpenGL/shaders/blinn_phong.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/blinn_phong.fs").c_str());
+                    obj->setShader(blinnPhongShader);
                     obj->phongShaderSetting(window.getCamera(), scene.lights);
                 } else if (gui->getMode() == DEPTH) {
                     Shader depthShader(FileSystem::getPath("src/OpenGL/shaders/depth_testing.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/depth_testing.fs").c_str());

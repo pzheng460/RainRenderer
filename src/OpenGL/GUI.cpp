@@ -112,14 +112,21 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
 
         // Light 光源
         ImGui::Checkbox("Light", &lightActive);
+        ImGui::SameLine();
+        // Floor 地板
+        ImGui::Checkbox("Floor", &floorActive);
+
         // Outline 轮廓
         ImGui::Checkbox("Outline", &outlineActive);
         // normal visualization 法线可视化
         ImGui::Checkbox("Normal", &normalVisualizationActive);
         // face culling 面剔除
         ImGui::Checkbox("Face Culling", &faceCullingActive);
-        // Floor 地板
-        ImGui::Checkbox("Floor", &floorActive);
+        // MSAA 抗锯齿
+        ImGui::Checkbox("MSAA", &MSAAActive);
+        // Gamma Correction 伽马校正
+        ImGui::Checkbox("Gamma Correction", &gammaCorrectionActive);
+
         // PBR
         ImGui::Checkbox("PBR", &pbrActive);
 
@@ -129,6 +136,9 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
         }
         if (ImGui::RadioButton("Phong", mode == PHONG)) {
             mode = PHONG;
+        }
+        if (ImGui::RadioButton("Blinn-Phong", mode == BLINNPHONG)) {
+            mode = BLINNPHONG;
         }
         if (ImGui::RadioButton("Depth", mode == DEPTH)) {
             mode = DEPTH;

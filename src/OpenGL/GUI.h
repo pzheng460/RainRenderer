@@ -14,6 +14,7 @@
 enum renderMode {
     BASIC,
     PHONG,
+    BLINNPHONG,
     DEPTH,
     ENVIRONMENTMAPPING
 };
@@ -38,6 +39,14 @@ public:
         return skyboxMode;
     }
 
+    bool IsControlActive() const {
+        return controlActive;
+    }
+
+    bool IsPBRActive() const {
+        return pbrActive;
+    }
+
     bool IsSkyBoxActive() const {
         return skyBoxActive;
     }
@@ -48,13 +57,6 @@ public:
         return floorActive;
     }
 
-    bool IsPBRActive() const {
-        return pbrActive;
-    }
-
-    bool IsControlActive() const {
-        return controlActive;
-    }
     bool IsOutlineActive() const {
         return outlineActive;
     }
@@ -63,6 +65,12 @@ public:
     }
     bool IsFaceCullingActive() const {
         return faceCullingActive;
+    }
+    bool IsMSAAActive() const {
+        return MSAAActive;
+    }
+    bool IsGammaCorrectionActive() const {
+        return gammaCorrectionActive;
     }
 
     void ToggleControl() {
@@ -84,6 +92,8 @@ private:
     bool outlineActive = false;
     bool normalVisualizationActive = false;
     bool faceCullingActive = false;
+    bool MSAAActive = true;
+    bool gammaCorrectionActive = false;
 };
 
 #endif // GUI_H
