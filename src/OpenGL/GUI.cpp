@@ -72,7 +72,9 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
 
             ImGui::Text("Light %d Color", i);
             ImGui::ColorEdit3(("Color##" + std::to_string(i)).c_str(), (float*)&scene.lights[i].color);
+            
             scene.lights[i].updateLightColor();
+            scene.lights[i].updateLightSpaceMatrix();
         }
 
         ImGui::Separator(); // 分隔线
@@ -116,8 +118,6 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
         // Floor 地板
         ImGui::Checkbox("Floor", &floorActive);
 
-        // Outline 轮廓
-        ImGui::Checkbox("Outline", &outlineActive);
         // normal visualization 法线可视化
         ImGui::Checkbox("Normal", &normalVisualizationActive);
         // face culling 面剔除
@@ -146,6 +146,13 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
         if (ImGui::RadioButton("Environment Mapping", mode == ENVIRONMENTMAPPING)) {
             mode = ENVIRONMENTMAPPING;
         }
+
+        if (mode != BLINNPHONG) { ImGui::BeginDisabled(); }
+        {
+            ImGui::Text("Shadow");
+            ImGui::Checkbox("Shadow", &shadowActive);
+        }
+        if (mode != BLINNPHONG) { ImGui::EndDisabled(); }
 
         ImGui::Separator(); // 分隔线
 

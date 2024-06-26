@@ -5,7 +5,7 @@
 #include <learnopengl/filesystem.h>
 #include <learnopengl/camera.h>
 
-const glm::vec3 AMBIENT = glm::vec3(0.1);
+const glm::vec3 AMBIENT = glm::vec3(0.5);
 const glm::vec3 DIFFUSE = glm::vec3(0.5);
 const glm::vec3 SPECULAR = glm::vec3(1.0);
 
@@ -15,6 +15,7 @@ public:
             : position(position), color(color), ambient(AMBIENT), diffuse(DIFFUSE), specular(SPECULAR),
               lightShader(FileSystem::getPath("src/OpenGL/shaders/light_cube.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/light_cube.fs").c_str()) {
         updateLightColor();
+        updateLightSpaceMatrix();
         // set up vertex data (and buffer(s)) and configure vertex attributes
         // ------------------------------------------------------------------
         float vertices[] = {
@@ -96,6 +97,12 @@ public:
         specularColor = color * specular;
     }
 
+    void updateLightSpaceMatrix() {
+        lightProjection = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, near_plane, far_plane);
+        lightView = glm::lookAt(position, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+        lightSpaceMatrix = lightProjection * lightView;
+    }
+
     void setPosition(const glm::vec3& position) { this->position = position; }
     void setColor(const glm::vec3& color) {
         this->color = color;
@@ -106,6 +113,7 @@ public:
     const glm::vec3& getAmbientColor() const { return ambientColor; }
     const glm::vec3& getDiffuseColor() const { return diffuseColor; }
     const glm::vec3& getSpecularColor() const { return specularColor; }
+    const glm::mat4& getLightSpaceMatrix() const { return lightSpaceMatrix; }
     friend class GUI;
 private:
     glm::mat4 modelMatrix = glm::mat4(1.0f);
@@ -122,6 +130,10 @@ private:
     glm::vec3 diffuseColor;
     glm::vec3 specular;
     glm::vec3 specularColor;
+
+    glm::mat4 lightProjection, lightView;
+    glm::mat4 lightSpaceMatrix;
+    float near_plane = 1.0f, far_plane = 100.0f;
 };
 
 #endif // LIGHT_H

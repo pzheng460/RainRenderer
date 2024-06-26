@@ -20,6 +20,7 @@ public:
 
     bool shouldClose() const;
     void preRender();
+    void reset();
     void processInput(GLFWwindow *window);
     void swapBuffersAndPollEvents() const;
 
@@ -44,7 +45,7 @@ public:
         return window;
     }
 
-    Camera& getCamera() {
+    Camera& getCamera() const {
         return camera;
     }
 

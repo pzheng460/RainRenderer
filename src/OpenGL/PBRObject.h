@@ -10,7 +10,6 @@ public:
     PBRObject(const Model& model, const Shader& shader);
     PBRObject(ImplicitGeometryType geometryType, const Shader& shader);
 
-    void PBRShaderSetting(std::vector<Light>& lights, unsigned int irradianceMap, unsigned int prefilterMap, unsigned int brdfLUTTexture);
     void draw() override;
 
 private:

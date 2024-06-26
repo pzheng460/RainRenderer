@@ -102,6 +102,10 @@ void Window::preRender() {
     // 处理用户输入
     processInput(window);
 
+    reset();
+}
+
+void Window::reset() {
     // 设置清屏颜色
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     // 清空颜色缓冲、深度缓冲、模板缓冲

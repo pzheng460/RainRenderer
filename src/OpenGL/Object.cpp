@@ -24,37 +24,11 @@ void Object::setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT) {
 }
 
 void Object::draw() {
+    shader.use();
+    shader.setMat4("model", modelMatrix);
+    shader.setMat4("view", viewMatrix);
+    shader.setMat4("projection", projectionMatrix);
     model.Draw(shader);
-}
-
-void Object::basicShaderSetting() {
-    shader.use();
-    shader.setMat4("model", modelMatrix);
-    shader.setMat4("view", viewMatrix);
-    shader.setMat4("projection", projectionMatrix);
-}
-
-void Object::phongShaderSetting(Camera& camera, std::vector<Light>& lights) {
-    shader.use();
-
-    for (unsigned int i = 0; i < lights.size(); ++i)
-    {
-        shader.setVec3("pointLights[" + std::to_string(i) + "].position", lights[i].getPosition());
-        shader.setVec3("pointLights[" + std::to_string(i) + "].ambient", lights[i].getAmbientColor());
-        shader.setVec3("pointLights[" + std::to_string(i) + "].diffuse", lights[i].getDiffuseColor());
-        shader.setVec3("pointLights[" + std::to_string(i) + "].specular", lights[i].getSpecularColor());
-
-        shader.setFloat("pointLights[" + std::to_string(i) + "].constant", 1.0f);
-        shader.setFloat("pointLights[" + std::to_string(i) + "].linear", 0.09f);
-        shader.setFloat("pointLights[" + std::to_string(i) + "].quadratic", 0.032f);
-    }
-
-    shader.setVec3("viewPos", camera.Position);
-    shader.setFloat("material.shininess", 32.0f);
-
-    shader.setMat4("model", modelMatrix);
-    shader.setMat4("view", viewMatrix);
-    shader.setMat4("projection", projectionMatrix);
 }
 
 void Object::generateModel(ImplicitGeometryType geometryType) {

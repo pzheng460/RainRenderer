@@ -3,9 +3,9 @@
 *.iml
 
 # Ignore bin directory
-/bin/
-/build/
-/out/
+bin/
+build/
+out/
 
 # Ignore cmake-build-debug directory
-/cmake-build-debug/
+cmake-build-debug/

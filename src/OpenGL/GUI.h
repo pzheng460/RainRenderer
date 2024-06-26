@@ -56,10 +56,10 @@ public:
     bool IsFloorActive() const {
         return floorActive;
     }
-
-    bool IsOutlineActive() const {
-        return outlineActive;
+    bool IsShadowActive() const {
+        return shadowActive;
     }
+
     bool IsNormalVisualizationActive() const {
         return normalVisualizationActive;
     }
@@ -85,9 +85,10 @@ private:
 
     bool pbrActive = false;
 
-    bool skyBoxActive = true;
+    bool skyBoxActive = false;
     bool lightActive = true;
-    bool floorActive = false;
+    bool floorActive = true;
+    bool shadowActive = false;
 
     bool outlineActive = false;
     bool normalVisualizationActive = false;

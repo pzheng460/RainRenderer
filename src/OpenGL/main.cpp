@@ -19,6 +19,8 @@
 #include "GUI.h"
 #include "Window.h"
 #include "Scene.h"
+#include "shaderSetting.h"
+#include "render_implicit_geometry.h"
 
 // settings 窗口设置
 constexpr unsigned int SCR_WIDTH = 1280;
@@ -78,15 +80,15 @@ int main()
     scene.addObject(std::move(object));
 
     // load lights 加载光源
-    Light light0(glm::vec3(-10.0f,  10.0f, 10.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-    Light light1(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-    Light light2(glm::vec3(-10.0f, -10.0f, 10.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-    Light light3(glm::vec3(10.0f, -10.0f, -10.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    Light light0(glm::vec3(-10.0f,  10.0f, 10.0f), glm::vec3(1.0f));
+    Light light1(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(1.0f));
+    Light light2(glm::vec3(-10.0f, -10.0f, 10.0f), glm::vec3(1.0f));
+    Light light3(glm::vec3(10.0f, -10.0f, -10.0f), glm::vec3(1.0f));
 
     scene.addLight(light0);
-    scene.addLight(light1);
-    scene.addLight(light2);
-    scene.addLight(light3);
+//    scene.addLight(light1);
+//    scene.addLight(light2);
+//    scene.addLight(light3);
 
     // Initialize Dear ImGui 初始化Dear ImGui
     gui->init(window.getGLFWwindow());
@@ -118,6 +120,21 @@ int main()
             obj->setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
         }
 
+        // render shadow map 渲染阴影贴图
+        Shader simpleDepthShader(FileSystem::getPath("src/OpenGL/shaders/shadow_mapping_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/shadow_mapping_depth.fs").c_str());
+        for (int i = 0; i < scene.lights.size(); ++i) {
+            shadowMapShaderSetting(simpleDepthShader, scene.lights[i]);
+            scene.shadowMaps[i].preDraw();
+            scene.drawScene(simpleDepthShader);
+            scene.shadowMaps[i].postDraw();
+        }
+
+        window.reset();
+
+        Shader debugDepthQuad(FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.fs").c_str());
+        debugDepthQuadShaderSetting(debugDepthQuad, scene.shadowMaps[0].getDepthMap());
+//        renderQuad();
+
         // render lights 渲染光源
         if (gui->IsLightActive()) {
             for (int i = 0; i < scene.lights.size(); ++i) {
@@ -125,68 +142,30 @@ int main()
             }
         }
 
-        // render floor 渲染地板
-        if (gui->IsFloorActive()) {
-            scene.floor.basicShaderSetting();
-            scene.floor.draw();
+        // render scene 渲染主场景
+        Shader mainShader;
+
+        if (gui->getMode() == BASIC) {
+            mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
+        } else if (gui->getMode() == PHONG) {
+            mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/phong.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/phong.fs").c_str());
+            phongShaderSetting(mainShader, window.getCamera(), scene.lights, scene.shadowMaps);
+        } else if (gui->getMode() == BLINNPHONG) {
+            mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/blinn_phong.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/blinn_phong.fs").c_str());
+            phongShaderSetting(mainShader, window.getCamera(), scene.lights, scene.shadowMaps, gui->IsShadowActive());
+        } else if (gui->getMode() == DEPTH) {
+            mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/depth_testing.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/depth_testing.fs").c_str());
+        } else if (gui->getMode() == ENVIRONMENTMAPPING) {
+            mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/environment_mapping.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/environment_mapping.fs").c_str());
+            phongShaderSetting(mainShader, window.getCamera(), scene.lights, scene.shadowMaps);
         }
 
-        // render objects 渲染物体
-        for (auto& obj : scene.objects) {
-            if (auto pbrObj = dynamic_cast<PBRObject*>(obj.get())) {
-                if (gui->IsPBRActive()) {
-                    pbrObj->PBRShaderSetting(scene.lights, scene.skybox.getIrradianceMap(), scene.skybox.getPrefilterMap(), scene.skybox.getBRDFLUTTexture());
-                    pbrObj->draw();
-                }
-            } else {
-                if (gui->IsOutlineActive()) {
-                    window.preOutlineSetting();
-                }
+        scene.drawScene(mainShader, gui->IsFloorActive(), gui->IsPBRActive());
 
-                if (gui->getMode() == BASIC) {
-                    Shader basicShader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
-                    obj->setShader(basicShader);
-                    obj->basicShaderSetting();
-                } else if (gui->getMode() == PHONG) {
-                    Shader phongShader(FileSystem::getPath("src/OpenGL/shaders/phong.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/phong.fs").c_str());
-                    obj->setShader(phongShader);
-                    obj->phongShaderSetting(window.getCamera(), scene.lights);
-                } else if (gui->getMode() == BLINNPHONG) {
-                    Shader blinnPhongShader(FileSystem::getPath("src/OpenGL/shaders/blinn_phong.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/blinn_phong.fs").c_str());
-                    obj->setShader(blinnPhongShader);
-                    obj->phongShaderSetting(window.getCamera(), scene.lights);
-                } else if (gui->getMode() == DEPTH) {
-                    Shader depthShader(FileSystem::getPath("src/OpenGL/shaders/depth_testing.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/depth_testing.fs").c_str());
-                    obj->setShader(depthShader);
-                    obj->basicShaderSetting();
-                } else if (gui->getMode() == ENVIRONMENTMAPPING) {
-                    Shader environmentMappingShader(FileSystem::getPath("src/OpenGL/shaders/environment_mapping.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/environment_mapping.fs").c_str());
-                    obj->setShader(environmentMappingShader);
-                    obj->phongShaderSetting(window.getCamera(), scene.lights);
-                }
-                obj->draw();
-
-                // render outline 渲染轮廓
-                if (gui->IsOutlineActive()) {
-                    window.outlineSetting();
-                    Shader outlineShader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/stencil_single_color.fs").c_str());
-                    obj->setShader(outlineShader);
-                    obj->setScale(1.01f);
-                    obj->setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
-                    obj->basicShaderSetting();
-                    obj->draw();
-                    obj->setScale(1.0f);
-                    window.afterOutlineSetting();
-                }
-
-                // render normal visualization 渲染法线可视化
-                if (gui->IsNormalVisualizationActive()) {
-                    Shader normalShader(FileSystem::getPath("src/OpenGL/shaders/normal_visualization.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.fs").c_str(), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.gs").c_str());
-                    obj->setShader(normalShader);
-                    obj->basicShaderSetting();
-                    obj->draw();
-                }
-            }
+        // render normal visualization 渲染法线可视化
+        if (gui->IsNormalVisualizationActive()) {
+            Shader normalShader(FileSystem::getPath("src/OpenGL/shaders/normal_visualization.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.fs").c_str(), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.gs").c_str());
+            scene.drawScene(normalShader);
         }
 
         // render skybox 渲染天空盒，放在最后渲染保证early-z测试

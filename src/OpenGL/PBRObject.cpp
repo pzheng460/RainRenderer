@@ -26,39 +26,12 @@ void PBRObject::loadPBRTextures(std::vector<Texture>& textures, const std::strin
     textures.push_back(loadTexture(aoPath, "aoMap"));
 }
 
-void PBRObject::PBRShaderSetting(std::vector<Light> &lights, unsigned int irradianceMap, unsigned int prefilterMap,
-                                 unsigned int brdfLUTTexture) {
+void PBRObject::draw() {
     shader.use();
-    shader.setInt("albedoMap", 0);
-    shader.setInt("normalMap", 1);
-    shader.setInt("metallicMap", 2);
-    shader.setInt("roughnessMap", 3);
-    shader.setInt("aoMap", 4);
-    shader.setInt("irradianceMap", 5);
-    shader.setInt("prefilterMap", 6);
-    shader.setInt("brdfLUT", 7);
-
-    for (unsigned int i = 0; i < lights.size(); ++i)
-    {
-        shader.setVec3("lightPositions[" + std::to_string(i) + "]", lights[i].getPosition());
-        shader.setVec3("lightColors[" + std::to_string(i) + "]", lights[i].getColor());
-    }
-
     // MVP matrices
     shader.setMat4("model", modelMatrix);
     shader.setMat4("view", viewMatrix);
     shader.setMat4("projection", projectionMatrix);
     shader.setMat3("normalMatrix", glm::transpose(glm::inverse(modelMatrix)));
-
-    // bind pre-computed IBL data
-    glActiveTexture(GL_TEXTURE5);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
-    glActiveTexture(GL_TEXTURE6);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
-    glActiveTexture(GL_TEXTURE7);
-    glBindTexture(GL_TEXTURE_2D, brdfLUTTexture);
-}
-
-void PBRObject::draw() {
     model.Draw(shader, GL_TRIANGLE_STRIP);
 }

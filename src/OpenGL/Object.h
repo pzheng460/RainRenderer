@@ -30,8 +30,6 @@ public:
     void setShader(const Shader& shader) { this->shader = shader; }  // 设置着色器（Shader）
     void setScale(float scale) { this->scale = scale; }  // 设置缩放
 
-    void basicShaderSetting();
-    void phongShaderSetting(Camera& camera, std::vector<Light>& light);
     virtual void draw();
 
     const glm::mat4 getModelMatrix() const {
@@ -44,6 +42,10 @@ public:
 
     const glm::mat4 getProjectionMatrix() const {
         return projectionMatrix;
+    }
+
+    Shader& getShader() {
+        return shader;
     }
 
 protected:
