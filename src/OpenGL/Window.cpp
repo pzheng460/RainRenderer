@@ -84,7 +84,32 @@ bool Window::init() {
     // enable seamless cubemap sampling for lower mip levels in the pre-filter map.
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); // 立方体贴图无缝采样
 
+    generateMainMSAAFrameBuffer();
+    generateIntermediateFrameBuffer();
+
     return true;
+}
+
+void Window::generateMainMSAAFrameBuffer() {
+    mainMSAAFrameBuffer.init();
+    mainMSAAFrameBuffer.bind();
+    // create floating point color buffer 创建浮点颜色缓冲区
+    mainMSAAFrameBuffer.createMSAAColorTextureAttachment(width, height);
+    // create depth buffer (renderbuffer) 创建深度缓冲区（渲染缓冲区）
+    mainMSAAFrameBuffer.createMSAARenderBufferAttachment(width, height);
+    // check if frame buffer is complete 检查帧缓冲是否完整
+    mainMSAAFrameBuffer.checkComplete();
+    mainMSAAFrameBuffer.unbind();
+}
+
+void Window::generateIntermediateFrameBuffer() {
+    intermediateFrameBuffer.init();
+    intermediateFrameBuffer.bind();
+    // create floating point color buffer 创建浮点颜色缓冲区
+    intermediateFrameBuffer.createColorTextureAttachment(width, height);
+    // check if frame buffer is complete 检查帧缓冲是否完整
+    intermediateFrameBuffer.checkComplete();
+    intermediateFrameBuffer.unbind();
 }
 
 // check if the window should close 检查窗口是否应该关闭

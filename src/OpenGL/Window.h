@@ -6,6 +6,7 @@
 #include <iostream>
 #include <learnopengl/camera.h>
 #include "GUI.h"
+#include "FrameBuffer.h"
 
 class Window {
 public:
@@ -13,6 +14,8 @@ public:
     ~Window();
 
     bool init();
+    void generateMainMSAAFrameBuffer();
+    void generateIntermediateFrameBuffer();
 
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
     static void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
@@ -49,6 +52,14 @@ public:
         return camera;
     }
 
+    FrameBuffer& getMainMSAAFrameBuffer() {
+        return mainMSAAFrameBuffer;
+    }
+
+    FrameBuffer& getIntermediateFrameBuffer() {
+        return intermediateFrameBuffer;
+    }
+
 private:
     unsigned int width;
     unsigned int height;
@@ -58,6 +69,9 @@ private:
     // timing
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
+
+    FrameBuffer mainMSAAFrameBuffer;
+    FrameBuffer intermediateFrameBuffer;
 };
 
 #endif // WINDOW_H

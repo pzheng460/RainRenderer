@@ -94,7 +94,7 @@ void main()
     // phase 3: spot light
 //     result += CalcSpotLight(spotLight, norm, FragPos, viewDir);
 
-    FragColor = vec4(lighting, 1.0) * 10;
+    FragColor = vec4(lighting, 1.0);
 }
 
 // calculates the color when using a directional light.
@@ -193,7 +193,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightPos, sampler2D shadowM
     shadow /= 9.0;
 
     // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
-    if(projCoords.z > 1.0)
+    if (projCoords.z > 1.0)
         shadow = 0.0;
 
     return shadow;

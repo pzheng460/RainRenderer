@@ -21,6 +21,7 @@
 #include "Scene.h"
 #include "shaderSetting.h"
 #include "render_implicit_geometry.h"
+#include "FrameBuffer.h"
 
 // settings 窗口设置
 constexpr unsigned int SCR_WIDTH = 1280;
@@ -44,6 +45,8 @@ int main()
     if (!window.init()) {
         return -1;
     }
+
+    window.reset();
 
     // initialize scene 初始化scene类
     Scene scene;
@@ -131,9 +134,14 @@ int main()
 
         window.reset();
 
-        Shader debugDepthQuad(FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.fs").c_str());
-        debugDepthQuadShaderSetting(debugDepthQuad, scene.shadowMaps[0].getDepthMap());
+//        Shader debugDepthQuad(FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.fs").c_str());
+//        debugDepthQuadShaderSetting(debugDepthQuad, scene.shadowMaps[0].getDepthMap());
 //        renderQuad();
+
+        window.getMainMSAAFrameBuffer().bind();
+
+        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // render lights 渲染光源
         if (gui->IsLightActive()) {
@@ -176,6 +184,18 @@ int main()
                 scene.skybox.draw();
             }
         }
+
+        window.getMainMSAAFrameBuffer().unbind();
+
+        window.reset();
+
+        window.getMainMSAAFrameBuffer().transferFrameBuffer(window.getIntermediateFrameBuffer(), SCR_WIDTH, SCR_HEIGHT);
+
+        window.reset();
+
+        Shader HDRShader(FileSystem::getPath("src/OpenGL/shaders/hdr.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/hdr.fs").c_str());
+        HDRShaderSetting(HDRShader, window.getIntermediateFrameBuffer().getTextureColorBuffer(), gui->IsHDRActive(), 10.0f);
+        renderQuad();
 
         // render Dear ImGui 渲染 Dear ImGui
         gui->render(window.getCamera(), modelFilePath, scene);

@@ -72,7 +72,7 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
 
             ImGui::Text("Light %d Color", i);
             ImGui::ColorEdit3(("Color##" + std::to_string(i)).c_str(), (float*)&scene.lights[i].color);
-            
+
             scene.lights[i].updateLightColor();
             scene.lights[i].updateLightSpaceMatrix();
         }
@@ -126,6 +126,10 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
         ImGui::Checkbox("MSAA", &MSAAActive);
         // Gamma Correction 伽马校正
         ImGui::Checkbox("Gamma Correction", &gammaCorrectionActive);
+        // HDR 高动态范围
+        ImGui::Checkbox("HDR", &HDRActive);
+        // Bloom 泛光
+        ImGui::Checkbox("Bloom", &bloomActive);
 
         // PBR
         ImGui::Checkbox("PBR", &pbrActive);

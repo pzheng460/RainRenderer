@@ -72,6 +72,12 @@ public:
     bool IsGammaCorrectionActive() const {
         return gammaCorrectionActive;
     }
+    bool IsHDRActive() const {
+        return HDRActive;
+    }
+    bool IsBloomActive() const {
+        return bloomActive;
+    }
 
     void ToggleControl() {
         controlActive = !controlActive;
@@ -95,6 +101,8 @@ private:
     bool faceCullingActive = false;
     bool MSAAActive = true;
     bool gammaCorrectionActive = false;
+    bool HDRActive = false;
+    bool bloomActive = false;
 };
 
 #endif // GUI_H
