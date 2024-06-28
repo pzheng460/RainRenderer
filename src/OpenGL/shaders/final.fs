@@ -7,10 +7,16 @@ uniform sampler2D hdrBuffer;
 uniform bool HDRActive;
 uniform float exposure;
 
+uniform sampler2D bloomBlur;
+uniform bool bloomActive;
+
 void main()
 {             
     const float gamma = 2.2;
     vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;
+    vec3 bloomColor = texture(bloomBlur, TexCoords).rgb;
+    if (bloomActive)
+        hdrColor += bloomColor; // additive blending
     if (HDRActive)
     {
         // reinhard

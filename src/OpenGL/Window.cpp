@@ -84,32 +84,26 @@ bool Window::init() {
     // enable seamless cubemap sampling for lower mip levels in the pre-filter map.
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); // 立方体贴图无缝采样
 
-    generateMainMSAAFrameBuffer();
-    generateIntermediateFrameBuffer();
+    generateFrameBuffer(mainMSAAFrameBuffer);
+    generateFrameBuffer(intermediateFrameBuffer);
+    for (int i = 0; i < 2; ++i) {
+        generateFrameBuffer(pingPongFrameBuffers[i]);
+    }
 
     return true;
 }
 
-void Window::generateMainMSAAFrameBuffer() {
-    mainMSAAFrameBuffer.init();
-    mainMSAAFrameBuffer.bind();
+void Window::generateFrameBuffer(FrameBuffer& frameBuffer) {
+    frameBuffer.init();
+    frameBuffer.bind();
     // create floating point color buffer 创建浮点颜色缓冲区
-    mainMSAAFrameBuffer.createMSAAColorTextureAttachment(width, height);
+    frameBuffer.createColorTextureAttachment(width * 2, height * 2);
     // create depth buffer (renderbuffer) 创建深度缓冲区（渲染缓冲区）
-    mainMSAAFrameBuffer.createMSAARenderBufferAttachment(width, height);
+    if (frameBuffer.getNumOfDepthAttachments() > 0)
+        frameBuffer.createRenderBufferAttachment(width * 2, height * 2);
     // check if frame buffer is complete 检查帧缓冲是否完整
-    mainMSAAFrameBuffer.checkComplete();
-    mainMSAAFrameBuffer.unbind();
-}
-
-void Window::generateIntermediateFrameBuffer() {
-    intermediateFrameBuffer.init();
-    intermediateFrameBuffer.bind();
-    // create floating point color buffer 创建浮点颜色缓冲区
-    intermediateFrameBuffer.createColorTextureAttachment(width, height);
-    // check if frame buffer is complete 检查帧缓冲是否完整
-    intermediateFrameBuffer.checkComplete();
-    intermediateFrameBuffer.unbind();
+    frameBuffer.checkComplete();
+    frameBuffer.unbind();
 }
 
 // check if the window should close 检查窗口是否应该关闭

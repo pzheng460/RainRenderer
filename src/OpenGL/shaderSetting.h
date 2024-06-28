@@ -83,12 +83,18 @@ inline void debugDepthQuadShaderSetting(Shader& shader, unsigned int depthMap) {
     glBindTexture(GL_TEXTURE_2D, depthMap);
 }
 
-inline void HDRShaderSetting(Shader& shader, unsigned int colorBuffer, bool HDRActive, float exposure = 1.0f) {
+inline void FinalShaderSetting(Shader& shader, unsigned int hdrBuffer, bool HDRActive, float exposure, unsigned int bloomBlur, bool bloomActive) {
     shader.use();
+
     shader.setInt("hdrBuffer", 0);
     shader.setBool("HDRActive", HDRActive);
     shader.setFloat("exposure", exposure);
+
+    shader.setInt("bloomBlur", 1);
+    shader.setBool("bloomActive", bloomActive);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, colorBuffer);
+    glBindTexture(GL_TEXTURE_2D, hdrBuffer);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, bloomBlur);
 }
 #endif // SHADERSETTING_H

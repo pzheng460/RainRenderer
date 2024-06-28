@@ -21,7 +21,6 @@
 #include "Scene.h"
 #include "shaderSetting.h"
 #include "render_implicit_geometry.h"
-#include "FrameBuffer.h"
 
 // settings 窗口设置
 constexpr unsigned int SCR_WIDTH = 1280;
@@ -133,15 +132,13 @@ int main()
         }
 
         window.reset();
-
-//        Shader debugDepthQuad(FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.fs").c_str());
-//        debugDepthQuadShaderSetting(debugDepthQuad, scene.shadowMaps[0].getDepthMap());
-//        renderQuad();
+        Shader debugDepthQuad(FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.fs").c_str());
+        debugDepthQuadShaderSetting(debugDepthQuad, scene.shadowMaps[0].getDepthMap());
+        renderQuad();
 
         window.getMainMSAAFrameBuffer().bind();
 
-        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        window.reset();
 
         // render lights 渲染光源
         if (gui->IsLightActive()) {
@@ -187,14 +184,31 @@ int main()
 
         window.getMainMSAAFrameBuffer().unbind();
 
+        window.getMainMSAAFrameBuffer().transferFrameBuffer(window.getIntermediateFrameBuffer(), SCR_WIDTH * 2, SCR_HEIGHT * 2);
+
+        // blur bright fragments with two-pass Gaussian Blur 用两次高斯模糊模糊亮的片段
+        bool horizontal = true, first_iteration = true;
+        unsigned int amount = 10;
+        Shader shaderBlur(FileSystem::getPath("src/OpenGL/shaders/blur.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/blur.fs").c_str());
+        shaderBlur.use();
+        shaderBlur.setInt("image", 0);
+
+        for (unsigned int i = 0; i < amount; i++)
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, window.getPingPongFrameBuffers()[horizontal].getFrameBuffer());
+            shaderBlur.setInt("horizontal", horizontal);
+            glBindTexture(GL_TEXTURE_2D, first_iteration ? window.getIntermediateFrameBuffer().getTextureColorBuffer()[1] : window.getPingPongFrameBuffers()[!horizontal].getFrameBuffer());  // bind texture of other framebuffer (or scene if first iteration)
+            renderQuad();
+            horizontal = !horizontal;
+            if (first_iteration)
+                first_iteration = false;
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
         window.reset();
 
-        window.getMainMSAAFrameBuffer().transferFrameBuffer(window.getIntermediateFrameBuffer(), SCR_WIDTH, SCR_HEIGHT);
-
-        window.reset();
-
-        Shader HDRShader(FileSystem::getPath("src/OpenGL/shaders/hdr.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/hdr.fs").c_str());
-        HDRShaderSetting(HDRShader, window.getIntermediateFrameBuffer().getTextureColorBuffer(), gui->IsHDRActive(), 10.0f);
+        Shader FinalShader(FileSystem::getPath("src/OpenGL/shaders/final.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/final.fs").c_str());
+        FinalShaderSetting(FinalShader, window.getIntermediateFrameBuffer().getTextureColorBuffer()[0], gui->IsHDRActive(), 10.0f, window.getPingPongFrameBuffers()[!horizontal].getTextureColorBuffer()[0], gui->IsBloomActive());
         renderQuad();
 
         // render Dear ImGui 渲染 Dear ImGui

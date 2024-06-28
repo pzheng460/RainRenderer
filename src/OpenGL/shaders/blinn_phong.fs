@@ -1,5 +1,6 @@
 #version 330 core
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
 
 struct Material {
     sampler2D texture_diffuse1; // 漫反射贴图
@@ -75,7 +76,7 @@ void main()
     // properties
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 lighting = vec3(0.0);
+    vec3 result = vec3(0.0);
 
     // == =====================================================
     // Our lighting is set up in 3 phases: directional, point lights and an optional flashlight
@@ -88,13 +89,20 @@ void main()
     // phase 2: point lights
     for (int i = 0; i < size; i++) {
         float shadow = shadowActive ? ShadowCalculation(FragPosLightSpace[i], pointLights[i].position, shadowMaps[i]) : 0.0;
-        lighting += CalcPointLight(pointLights[i], norm, FragPos, viewDir, shadow);
+        result += CalcPointLight(pointLights[i], norm, FragPos, viewDir, shadow);
     }
 
     // phase 3: spot light
 //     result += CalcSpotLight(spotLight, norm, FragPos, viewDir);
 
-    FragColor = vec4(lighting, 1.0);
+    // check whether result is higher than some threshold, if so, output as bloom threshold color
+    float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
+    if (brightness > 1.0)
+        BrightColor = vec4(result, 1.0);
+    else
+        BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
+
+    FragColor = vec4(result, 1.0);
 }
 
 // calculates the color when using a directional light.

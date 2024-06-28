@@ -8,27 +8,42 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <vector>
+
 class FrameBuffer {
 public:
-    FrameBuffer() = default;
+    FrameBuffer(int numOfColorAttachments = 1, int numOfDepthAttachments = 0);
     void init();
     void bind();
     void unbind();
-    void createColorTextureAttachment(int SCR_WIDTH, int SCR_HEIGHT);
-    void createRenderBufferAttachment(int SCR_WIDTH, int SCR_HEIGHT);
-    void createMSAAColorTextureAttachment(int SCR_WIDTH, int SCR_HEIGHT);
-    void createMSAARenderBufferAttachment(int SCR_WIDTH, int SCR_HEIGHT);
+    virtual void createColorTextureAttachment(int SCR_WIDTH, int SCR_HEIGHT);
+    virtual void createRenderBufferAttachment(int SCR_WIDTH, int SCR_HEIGHT);
+
     bool checkComplete();
 
     void transferFrameBuffer(FrameBuffer& targetFrameBuffer, int SCR_WIDTH, int SCR_HEIGHT);
 
-    unsigned int getTextureColorBuffer() const {
-        return textureColorBuffer;
+    std::vector<unsigned int>& getTextureColorBuffer() {
+        return textureColorBuffers;
+    }
+
+    int getNumOfColorAttachments() {
+        return numOfColorAttachments;
+    }
+
+    int getNumOfDepthAttachments() {
+        return numOfDepthAttachments;
+    }
+
+    unsigned int getFrameBuffer() {
+        return framebuffer;
     }
 
 protected:
     unsigned int framebuffer;
-    unsigned int textureColorBuffer;
+    std::vector<unsigned int> textureColorBuffers;
     unsigned int rbo;
+    int numOfColorAttachments;
+    int numOfDepthAttachments;
 };
 #endif // FRAMEBUFFER_H

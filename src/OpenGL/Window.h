@@ -7,6 +7,8 @@
 #include <learnopengl/camera.h>
 #include "GUI.h"
 #include "FrameBuffer.h"
+#include "MSAAFrameBuffer.h"
+#include "PingPongFrameBuffer.h"
 
 class Window {
 public:
@@ -14,8 +16,7 @@ public:
     ~Window();
 
     bool init();
-    void generateMainMSAAFrameBuffer();
-    void generateIntermediateFrameBuffer();
+    void generateFrameBuffer(FrameBuffer& frameBuffer);
 
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
     static void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
@@ -60,6 +61,10 @@ public:
         return intermediateFrameBuffer;
     }
 
+    std::vector<PingPongFrameBuffer>& getPingPongFrameBuffers() {
+        return pingPongFrameBuffers;
+    }
+
 private:
     unsigned int width;
     unsigned int height;
@@ -70,8 +75,9 @@ private:
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
 
-    FrameBuffer mainMSAAFrameBuffer;
-    FrameBuffer intermediateFrameBuffer;
+    MSAAFrameBuffer mainMSAAFrameBuffer = MSAAFrameBuffer(2, 1);
+    FrameBuffer intermediateFrameBuffer = FrameBuffer(2);
+    std::vector<PingPongFrameBuffer> pingPongFrameBuffers = std::vector<PingPongFrameBuffer>(2);
 };
 
 #endif // WINDOW_H
