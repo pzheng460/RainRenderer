@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include "render_implicit_geometry.h"
 #include "shaderSetting.h"
+#include "SSAO.h"
 
 void Renderer::init() {
     mainMSAAFrameBuffer.generateFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
@@ -71,8 +72,7 @@ void Renderer::draw(Scene& scene) {
     }
 
     reset();
-    FinalShader = Shader(FileSystem::getPath("src/OpenGL/shaders/final.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/final.fs").c_str());
-    FinalShaderSetting(FinalShader, intermediateFrameBuffer.getTextureColorBuffer()[0], gui->IsHDRActive(), 10.0f, pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0], gui->IsBloomActive());
+    finalShaderSetting(finalShader, intermediateFrameBuffer.getTextureColorBuffer()[0].getTexture(), gui->IsHDRActive(), 10.0f, pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0].getTexture(), gui->IsBloomActive());
     renderQuad();
 }
 
@@ -85,7 +85,7 @@ void Renderer::gaussianBlur() {
     {
         glBindFramebuffer(GL_FRAMEBUFFER, pingPongFrameBuffers[horizontal].getFrameBuffer());
         shaderBlur.setInt("horizontal", horizontal);
-        glBindTexture(GL_TEXTURE_2D, first_iteration ? intermediateFrameBuffer.getTextureColorBuffer()[1] : pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0]);  // bind texture of other framebuffer (or scene if first iteration)
+        glBindTexture(GL_TEXTURE_2D, first_iteration ? intermediateFrameBuffer.getTextureColorBuffer()[1].getTexture() : pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0].getTexture());  // bind texture of other framebuffer (or scene if first iteration)
         renderQuad();
         horizontal = !horizontal;
         if (first_iteration)

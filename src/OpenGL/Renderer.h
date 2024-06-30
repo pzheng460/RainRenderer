@@ -1,6 +1,13 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "FrameBuffer.h"
 #include "MSAAFrameBuffer.h"
 #include <learnopengl/filesystem.h>
@@ -9,6 +16,8 @@
 #include <utility>
 #include "Scene.h"
 #include "GUI.h"
+
+#include <random>
 
 class Renderer {
 public:
@@ -25,7 +34,6 @@ public:
     void faceCulling() const;
     void MSAA() const;
     void gammaCorrection() const;
-
 
     // GUI
     std::shared_ptr<GUI> gui;
@@ -54,7 +62,7 @@ private:
 
     // Main FrameBuffer
     MSAAFrameBuffer mainMSAAFrameBuffer = MSAAFrameBuffer(2, 1);
-    FrameBuffer intermediateFrameBuffer = FrameBuffer(2, 0);
+    FrameBuffer intermediateFrameBuffer = FrameBuffer(2);
 
     // Bloom
     Shader shaderBlur = Shader(FileSystem::getPath("src/OpenGL/shaders/blur.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/blur.fs").c_str());
@@ -66,13 +74,8 @@ private:
     Shader gBufferShader;
     FrameBuffer gFrameBuffer = FrameBuffer(3, 1);
 
-    // SSAO
-    Shader SSAOShader;
-    Shader SSAOBlurShader;
-    FrameBuffer SSAOFrameBuffer = FrameBuffer(1, 1);
-
     // Final
-    Shader FinalShader;
+    Shader finalShader = Shader(FileSystem::getPath("src/OpenGL/shaders/final.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/final.fs").c_str());
 };
 
 #endif // _RENDERER_H

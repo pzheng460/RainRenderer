@@ -10,22 +10,48 @@
 
 #include <vector>
 
+class Textures {
+public:
+    Textures() = default;
+    virtual void generateTexture(int SCR_WIDTH, int SCR_HEIGHT);
+    unsigned int getTexture() {
+        return texture;
+    }
+protected:
+    unsigned int texture;
+};
+
+class RenderBufferObject {
+public:
+    RenderBufferObject() = default;
+    virtual void generateRenderBufferObject(int SCR_WIDTH, int SCR_HEIGHT);
+    unsigned int getRBO() { return rbo; }
+protected:
+    unsigned int rbo;
+};
+
+class RenderBufferObjectDepth : public RenderBufferObject {
+public:
+    RenderBufferObjectDepth() = default;
+    void generateRenderBufferObject(int SCR_WIDTH, int SCR_HEIGHT) override;
+};
+
 class FrameBuffer {
 public:
     FrameBuffer(int numOfColorAttachments = 1, int numOfDepthAttachments = 0);
     void init();
     void bind();
     void unbind();
-    virtual void createColorTextureAttachment(int SCR_WIDTH, int SCR_HEIGHT);
-    virtual void createRenderBufferAttachment(int SCR_WIDTH, int SCR_HEIGHT);
+    virtual void bindColorTextureAttachment();
+    virtual void bindRenderBufferDepthAttachment();
 
     bool checkComplete();
 
     void transferFrameBuffer(FrameBuffer& targetFrameBuffer, int SCR_WIDTH, int SCR_HEIGHT);
 
-    void generateFrameBuffer(int SCR_WIDTH, int SCR_HEIGHT);
+    virtual void generateFrameBuffer(int SCR_WIDTH, int SCR_HEIGHT);
 
-    std::vector<unsigned int>& getTextureColorBuffer() {
+    std::vector<Textures>& getTextureColorBuffer() {
         return textureColorBuffers;
     }
 
@@ -43,9 +69,11 @@ public:
 
 protected:
     unsigned int framebuffer;
-    std::vector<unsigned int> textureColorBuffers;
-    unsigned int rbo;
     int numOfColorAttachments;
     int numOfDepthAttachments;
+private:
+    std::vector<Textures> textureColorBuffers;
+    RenderBufferObjectDepth rboDepth;
 };
+
 #endif // FRAMEBUFFER_H
