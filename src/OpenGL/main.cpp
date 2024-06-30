@@ -21,6 +21,7 @@
 #include "Scene.h"
 #include "shaderSetting.h"
 #include "render_implicit_geometry.h"
+#include "Renderer.h"
 
 // settings 窗口设置
 constexpr unsigned int SCR_WIDTH = 1280;
@@ -28,7 +29,6 @@ constexpr unsigned int SCR_HEIGHT = 720;
 
 std::string modelFilePath = "resources/objects/YYB Symphony Miku by HB-Squiddy/yyb Symphony Miku by HB-Squiddy.pmx";
 bool Window::firstMouse = true;
-Camera Window::camera(glm::vec3(0.0f, 10.0f, 30.0f));
 float Window::lastX = (float) SCR_WIDTH / 2.0;
 float Window::lastY = (float) SCR_HEIGHT / 2.0;
 
@@ -45,7 +45,9 @@ int main()
         return -1;
     }
 
-    window.reset();
+    auto realScreen = window.reset();
+    Renderer renderer(realScreen.first, realScreen.second, gui);
+    renderer.init();
 
     // initialize scene 初始化scene类
     Scene scene;
@@ -78,7 +80,7 @@ int main()
     // load PBR Sphere 加载PBR球体
     Shader pbrShader(FileSystem::getPath("src/OpenGL/shaders/pbr.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/pbr.fs").c_str());
     auto object = std::make_unique<PBRObject>(SPHERE, pbrShader);
-    object->setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
+    object->setMVP(gui->getCamera(), SCR_WIDTH, SCR_HEIGHT);
     scene.addObject(std::move(object));
 
     // load lights 加载光源
@@ -101,25 +103,23 @@ int main()
         // reprocess before rendering 在渲染之前的预处理
         window.preRender();
 
-        // face culling 面剔除
-        window.faceCulling(gui->IsFaceCullingActive());
-
-        // MSAA 抗锯齿
-        window.MSAA(gui->IsMSAAActive());
-
-        // Gamma Correction 伽马校正
-        window.gammaCorrection(gui->IsGammaCorrectionActive());
+        auto newScreen = window.reset();
+        if (newScreen != realScreen) {
+            realScreen = newScreen;
+            renderer.setFrameBufferSize(realScreen);
+            renderer.init();
+        }
 
         // update MVP 更新MVP
-        scene.skybox.setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
-        scene.floor.setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
+        scene.skybox.setMVP(gui->getCamera(), SCR_WIDTH, SCR_HEIGHT);
+        scene.floor.setMVP(gui->getCamera(), SCR_WIDTH, SCR_HEIGHT);
 
         for (auto& light : scene.lights) {
-            light.setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
+            light.setMVP(gui->getCamera(), SCR_WIDTH, SCR_HEIGHT);
         }
 
         for (auto& obj : scene.objects) {
-            obj->setMVP(window.getCamera(), SCR_WIDTH, SCR_HEIGHT);
+            obj->setMVP(gui->getCamera(), SCR_WIDTH, SCR_HEIGHT);
         }
 
         // render shadow map 渲染阴影贴图
@@ -131,88 +131,16 @@ int main()
             scene.shadowMaps[i].postDraw();
         }
 
-        window.reset();
-        Shader debugDepthQuad(FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.fs").c_str());
-        debugDepthQuadShaderSetting(debugDepthQuad, scene.shadowMaps[0].getDepthMap());
-        renderQuad();
+        // debug depth map 调试深度贴图
+//        window.reset();
+//        Shader debugDepthQuad(FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.fs").c_str());
+//        debugDepthQuadShaderSetting(debugDepthQuad, scene.shadowMaps[0].getDepthMap());
+//        renderQuad();
 
-        window.getMainMSAAFrameBuffer().bind();
-
-        window.reset();
-
-        // render lights 渲染光源
-        if (gui->IsLightActive()) {
-            for (int i = 0; i < scene.lights.size(); ++i) {
-                scene.lights[i].draw();
-            }
-        }
-
-        // render scene 渲染主场景
-        Shader mainShader;
-
-        if (gui->getMode() == BASIC) {
-            mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
-        } else if (gui->getMode() == PHONG) {
-            mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/phong.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/phong.fs").c_str());
-            phongShaderSetting(mainShader, window.getCamera(), scene.lights, scene.shadowMaps);
-        } else if (gui->getMode() == BLINNPHONG) {
-            mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/blinn_phong.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/blinn_phong.fs").c_str());
-            phongShaderSetting(mainShader, window.getCamera(), scene.lights, scene.shadowMaps, gui->IsShadowActive());
-        } else if (gui->getMode() == DEPTH) {
-            mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/depth_testing.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/depth_testing.fs").c_str());
-        } else if (gui->getMode() == ENVIRONMENTMAPPING) {
-            mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/environment_mapping.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/environment_mapping.fs").c_str());
-            phongShaderSetting(mainShader, window.getCamera(), scene.lights, scene.shadowMaps);
-        }
-
-        scene.drawScene(mainShader, gui->IsFloorActive(), gui->IsPBRActive());
-
-        // render normal visualization 渲染法线可视化
-        if (gui->IsNormalVisualizationActive()) {
-            Shader normalShader(FileSystem::getPath("src/OpenGL/shaders/normal_visualization.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.fs").c_str(), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.gs").c_str());
-            scene.drawScene(normalShader);
-        }
-
-        // render skybox 渲染天空盒，放在最后渲染保证early-z测试
-        if (gui->IsSkyBoxActive()) {
-            if (gui->getSkyboxLoadMode() == CUBEMAP) {
-                scene.skybox.drawGeometry();
-            } else if (gui->getSkyboxLoadMode() == SPHEREMAP) {
-                scene.skybox.draw();
-            }
-        }
-
-        window.getMainMSAAFrameBuffer().unbind();
-
-        window.getMainMSAAFrameBuffer().transferFrameBuffer(window.getIntermediateFrameBuffer(), SCR_WIDTH * 2, SCR_HEIGHT * 2);
-
-        // blur bright fragments with two-pass Gaussian Blur 用两次高斯模糊模糊亮的片段
-        bool horizontal = true, first_iteration = true;
-        unsigned int amount = 10;
-        Shader shaderBlur(FileSystem::getPath("src/OpenGL/shaders/blur.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/blur.fs").c_str());
-        shaderBlur.use();
-        shaderBlur.setInt("image", 0);
-
-        for (unsigned int i = 0; i < amount; i++)
-        {
-            glBindFramebuffer(GL_FRAMEBUFFER, window.getPingPongFrameBuffers()[horizontal].getFrameBuffer());
-            shaderBlur.setInt("horizontal", horizontal);
-            glBindTexture(GL_TEXTURE_2D, first_iteration ? window.getIntermediateFrameBuffer().getTextureColorBuffer()[1] : window.getPingPongFrameBuffers()[!horizontal].getFrameBuffer());  // bind texture of other framebuffer (or scene if first iteration)
-            renderQuad();
-            horizontal = !horizontal;
-            if (first_iteration)
-                first_iteration = false;
-        }
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        window.reset();
-
-        Shader FinalShader(FileSystem::getPath("src/OpenGL/shaders/final.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/final.fs").c_str());
-        FinalShaderSetting(FinalShader, window.getIntermediateFrameBuffer().getTextureColorBuffer()[0], gui->IsHDRActive(), 10.0f, window.getPingPongFrameBuffers()[!horizontal].getTextureColorBuffer()[0], gui->IsBloomActive());
-        renderQuad();
+        renderer.draw(scene);
 
         // render Dear ImGui 渲染 Dear ImGui
-        gui->render(window.getCamera(), modelFilePath, scene);
+        gui->render(modelFilePath, scene);
 
         // swap buffers and poll IO events (keys pressed/released, mouse moved etc.) 交换缓冲区并轮询IO事件（按键按下/释放、鼠标移动等）
         window.swapBuffersAndPollEvents();

@@ -23,6 +23,8 @@ public:
 
     void transferFrameBuffer(FrameBuffer& targetFrameBuffer, int SCR_WIDTH, int SCR_HEIGHT);
 
+    void generateFrameBuffer(int SCR_WIDTH, int SCR_HEIGHT);
+
     std::vector<unsigned int>& getTextureColorBuffer() {
         return textureColorBuffers;
     }

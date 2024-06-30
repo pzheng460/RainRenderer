@@ -84,26 +84,7 @@ bool Window::init() {
     // enable seamless cubemap sampling for lower mip levels in the pre-filter map.
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); // 立方体贴图无缝采样
 
-    generateFrameBuffer(mainMSAAFrameBuffer);
-    generateFrameBuffer(intermediateFrameBuffer);
-    for (int i = 0; i < 2; ++i) {
-        generateFrameBuffer(pingPongFrameBuffers[i]);
-    }
-
     return true;
-}
-
-void Window::generateFrameBuffer(FrameBuffer& frameBuffer) {
-    frameBuffer.init();
-    frameBuffer.bind();
-    // create floating point color buffer 创建浮点颜色缓冲区
-    frameBuffer.createColorTextureAttachment(width * 2, height * 2);
-    // create depth buffer (renderbuffer) 创建深度缓冲区（渲染缓冲区）
-    if (frameBuffer.getNumOfDepthAttachments() > 0)
-        frameBuffer.createRenderBufferAttachment(width * 2, height * 2);
-    // check if frame buffer is complete 检查帧缓冲是否完整
-    frameBuffer.checkComplete();
-    frameBuffer.unbind();
 }
 
 // check if the window should close 检查窗口是否应该关闭
@@ -120,25 +101,24 @@ void Window::preRender() {
 
     // 处理用户输入
     processInput(window);
-
-    reset();
 }
 
-void Window::reset() {
+pair<int, int> Window::reset() {
     // 设置清屏颜色
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     // 清空颜色缓冲、深度缓冲、模板缓冲
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     // update stencil buffer 保证默认情况下，不会更新模板缓冲区
     glStencilMask(0x00);
 
-    // then before rendering, configure the viewport to the original framebuffer's screen dimensions 然后在渲染之前，将视口配置为原始帧缓冲区的屏幕尺寸
+//    glViewport(0, 0, width, height);
     int scrWidth, scrHeight;
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
     // set viewport to the size of the framebuffer 设置视口大小为帧缓冲区的大小
     // 参数：左下角的横坐标x，左下角的纵坐标y，宽度，高度
     glViewport(0, 0, scrWidth, scrHeight);
+    return {scrWidth, scrHeight};
 }
 
 // swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -147,55 +127,6 @@ void Window::swapBuffersAndPollEvents() const {
     glfwSwapBuffers(window);
     // 检查触发事件（如键盘输入、鼠标移动、窗口更新等）
     glfwPollEvents();
-}
-
-void Window::preOutlineSetting() const {
-    // update stencil buffer
-    glStencilFunc(GL_ALWAYS, 1, 0xFF);
-    glStencilMask(0xFF);
-}
-
-void Window::outlineSetting() const {
-    // only the stencil value who is not equal to 1 can pass 只有模板缓冲区的值不等于1的片段才会通过，可以绘制
-    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-    // 禁止写入模板缓冲区，防止preOutlineSetting中已经写入的模板缓冲区被修改，因为GL_REPLACE会将模板缓冲区的值设置为ref的1
-    glStencilMask(0x00);
-    // 禁用深度测试，防止有物体遮挡轮廓
-    glDisable(GL_DEPTH_TEST);
-}
-
-void Window::afterOutlineSetting() const {
-    // reset stencil test 重置模板测试
-    glStencilMask(0xFF);
-    glStencilFunc(GL_ALWAYS, 0, 0xFF);
-    // reset depth test 再次启用深度测试
-    glEnable(GL_DEPTH_TEST);
-}
-
-void Window::faceCulling(bool faceCullingActive) const {
-    if (faceCullingActive) {
-        glEnable(GL_CULL_FACE); // enable face culling 启用面剔除
-        glCullFace(GL_BACK); // cull back face 剔除背面
-        glFrontFace(GL_CCW); // GL_CCW for counter clock-wise 逆时针
-    } else {
-        glDisable(GL_CULL_FACE);
-    }
-}
-
-void Window::MSAA(bool MSAAActive) const {
-    if (MSAAActive) {
-        glEnable(GL_MULTISAMPLE);
-    } else {
-        glDisable(GL_MULTISAMPLE);
-    }
-}
-
-void Window::gammaCorrection(bool gammaActive) const {
-    if (gammaActive) {
-        glEnable(GL_FRAMEBUFFER_SRGB);
-    } else {
-        glDisable(GL_FRAMEBUFFER_SRGB);
-    }
 }
 
 // whenever the window size changed (by OS or user resize) this callback function executes
@@ -230,7 +161,7 @@ void Window::mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
     lastX = xpos;
     lastY = ypos;
 
-    camera.ProcessMouseMovement(xoffset, yoffset);
+    gui->getCamera().ProcessMouseMovement(xoffset, yoffset);
 }
 
 // whenever the mouse scroll wheel scrolls, this callback is called
@@ -240,7 +171,7 @@ void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     {
         return;
     }
-    camera.ProcessMouseScroll(static_cast<float>(yoffset));
+    gui->getCamera().ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
@@ -277,13 +208,13 @@ void Window::processInput(GLFWwindow *window)
     if (gui->IsControlActive())
     {
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            camera.ProcessKeyboard(FORWARD, deltaTime);
+            gui->getCamera().ProcessKeyboard(FORWARD, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            camera.ProcessKeyboard(BACKWARD, deltaTime);
+            gui->getCamera().ProcessKeyboard(BACKWARD, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            camera.ProcessKeyboard(LEFT, deltaTime);
+            gui->getCamera().ProcessKeyboard(LEFT, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            camera.ProcessKeyboard(RIGHT, deltaTime);
+            gui->getCamera().ProcessKeyboard(RIGHT, deltaTime);
     }
 }
 

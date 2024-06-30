@@ -6,9 +6,6 @@
 #include <iostream>
 #include <learnopengl/camera.h>
 #include "GUI.h"
-#include "FrameBuffer.h"
-#include "MSAAFrameBuffer.h"
-#include "PingPongFrameBuffer.h"
 
 class Window {
 public:
@@ -16,32 +13,22 @@ public:
     ~Window();
 
     bool init();
-    void generateFrameBuffer(FrameBuffer& frameBuffer);
+
+    bool shouldClose() const;
+    void preRender();
+    pair<int, int> reset();
+    void processInput(GLFWwindow *window);
+    void swapBuffersAndPollEvents() const;
 
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
     static void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
     static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-
-    bool shouldClose() const;
-    void preRender();
-    void reset();
-    void processInput(GLFWwindow *window);
-    void swapBuffersAndPollEvents() const;
-
-    void preOutlineSetting() const;
-    void outlineSetting() const;
-    void afterOutlineSetting() const;
-
-    void faceCulling(bool faceCullingActive) const;
-    void MSAA(bool MSAAActive) const;
-    void gammaCorrection(bool gammaActive) const;
 
     // GUI
     static std::shared_ptr<GUI> gui;
     // control
     static bool firstMouse;
     // camera
-    static Camera camera;
     static float lastX;
     static float lastY;
 
@@ -49,23 +36,8 @@ public:
         return window;
     }
 
-    Camera& getCamera() const {
-        return camera;
-    }
-
-    FrameBuffer& getMainMSAAFrameBuffer() {
-        return mainMSAAFrameBuffer;
-    }
-
-    FrameBuffer& getIntermediateFrameBuffer() {
-        return intermediateFrameBuffer;
-    }
-
-    std::vector<PingPongFrameBuffer>& getPingPongFrameBuffers() {
-        return pingPongFrameBuffers;
-    }
-
 private:
+    // window settings
     unsigned int width;
     unsigned int height;
     std::string title;
@@ -74,10 +46,6 @@ private:
     // timing
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
-
-    MSAAFrameBuffer mainMSAAFrameBuffer = MSAAFrameBuffer(2, 1);
-    FrameBuffer intermediateFrameBuffer = FrameBuffer(2);
-    std::vector<PingPongFrameBuffer> pingPongFrameBuffers = std::vector<PingPongFrameBuffer>(2);
 };
 
 #endif // WINDOW_H

@@ -26,7 +26,7 @@ void GUI::init(GLFWwindow* window) {
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f); // 背景颜色
 }
 
-void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
+void GUI::render(std::string& modelFilePath, Scene& scene) {
     ImGui_ImplOpenGL3_NewFrame(); // OpenGL 渲染 ImGui
     ImGui_ImplGlfw_NewFrame(); // GLFW 渲染 ImGui
     ImGui::NewFrame(); // ImGui 新帧
@@ -130,6 +130,8 @@ void GUI::render(Camera& camera, std::string& modelFilePath, Scene& scene) {
         ImGui::Checkbox("HDR", &HDRActive);
         // Bloom 泛光
         ImGui::Checkbox("Bloom", &bloomActive);
+        // SSAO 屏幕空间环境光遮蔽
+        ImGui::Checkbox("SSAO", &SSAOActive);
 
         // PBR
         ImGui::Checkbox("PBR", &pbrActive);

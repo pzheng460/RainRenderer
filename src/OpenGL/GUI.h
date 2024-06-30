@@ -8,7 +8,7 @@
 #include <learnopengl/model.h>
 #include <learnopengl/camera.h>
 #include <learnopengl/light.h>
-//#include "Object.h"
+
 #include "Scene.h"
 
 enum renderMode {
@@ -29,7 +29,11 @@ public:
     GUI();
     ~GUI();
     void init(GLFWwindow* window);
-    void render(Camera& camera, std::string& modelFilePath, Scene& scene);
+    void render(std::string& modelFilePath, Scene& scene);
+
+    Camera& getCamera() {
+        return camera;
+    }
 
     renderMode getMode() const {
         return mode;
@@ -78,6 +82,9 @@ public:
     bool IsBloomActive() const {
         return bloomActive;
     }
+    bool IsSSAOActive() const {
+        return SSAOActive;
+    }
 
     void ToggleControl() {
         controlActive = !controlActive;
@@ -86,6 +93,8 @@ public:
 private:
     renderMode mode = BASIC;
     skyboxLoadMode skyboxMode = SPHEREMAP;
+
+    Camera camera = Camera(glm::vec3(0.0f, 10.0f, 30.0f));
 
     bool controlActive = false;
 
@@ -103,6 +112,7 @@ private:
     bool gammaCorrectionActive = false;
     bool HDRActive = false;
     bool bloomActive = false;
+    bool SSAOActive = false;
 };
 
 #endif // GUI_H

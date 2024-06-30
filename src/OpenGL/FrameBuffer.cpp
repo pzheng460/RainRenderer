@@ -51,6 +51,19 @@ bool FrameBuffer::checkComplete() {
     return true;
 }
 
+void FrameBuffer::generateFrameBuffer(int SCR_WIDTH, int SCR_HEIGHT) {
+    init();
+    bind();
+    // create floating point color buffer 创建浮点颜色缓冲区
+    createColorTextureAttachment(SCR_WIDTH, SCR_HEIGHT);
+    // create depth buffer (renderbuffer) 创建深度缓冲区（渲染缓冲区）
+    if (numOfDepthAttachments > 0)
+        createRenderBufferAttachment(SCR_WIDTH, SCR_HEIGHT);
+    // check if frame buffer is complete 检查帧缓冲是否完整
+    checkComplete();
+    unbind();
+}
+
 void FrameBuffer::transferFrameBuffer(FrameBuffer& targetFrameBuffer, int SCR_WIDTH, int SCR_HEIGHT) {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetFrameBuffer.framebuffer);
