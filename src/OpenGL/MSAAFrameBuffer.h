@@ -23,9 +23,6 @@ public:
     void bindColorTextureAttachment() override;
     void bindRenderBufferDepthAttachment() override;
     void generateFrameBuffer(int SCR_WIDTH, int SCR_HEIGHT) override;
-private:
-    std::vector<MSAATexture> msaaTextureColorBuffers;
-    MSAARenderBufferObjectDepth msaaRBODepth;
 };
 
 #endif // MSAAFRAMEBUFFER_H

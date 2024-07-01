@@ -10,6 +10,8 @@ void Textures::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);  // we clamp to the edge as the blur filter would otherwise sample repeated texture values!
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -24,8 +26,13 @@ void RenderBufferObjectDepth::generateRenderBufferObject(int SCR_WIDTH, int SCR_
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
-FrameBuffer::FrameBuffer(int numOfColorAttachments, int numOfDepthAttachments) : numOfColorAttachments(numOfColorAttachments), numOfDepthAttachments(numOfDepthAttachments) {
-    textureColorBuffers.resize(numOfColorAttachments);
+FrameBuffer::FrameBuffer(int numOfColorAttachments, int numOfDepthAttachments) :
+    numOfColorAttachments(numOfColorAttachments), numOfDepthAttachments(numOfDepthAttachments) {
+    for (int i = 0; i < numOfColorAttachments; i++) {
+        std::unique_ptr<Textures> textureColorBuffer = std::make_unique<Textures>();
+        textureColorBuffers.push_back(std::move(textureColorBuffer));
+    }
+    rboDepth = std::make_unique<RenderBufferObjectDepth>();
 }
 
 void FrameBuffer::init() {
@@ -42,7 +49,7 @@ void FrameBuffer::unbind() {
 
 void FrameBuffer::bindColorTextureAttachment() {
     for (int i = 0; i < numOfColorAttachments; i++) {
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, textureColorBuffers[i].getTexture(), 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, textureColorBuffers[i]->getTexture(), 0);
     }
     // 动态设置绘制缓冲区
     std::vector<GLuint> attachments(numOfColorAttachments);
@@ -53,7 +60,7 @@ void FrameBuffer::bindColorTextureAttachment() {
 }
 
 void FrameBuffer::bindRenderBufferDepthAttachment() {
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth.getRBO());
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth->getRBO());
 }
 
 bool FrameBuffer::checkComplete() {
@@ -70,13 +77,13 @@ void FrameBuffer::generateFrameBuffer(int SCR_WIDTH, int SCR_HEIGHT) {
 
     // create floating point color buffer 创建浮点颜色缓冲区
     for (int i = 0; i < numOfColorAttachments; i++) {
-        textureColorBuffers[i].generateTexture(SCR_WIDTH, SCR_HEIGHT);
+        textureColorBuffers[i]->generateTexture(SCR_WIDTH, SCR_HEIGHT);
     }
     bindColorTextureAttachment();
 
     // create depth buffer (renderbuffer) 创建深度缓冲区（渲染缓冲区）
     if (numOfDepthAttachments > 0) {
-        rboDepth.generateRenderBufferObject(SCR_WIDTH, SCR_HEIGHT);
+        rboDepth->generateRenderBufferObject(SCR_WIDTH, SCR_HEIGHT);
         bindRenderBufferDepthAttachment();
     }
 

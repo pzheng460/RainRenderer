@@ -51,7 +51,7 @@ public:
 
     virtual void generateFrameBuffer(int SCR_WIDTH, int SCR_HEIGHT);
 
-    std::vector<Textures>& getTextureColorBuffer() {
+    std::vector<std::unique_ptr<Textures>>& getTextureColorBuffer() {
         return textureColorBuffers;
     }
 
@@ -71,9 +71,9 @@ protected:
     unsigned int framebuffer;
     int numOfColorAttachments;
     int numOfDepthAttachments;
-private:
-    std::vector<Textures> textureColorBuffers;
-    RenderBufferObjectDepth rboDepth;
+
+    std::vector<std::unique_ptr<Textures>> textureColorBuffers;
+    std::unique_ptr<RenderBufferObjectDepth> rboDepth;
 };
 
 #endif // FRAMEBUFFER_H

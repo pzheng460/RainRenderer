@@ -67,7 +67,7 @@ uniform bool shadowActive;
 
 // function prototypes
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
-vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, float shadow);
+vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightPos, sampler2D shadowMap);
 
@@ -89,7 +89,7 @@ void main()
     // phase 2: point lights
     for (int i = 0; i < size; i++) {
         float shadow = shadowActive ? ShadowCalculation(FragPosLightSpace[i], pointLights[i].position, shadowMaps[i]) : 0.0;
-        result += CalcPointLight(pointLights[i], norm, FragPos, viewDir, shadow);
+        result += (1.0 - shadow) * CalcPointLight(pointLights[i], norm, FragPos, viewDir);
     }
 
     // phase 3: spot light
@@ -124,7 +124,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 }
 
 // calculates the color when using a point light.
-vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, float shadow)
+vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
     vec3 lightDir = normalize(light.position - fragPos);
     // diffuse shading
@@ -142,7 +142,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, f
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
-    return (1.0 - shadow) * (ambient + (diffuse + specular));
+    return (ambient + diffuse + specular);
 }
 
 // calculates the color when using a spot light.

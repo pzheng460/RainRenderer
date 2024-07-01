@@ -79,8 +79,18 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
 
         ImGui::Separator(); // 分隔线
 
-        ImGui::Text("EFFECTS");
+        // Rendering Path 渲染路径
+        ImGui::Text("Rendering Path");
+        if (ImGui::RadioButton("Forward Rendering", renderingPath == FORWARDRENDERING)) {
+            renderingPath = FORWARDRENDERING;
+        }
+        if (ImGui::RadioButton("Deferred Rendering", renderingPath == DEFERREDRENDERING)) {
+            renderingPath = DEFERREDRENDERING;
+        }
 
+        ImGui::Separator(); // 分隔线
+
+        ImGui::Text("EFFECTS");
         // 开关 SkyBox
         ImGui::Checkbox("Skybox", &skyBoxActive);
         if (!skyBoxActive) { ImGui::BeginDisabled(); }
@@ -123,7 +133,11 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
         // face culling 面剔除
         ImGui::Checkbox("Face Culling", &faceCullingActive);
         // MSAA 抗锯齿
-        ImGui::Checkbox("MSAA", &MSAAActive);
+        if (renderingPath != FORWARDRENDERING) { ImGui::BeginDisabled(); }
+        {
+            ImGui::Checkbox("MSAA", &MSAAActive);
+        }
+        if (renderingPath != FORWARDRENDERING) { ImGui::EndDisabled(); }
         // Gamma Correction 伽马校正
         ImGui::Checkbox("Gamma Correction", &gammaCorrectionActive);
         // HDR 高动态范围
@@ -131,8 +145,11 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
         // Bloom 泛光
         ImGui::Checkbox("Bloom", &bloomActive);
         // SSAO 屏幕空间环境光遮蔽
-        ImGui::Checkbox("SSAO", &SSAOActive);
-
+        if (renderingPath != DEFERREDRENDERING) { ImGui::BeginDisabled(); }
+        {
+            ImGui::Checkbox("SSAO", &SSAOActive);
+        }
+        if (renderingPath != DEFERREDRENDERING) { ImGui::EndDisabled(); }
         // PBR
         ImGui::Checkbox("PBR", &pbrActive);
 

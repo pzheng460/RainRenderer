@@ -97,4 +97,43 @@ inline void finalShaderSetting(Shader& shader, unsigned int hdrBuffer, bool HDRA
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, bloomBlur);
 }
+
+inline void geometryBufferShaderSetting(Shader& shader, bool invertNormals) {
+    shader.use();
+    shader.setBool("invertNormals", invertNormals);
+}
+
+inline void deferredLightingShaderSetting(Shader& shader, unsigned int gPosition, unsigned int gNormal, unsigned int gAlbedoSpec, unsigned int ssaoColorBuffer, Camera& camera, std::vector<Light> lights, bool ssaoActive) {
+    shader.use();
+    shader.setInt("gPosition", 0);
+    shader.setInt("gNormal", 1);
+    shader.setInt("gAlbedoSpec", 2);
+    shader.setInt("ssao", 3);
+
+    for (unsigned int i = 0; i < lights.size(); ++i)
+    {
+        shader.setVec3("lights[" + std::to_string(i) + "].Position", lights[i].getPosition());
+        shader.setVec3("lights[" + std::to_string(i) + "].Color", lights[i].getColor());
+        shader.setFloat("lights[" + std::to_string(i) + "].Linear", lights[i].getLinear());
+        shader.setFloat("lights[" + std::to_string(i) + "].Quadratic", lights[i].getQuadratic());
+        // then calculate radius of light volume/sphere
+        const float maxBrightness = std::fmaxf(std::fmaxf(lights[i].getColor().r, lights[i].getColor().g), lights[i].getColor().b);
+        float radius = (-lights[i].getLinear() + std::sqrt(lights[i].getLinear() * lights[i].getLinear() - 4 * lights[i].getQuadratic() * (lights[i].getConstant() - (256.0f / 5.0f) * maxBrightness))) / (2.0f * lights[i].getQuadratic());
+        shader.setFloat("lights[" + std::to_string(i) + "].Radius", radius);
+    }
+    shader.setVec3("viewPos", camera.Position);
+    shader.setInt("size", lights.size());
+
+    shader.setBool("ssaoActive", ssaoActive);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, gPosition);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, gNormal);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
+}
+
 #endif // SHADERSETTING_H

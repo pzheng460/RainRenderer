@@ -10,12 +10,14 @@
 
 #include "FrameBuffer.h"
 #include "MSAAFrameBuffer.h"
+#include "GeometryFrameBuffer.h"
 #include <learnopengl/filesystem.h>
 #include <learnopengl/shader.h>
 
 #include <utility>
 #include "Scene.h"
 #include "GUI.h"
+#include "SSAO.h"
 
 #include <random>
 
@@ -28,6 +30,8 @@ public:
     void init();
     void reset();
     void draw(Scene& scene);
+    void forwardRendering(Scene& scene);
+    void deferredRendering(Scene& scene);
 
     void gaussianBlur();
 
@@ -60,6 +64,8 @@ private:
 
     int SCR_WIDTH, SCR_HEIGHT;
 
+    bool firstIteration = true;
+
     // Main FrameBuffer
     MSAAFrameBuffer mainMSAAFrameBuffer = MSAAFrameBuffer(2, 1);
     FrameBuffer intermediateFrameBuffer = FrameBuffer(2);
@@ -71,8 +77,14 @@ private:
     unsigned int amount = 10;
 
     // G-Buffer
-    Shader gBufferShader;
-    FrameBuffer gFrameBuffer = FrameBuffer(3, 1);
+    Shader gFrameBufferShader = Shader(FileSystem::getPath("src/OpenGL/shaders/g_buffer.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/g_buffer.fs").c_str());
+    GeometryFrameBuffer gFrameBuffer = GeometryFrameBuffer(3, 1);
+
+    // SSAO
+    SSAO ssao = SSAO(gui->getCamera(), SCR_WIDTH, SCR_HEIGHT, gFrameBuffer);
+
+    // Deferred lighting
+    Shader deferredLightingShader = Shader(FileSystem::getPath("src/OpenGL/shaders/deferred_shading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/deferred_shading.fs").c_str());
 
     // Final
     Shader finalShader = Shader(FileSystem::getPath("src/OpenGL/shaders/final.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/final.fs").c_str());

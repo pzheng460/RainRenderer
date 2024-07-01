@@ -114,6 +114,9 @@ public:
     const glm::vec3& getDiffuseColor() const { return diffuseColor; }
     const glm::vec3& getSpecularColor() const { return specularColor; }
     const glm::mat4& getLightSpaceMatrix() const { return lightSpaceMatrix; }
+    const float getConstant() const { return constant; }
+    const float getLinear() const { return linear; }
+    const float getQuadratic() const { return quadratic; }
     friend class GUI;
 private:
     glm::mat4 modelMatrix = glm::mat4(1.0f);
@@ -130,6 +133,9 @@ private:
     glm::vec3 diffuseColor;
     glm::vec3 specular;
     glm::vec3 specularColor;
+    const float constant = 1.0f;
+    const float linear = 0.07f;
+    const float quadratic = 0.01f;
 
     glm::mat4 lightProjection, lightView;
     glm::mat4 lightSpaceMatrix;

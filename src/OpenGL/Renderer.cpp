@@ -1,7 +1,6 @@
 #include "Renderer.h"
 #include "render_implicit_geometry.h"
 #include "shaderSetting.h"
-#include "SSAO.h"
 
 void Renderer::init() {
     mainMSAAFrameBuffer.generateFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
@@ -9,6 +8,7 @@ void Renderer::init() {
     for (int i = 0; i < 2; ++i) {
         pingPongFrameBuffers[i].generateFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
     }
+    gFrameBuffer.generateFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
 }
 
 void Renderer::reset() {
@@ -21,6 +21,13 @@ void Renderer::draw(Scene& scene) {
     faceCulling();
     gammaCorrection();
 
+    if (gui->getRenderingPath() == FORWARDRENDERING) {
+        forwardRendering(scene);
+    } else if (gui->getRenderingPath() == DEFERREDRENDERING) {
+        deferredRendering(scene);
+    }
+}
+void Renderer::forwardRendering(Scene& scene) {
     mainMSAAFrameBuffer.bind();
 
     reset();
@@ -72,7 +79,39 @@ void Renderer::draw(Scene& scene) {
     }
 
     reset();
-    finalShaderSetting(finalShader, intermediateFrameBuffer.getTextureColorBuffer()[0].getTexture(), gui->IsHDRActive(), 10.0f, pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0].getTexture(), gui->IsBloomActive());
+    finalShaderSetting(finalShader, intermediateFrameBuffer.getTextureColorBuffer()[0]->getTexture(), gui->IsHDRActive(), 10.0f, pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0]->getTexture(), gui->IsBloomActive());
+    renderQuad();
+}
+
+void Renderer::deferredRendering(Scene &scene) {
+    gFrameBuffer.bind();
+    reset();
+    // render lights 渲染光源
+    if (gui->IsLightActive()) {
+        for (int i = 0; i < scene.lights.size(); ++i) {
+            scene.lights[i].draw();
+        }
+    }
+    // render scene 渲染场景
+    geometryBufferShaderSetting(gFrameBufferShader, false);
+    scene.drawScene(gFrameBufferShader, gui->IsFloorActive(), gui->IsPBRActive());
+    // render skybox 渲染天空盒，放在最后渲染保证early-z测试
+    if (gui->IsSkyBoxActive()) {
+        if (gui->getSkyboxLoadMode() == CUBEMAP) {
+            scene.skybox.drawGeometry();
+        } else if (gui->getSkyboxLoadMode() == SPHEREMAP) {
+            scene.skybox.draw();
+        }
+    }
+    gFrameBuffer.unbind();
+
+    unsigned int ssaoColorBufferBlur;
+    if (firstIteration || gui->IsSSAOActive()) {
+        ssaoColorBufferBlur = ssao.draw();
+    }
+
+    if (firstIteration) firstIteration = false;
+    deferredLightingShaderSetting(deferredLightingShader, gFrameBuffer.getTextureColorBuffer()[0]->getTexture(), gFrameBuffer.getTextureColorBuffer()[1]->getTexture(), gFrameBuffer.getTextureColorBuffer()[2]->getTexture(), ssaoColorBufferBlur, gui->getCamera(), scene.lights, gui->IsSSAOActive());
     renderQuad();
 }
 
@@ -85,7 +124,7 @@ void Renderer::gaussianBlur() {
     {
         glBindFramebuffer(GL_FRAMEBUFFER, pingPongFrameBuffers[horizontal].getFrameBuffer());
         shaderBlur.setInt("horizontal", horizontal);
-        glBindTexture(GL_TEXTURE_2D, first_iteration ? intermediateFrameBuffer.getTextureColorBuffer()[1].getTexture() : pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0].getTexture());  // bind texture of other framebuffer (or scene if first iteration)
+        glBindTexture(GL_TEXTURE_2D, first_iteration ? intermediateFrameBuffer.getTextureColorBuffer()[1]->getTexture() : pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0]->getTexture());  // bind texture of other framebuffer (or scene if first iteration)
         renderQuad();
         horizontal = !horizontal;
         if (first_iteration)

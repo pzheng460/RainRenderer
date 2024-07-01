@@ -11,6 +11,11 @@
 
 #include "Scene.h"
 
+enum RenderingPath {
+    FORWARDRENDERING,
+    DEFERREDRENDERING
+};
+
 enum renderMode {
     BASIC,
     PHONG,
@@ -33,6 +38,10 @@ public:
 
     Camera& getCamera() {
         return camera;
+    }
+
+    RenderingPath getRenderingPath() const {
+        return renderingPath;
     }
 
     renderMode getMode() const {
@@ -93,6 +102,7 @@ public:
 private:
     renderMode mode = BASIC;
     skyboxLoadMode skyboxMode = SPHEREMAP;
+    RenderingPath renderingPath = FORWARDRENDERING;
 
     Camera camera = Camera(glm::vec3(0.0f, 10.0f, 30.0f));
 
