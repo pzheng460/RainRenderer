@@ -1,17 +1,17 @@
-#include "Window.h"
+#include "MainWindow.h"
 
-std::shared_ptr<GUI> Window::gui = nullptr;
+std::shared_ptr<GUI> MainWindow::gui = nullptr;
 
-Window::Window(unsigned int width, unsigned int height, const std::string& title)
+MainWindow::MainWindow(unsigned int width, unsigned int height, const std::string& title)
         : width(width), height(height), title(title), window(nullptr) {}
 
-Window::~Window() {
+MainWindow::~MainWindow() {
     // glfw: terminate, clearing all previously allocated GLFW resources. 清理所有之前分配的GLFW资源
     // ------------------------------------------------------------------
     glfwTerminate();
 }
 
-bool Window::init() {
+bool MainWindow::init() {
     // glfw: initialize and configure 初始化和配置
     // ------------------------------
     // Initialize GLFW 初始化GLFW
@@ -88,12 +88,12 @@ bool Window::init() {
 }
 
 // check if the window should close 检查窗口是否应该关闭
-bool Window::shouldClose() const {
+bool MainWindow::shouldClose() const {
     return glfwWindowShouldClose(window);
 }
 
 // per-frame logic before rendering 每一帧渲染前的逻辑
-void Window::preRender() {
+void MainWindow::preRender() {
     // per-frame time logic 每一帧的时间逻辑
     float currentFrame = static_cast<float>(glfwGetTime());
     deltaTime = currentFrame - lastFrame;
@@ -103,7 +103,7 @@ void Window::preRender() {
     processInput(window);
 }
 
-pair<int, int> Window::reset() {
+pair<int, int> MainWindow::reset() {
     // 设置清屏颜色
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     // 清空颜色缓冲、深度缓冲、模板缓冲
@@ -122,7 +122,7 @@ pair<int, int> Window::reset() {
 }
 
 // swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-void Window::swapBuffersAndPollEvents() const {
+void MainWindow::swapBuffersAndPollEvents() const {
     // 交换颜色缓冲
     glfwSwapBuffers(window);
     // 检查触发事件（如键盘输入、鼠标移动、窗口更新等）
@@ -130,7 +130,7 @@ void Window::swapBuffersAndPollEvents() const {
 }
 
 // whenever the window size changed (by OS or user resize) this callback function executes
-void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void MainWindow::framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
@@ -139,7 +139,7 @@ void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height
 
 
 // whenever the mouse moves, this callback is called
-void Window::mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
+void MainWindow::mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
     if (!gui->IsControlActive())
     {
@@ -165,7 +165,7 @@ void Window::mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 }
 
 // whenever the mouse scroll wheel scrolls, this callback is called
-void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void MainWindow::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     if (!gui->IsControlActive())
     {
@@ -175,7 +175,7 @@ void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-void Window::processInput(GLFWwindow *window)
+void MainWindow::processInput(GLFWwindow *window)
 {
     // 检测用户是否点击了esc，如果是，则将shouldClose置为true
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)

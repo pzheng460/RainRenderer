@@ -7,10 +7,10 @@
 #include <utils/camera.h>
 #include "GUI.h"
 
-class Window {
+class MainWindow {
 public:
-    Window(unsigned int width, unsigned int height, const std::string& title);
-    ~Window();
+    MainWindow(unsigned int width, unsigned int height, const std::string& title);
+    ~MainWindow();
 
     bool init();
 

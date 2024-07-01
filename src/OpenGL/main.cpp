@@ -17,7 +17,7 @@
 #include "Object.h"
 #include "PBRObject.h"
 #include "GUI.h"
-#include "Window.h"
+#include "MainWindow.h"
 #include "Scene.h"
 #include "shaderSetting.h"
 #include "render_implicit_geometry.h"
@@ -28,9 +28,9 @@ constexpr unsigned int SCR_WIDTH = 1280;
 constexpr unsigned int SCR_HEIGHT = 720;
 
 std::string modelFilePath = "resources/objects/YYB Symphony Miku by HB-Squiddy/yyb Symphony Miku by HB-Squiddy.pmx";
-bool Window::firstMouse = true;
-float Window::lastX = (float) SCR_WIDTH / 2.0;
-float Window::lastY = (float) SCR_HEIGHT / 2.0;
+bool MainWindow::firstMouse = true;
+float MainWindow::lastX = (float) SCR_WIDTH / 2.0;
+float MainWindow::lastY = (float) SCR_HEIGHT / 2.0;
 
 int main()
 {
@@ -38,14 +38,14 @@ int main()
     auto gui = std::make_shared<GUI>();
 
     // bind GUI to Window 绑定GUI到Window
-    Window::gui = gui;
-    Window window(SCR_WIDTH, SCR_HEIGHT, "Rein Renderer GL");
+    MainWindow::gui = gui;
+    MainWindow mainWindow(SCR_WIDTH, SCR_HEIGHT, "Rein Renderer GL");
 
-    if (!window.init()) {
+    if (!mainWindow.init()) {
         return -1;
     }
 
-    auto realScreen = window.reset();
+    auto realScreen = mainWindow.reset();
     Renderer renderer(realScreen.first, realScreen.second, gui);
     renderer.init();
 
@@ -95,15 +95,15 @@ int main()
 //    scene.addLight(light3);
 
     // Initialize Dear ImGui 初始化Dear ImGui
-    gui->init(window.getGLFWwindow());
+    gui->init(mainWindow.getGLFWwindow());
 
     // render loop 渲染循环
-    while (!window.shouldClose())
+    while (!mainWindow.shouldClose())
     {
         // reprocess before rendering 在渲染之前的预处理
-        window.preRender();
+        mainWindow.preRender();
 
-        auto newScreen = window.reset();
+        auto newScreen = mainWindow.reset();
         if (newScreen != realScreen) {
             realScreen = newScreen;
             renderer.setFrameBufferSize(realScreen);
@@ -143,7 +143,7 @@ int main()
         gui->render(modelFilePath, scene);
 
         // swap buffers and poll IO events (keys pressed/released, mouse moved etc.) 交换缓冲区并轮询IO事件（按键按下/释放、鼠标移动等）
-        window.swapBuffersAndPollEvents();
+        mainWindow.swapBuffersAndPollEvents();
     }
 
     return 0;
