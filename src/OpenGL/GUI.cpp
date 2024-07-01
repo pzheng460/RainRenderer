@@ -4,6 +4,7 @@
 #include <imgui_impl_opengl3.h>
 #include <learnopengl/filesystem.h>
 #include <stb_image.h>
+#include <tinyfiledialogs.h>
 
 GUI::GUI() {
     // 初始化其他参数
@@ -41,7 +42,7 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
 
         // 控制鼠标和键盘开关
         ImGui::Text("Control");
-        ImGui::Checkbox("Control", &controlActive);
+        ImGui::Checkbox("Control (Press space to toggle)", &controlActive);
 
         ImGui::Separator(); // 分隔线
 
@@ -86,6 +87,7 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
         }
         if (ImGui::RadioButton("Deferred Rendering", renderingPath == DEFERREDRENDERING)) {
             renderingPath = DEFERREDRENDERING;
+            mode = BLINNPHONG;
         }
 
         ImGui::Separator(); // 分隔线
@@ -121,37 +123,38 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
         }
         if (!skyBoxActive) { ImGui::EndDisabled(); }
 
-
         // Light 光源
         ImGui::Checkbox("Light", &lightActive);
         ImGui::SameLine();
         // Floor 地板
         ImGui::Checkbox("Floor", &floorActive);
 
-        // normal visualization 法线可视化
-        ImGui::Checkbox("Normal", &normalVisualizationActive);
         // face culling 面剔除
         ImGui::Checkbox("Face Culling", &faceCullingActive);
-        // MSAA 抗锯齿
-        if (renderingPath != FORWARDRENDERING) { ImGui::BeginDisabled(); }
-        {
-            ImGui::Checkbox("MSAA", &MSAAActive);
-        }
-        if (renderingPath != FORWARDRENDERING) { ImGui::EndDisabled(); }
         // Gamma Correction 伽马校正
         ImGui::Checkbox("Gamma Correction", &gammaCorrectionActive);
-        // HDR 高动态范围
-        ImGui::Checkbox("HDR", &HDRActive);
-        // Bloom 泛光
-        ImGui::Checkbox("Bloom", &bloomActive);
-        // SSAO 屏幕空间环境光遮蔽
+
+        if (renderingPath != FORWARDRENDERING) { ImGui::BeginDisabled(); }
+        {
+            // normal visualization 法线可视化
+            ImGui::Checkbox("Normal", &normalVisualizationActive);
+            // MSAA 抗锯齿
+            ImGui::Checkbox("MSAA", &MSAAActive);
+            // HDR 高动态范围
+            ImGui::Checkbox("HDR", &HDRActive);
+            // Bloom 泛光
+            ImGui::Checkbox("Bloom", &bloomActive);
+            // PBR
+            ImGui::Checkbox("PBR", &pbrActive);
+        }
+        if (renderingPath != FORWARDRENDERING) { ImGui::EndDisabled(); }
+
         if (renderingPath != DEFERREDRENDERING) { ImGui::BeginDisabled(); }
         {
+            // SSAO 屏幕空间环境光遮蔽
             ImGui::Checkbox("SSAO", &SSAOActive);
         }
         if (renderingPath != DEFERREDRENDERING) { ImGui::EndDisabled(); }
-        // PBR
-        ImGui::Checkbox("PBR", &pbrActive);
 
         ImGui::Text("Render Mode");
         if (ImGui::RadioButton("Basic", mode == BASIC)) {
@@ -183,16 +186,26 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
         ImGui::Text("Model Import");
         static char filePath[128] = "";
         ImGui::InputText("File Path", filePath, sizeof(filePath));
+        if (ImGui::Button("Open File Dialog")) {
+            const char *filterPatterns[] = {"*.obj", "*.fbx", "*.dae", "*.pmx"};
+            const char *selectedFilePath = tinyfd_openFileDialog(
+                    "Select Model File", "", 4, filterPatterns, NULL, 0);
+            if (selectedFilePath) {
+                strncpy(filePath, selectedFilePath, sizeof(filePath) - 1);
+                filePath[sizeof(filePath) - 1] = '\0'; // 确保字符串以 null 结尾
+            }
+        }
         if (ImGui::Button("Load Model")) {
             if (strlen(filePath) == 0) {
-                strcpy(filePath, modelFilePath.c_str()); // 使用默认的模型文件路径
+                modelFilePath = FileSystem::getPath(modelFilePath); // 使用默认的模型文件路径
+                strcpy(filePath, modelFilePath.c_str());
             } else {
                 modelFilePath = std::string(filePath); // 更新模型文件路径
             }
 
             // load models
-            stbi_set_flip_vertically_on_load(false); // tell stb_image.h to flip loaded texture's on the y-axis.
-            Model ourModel(FileSystem::getPath(modelFilePath));
+            stbi_set_flip_vertically_on_load(false); // tell stb_image.h to flip loaded texture's on the y-axis 告诉 stb_image.h 在 y 轴上翻转加载的纹理
+            Model ourModel(modelFilePath);
             Shader shader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
             auto object = std::make_unique<Object>(ourModel, shader);
             scene.addObject(std::move(object));
