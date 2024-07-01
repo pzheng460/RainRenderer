@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <learnopengl/shader.h>
-#include <learnopengl/light.h>
+#include <utils/shader.h>
+#include <utils/light.h>
 #include <vector>
 #include "ShadowMap.h"
 

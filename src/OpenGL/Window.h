@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include <learnopengl/camera.h>
+#include <utils/camera.h>
 #include "GUI.h"
 
 class Window {

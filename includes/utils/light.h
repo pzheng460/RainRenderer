@@ -2,8 +2,8 @@
 #define LIGHT_H
 
 #include <glm/glm.hpp>
-#include <learnopengl/filesystem.h>
-#include <learnopengl/camera.h>
+#include <utils/filesystem.h>
+#include <utils/camera.h>
 
 const glm::vec3 AMBIENT = glm::vec3(0.5);
 const glm::vec3 DIFFUSE = glm::vec3(0.5);

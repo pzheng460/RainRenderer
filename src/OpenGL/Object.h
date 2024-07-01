@@ -4,10 +4,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <learnopengl/shader.h>
-#include <learnopengl/camera.h>
-#include <learnopengl/model.h>
-#include <learnopengl/light.h>
+#include <utils/shader.h>
+#include <utils/camera.h>
+#include <utils/model.h>
+#include <utils/light.h>
 #include <stb_image.h>
 #include <string>
 

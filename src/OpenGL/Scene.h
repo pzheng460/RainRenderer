@@ -3,11 +3,11 @@
 
 #include <vector>
 #include "Skybox.h"
-#include <learnopengl/light.h>
-#include <learnopengl/shader.h>
-#include <learnopengl/camera.h>
+#include <utils/light.h>
+#include <utils/shader.h>
+#include <utils/camera.h>
 #include <glm/glm.hpp>
-#include <learnopengl/filesystem.h>
+#include <utils/filesystem.h>
 #include "Object.h"
 #include "PBRObject.h"
 #include "ShadowMap.h"

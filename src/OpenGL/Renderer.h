@@ -11,8 +11,8 @@
 #include "FrameBuffer.h"
 #include "MSAAFrameBuffer.h"
 #include "GeometryFrameBuffer.h"
-#include <learnopengl/filesystem.h>
-#include <learnopengl/shader.h>
+#include <utils/filesystem.h>
+#include <utils/shader.h>
 
 #include <utility>
 #include "Scene.h"

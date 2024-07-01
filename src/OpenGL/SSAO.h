@@ -1,12 +1,12 @@
 #ifndef SSAO_H
 #define SSAO_H
 
-#include <learnopengl/shader.h>
-#include <learnopengl/filesystem.h>
+#include <utils/shader.h>
+#include <utils/filesystem.h>
 #include "FrameBuffer.h"
 #include "GeometryFrameBuffer.h"
 #include <random>
-#include <learnopengl/camera.h>
+#include <utils/camera.h>
 
 class NoiseTexture : public Textures {
 public:

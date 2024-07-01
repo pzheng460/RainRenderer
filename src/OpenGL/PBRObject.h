@@ -2,8 +2,8 @@
 #define PBROBJECT_H
 
 #include "Object.h"
-#include <learnopengl/filesystem.h>
-#include <learnopengl/light.h>
+#include <utils/filesystem.h>
+#include <utils/light.h>
 
 class PBRObject : public Object {
 public:

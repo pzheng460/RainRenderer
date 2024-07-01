@@ -4,10 +4,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <learnopengl/shader.h>
-#include <learnopengl/model.h>
-#include <learnopengl/camera.h>
-#include <learnopengl/light.h>
+#include <utils/shader.h>
+#include <utils/model.h>
+#include <utils/camera.h>
+#include <utils/light.h>
 
 #include "Scene.h"
 

@@ -1,8 +1,8 @@
 #ifndef SHADOWMAP_H
 #define SHADOWMAP_H
 
-#include <learnopengl/shader.h>
-#include <learnopengl/filesystem.h>
+#include <utils/shader.h>
+#include <utils/filesystem.h>
 
 class ShadowMap
 {

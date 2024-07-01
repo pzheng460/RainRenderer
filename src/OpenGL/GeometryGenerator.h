@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-#include <learnopengl/model.h>
+#include <utils/model.h>
 
 class GeometryGenerator {
 public:

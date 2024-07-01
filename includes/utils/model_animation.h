@@ -10,8 +10,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include <learnopengl/mesh.h>
-#include <learnopengl/shader.h>
+#include <utils/mesh.h>
+#include <utils/shader.h>
 
 #include <string>
 #include <fstream>
@@ -19,8 +19,8 @@
 #include <iostream>
 #include <map>
 #include <vector>
-#include <learnopengl/assimp_glm_helpers.h>
-#include <learnopengl/animdata.h>
+#include <utils/assimp_glm_helpers.h>
+#include <utils/animdata.h>
 
 using namespace std;
 
