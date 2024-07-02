@@ -2,7 +2,12 @@
 #include "render_implicit_geometry.h"
 #include "shaderSetting.h"
 
-void Renderer::init() {
+void Renderer::init(Scene& scene) {
+    for (int i = 0; i < scene.lights.size(); ++i) {
+        shadowMapFrameBuffers.emplace_back(0, 1, 0);
+        shadowMapFrameBuffers.back().generateFrameBuffer(SHADOW_WIDTH, SHADOW_HEIGHT);
+    }
+
     mainMSAAFrameBuffer.generateFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
     intermediateFrameBuffer.generateFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
     for (int i = 0; i < 2; ++i) {
@@ -21,6 +26,22 @@ void Renderer::draw(Scene& scene) {
     faceCulling();
     gammaCorrection();
 
+    // render shadow map 渲染阴影贴图
+    for (int i = 0; i < scene.lights.size(); ++i) {
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        shadowMapFrameBuffers[i].bind();
+        glClear(GL_DEPTH_BUFFER_BIT);
+        shadowMapShaderSetting(simpleDepthShader, scene.lights[i]);
+        scene.draw(simpleDepthShader, gui->IsFloorActive());
+        shadowMapFrameBuffers[i].unbind();
+    }
+
+    // debug depth map 调试深度贴图
+//        reset();
+//        Shader debugDepthQuad(FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.fs").c_str());
+//        debugDepthQuadShaderSetting(debugDepthQuad, scene.shadowMaps[0].getDepthMap());
+//        renderQuad();
+
     if (gui->getRenderingPath() == FORWARDRENDERING) {
         forwardRendering(scene);
     } else if (gui->getRenderingPath() == DEFERREDRENDERING) {
@@ -29,7 +50,6 @@ void Renderer::draw(Scene& scene) {
 }
 void Renderer::forwardRendering(Scene& scene) {
     mainMSAAFrameBuffer.bind();
-
     reset();
     // render lights 渲染光源
     if (gui->IsLightActive()) {
@@ -37,30 +57,30 @@ void Renderer::forwardRendering(Scene& scene) {
             scene.lights[i].draw();
         }
     }
-
+    // render scene 渲染场景
     if (gui->getMode() == BASIC) {
         mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
     } else if (gui->getMode() == PHONG) {
         mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/phong.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/phong.fs").c_str());
-        phongShaderSetting(mainShader, gui->getCamera(), scene.lights, scene.shadowMaps);
+        phongShaderSetting(mainShader, gui->getCamera(), scene.lights, shadowMapFrameBuffers);
     } else if (gui->getMode() == BLINNPHONG) {
         mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/blinn_phong.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/blinn_phong.fs").c_str());
-        phongShaderSetting(mainShader, gui->getCamera(), scene.lights, scene.shadowMaps, gui->IsShadowActive());
+        phongShaderSetting(mainShader, gui->getCamera(), scene.lights, shadowMapFrameBuffers, gui->IsShadowActive());
     } else if (gui->getMode() == DEPTH) {
         mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/depth_testing.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/depth_testing.fs").c_str());
     } else if (gui->getMode() == ENVIRONMENTMAPPING) {
         mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/environment_mapping.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/environment_mapping.fs").c_str());
-        phongShaderSetting(mainShader, gui->getCamera(), scene.lights, scene.shadowMaps);
+        phongShaderSetting(mainShader, gui->getCamera(), scene.lights, shadowMapFrameBuffers);
+    } else if (gui->getMode() == PBR) {
+        mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/pbr.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/pbr.fs").c_str());
+        PBRShaderSetting(mainShader, scene.lights, scene.skybox.getIrradianceMap(), scene.skybox.getPrefilterMap(), scene.skybox.getBRDFLUTTexture());
     }
-
-    scene.drawScene(mainShader, gui->IsFloorActive(), gui->IsPBRActive());
-
+    scene.draw(mainShader, gui->IsFloorActive());
     // render normal visualization 渲染法线可视化
     if (gui->IsNormalVisualizationActive()) {
         Shader normalShader(FileSystem::getPath("src/OpenGL/shaders/normal_visualization.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.fs").c_str(), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.gs").c_str());
-        scene.drawScene(normalShader);
+        scene.draw(normalShader);
     }
-
     // render skybox 渲染天空盒，放在最后渲染保证early-z测试
     if (gui->IsSkyBoxActive()) {
         if (gui->getSkyboxLoadMode() == CUBEMAP) {
@@ -69,7 +89,6 @@ void Renderer::forwardRendering(Scene& scene) {
             scene.skybox.draw();
         }
     }
-
     mainMSAAFrameBuffer.unbind();
 
     mainMSAAFrameBuffer.transferFrameBuffer(intermediateFrameBuffer, SCR_WIDTH, SCR_HEIGHT);
@@ -94,7 +113,7 @@ void Renderer::deferredRendering(Scene &scene) {
     }
     // render scene 渲染场景
     geometryBufferShaderSetting(gFrameBufferShader, false);
-    scene.drawScene(gFrameBufferShader, gui->IsFloorActive(), gui->IsPBRActive());
+    scene.draw(gFrameBufferShader, gui->IsFloorActive());
     // render skybox 渲染天空盒，放在最后渲染保证early-z测试
     if (gui->IsSkyBoxActive()) {
         if (gui->getSkyboxLoadMode() == CUBEMAP) {

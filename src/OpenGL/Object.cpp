@@ -1,16 +1,15 @@
 #include "Object.h"
 #include "GeometryGenerator.h"
 
-Object::Object(const AssimpModel::Model& model, const Shader& shader)
-        : model(model), shader(shader), geometryType(MODEL) {
+Object::Object(const AssimpModel::Model& model)
+        : model(model), geometryType(MODEL) {
 }
 
-Object::Object(ImplicitGeometryType geometryType, const Shader& shader, bool initializeTextures, std::string texturePath)
-        : model(), shader(shader), geometryType(geometryType) {
+Object::Object(ImplicitGeometryType geometryType, bool initializeTextures, std::string texturePath)
+        : model(), geometryType(geometryType) {
     generateModel(geometryType);
     if (initializeTextures) {
-        loadTextures(model.meshes[0].textures,
-                     FileSystem::getPath(texturePath.c_str()));
+        loadTextures(model.meshes[0].textures,FileSystem::getPath(texturePath.c_str()));
     }
 }
 
@@ -23,7 +22,7 @@ void Object::setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT) {
     projectionMatrix = glm::perspective(glm::radians(camera.Zoom), SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
 }
 
-void Object::draw() {
+void Object::draw(Shader& shader) {
     shader.use();
     shader.setMat4("model", modelMatrix);
     shader.setMat4("view", viewMatrix);
@@ -43,7 +42,7 @@ void Object::generateModel(ImplicitGeometryType geometryType) {
             model = GeometryGenerator::generateQuad();
             break;
         case PLANE:
-            model = GeometryGenerator::generatePlane();
+            model = std::move(GeometryGenerator::generatePlane());
             break;
         default:
             std::cerr << "Unknown geometry type" << std::endl;

@@ -47,7 +47,6 @@ int main()
 
     auto realScreen = mainWindow.reset();
     Renderer renderer(realScreen.first, realScreen.second, gui);
-    renderer.init();
 
     // initialize scene 初始化scene类
     Scene scene;
@@ -73,14 +72,11 @@ int main()
     }
 
     // load floor 加载地板
-    Shader floorShader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
-    Object floor(PLANE, floorShader, true, "resources/textures/wood.png");
+    Object floor(PLANE, true, "resources/textures/wood.png");
     scene.setFloor(floor);
 
     // load PBR Sphere 加载PBR球体
-    Shader pbrShader(FileSystem::getPath("src/OpenGL/shaders/pbr.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/pbr.fs").c_str());
-    auto object = std::make_unique<PBRObject>(SPHERE, pbrShader);
-    object->setMVP(gui->getCamera(), SCR_WIDTH, SCR_HEIGHT);
+    auto object = std::make_unique<PBRObject>(SPHERE);
     scene.addObject(std::move(object));
 
     // load lights 加载光源
@@ -93,6 +89,8 @@ int main()
 //    scene.addLight(light1);
 //    scene.addLight(light2);
 //    scene.addLight(light3);
+
+    renderer.init(scene);
 
     // Initialize Dear ImGui 初始化Dear ImGui
     gui->init(mainWindow.getGLFWwindow());
@@ -107,7 +105,7 @@ int main()
         if (newScreen != realScreen) {
             realScreen = newScreen;
             renderer.setFrameBufferSize(realScreen);
-            renderer.init();
+            renderer.init(scene);
         }
 
         // update MVP 更新MVP
@@ -122,21 +120,7 @@ int main()
             obj->setMVP(gui->getCamera(), SCR_WIDTH, SCR_HEIGHT);
         }
 
-        // render shadow map 渲染阴影贴图
-        Shader simpleDepthShader(FileSystem::getPath("src/OpenGL/shaders/shadow_mapping_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/shadow_mapping_depth.fs").c_str());
-        for (int i = 0; i < scene.lights.size(); ++i) {
-            shadowMapShaderSetting(simpleDepthShader, scene.lights[i]);
-            scene.shadowMaps[i].preDraw();
-            scene.drawScene(simpleDepthShader);
-            scene.shadowMaps[i].postDraw();
-        }
-
-        // debug depth map 调试深度贴图
-//        window.reset();
-//        Shader debugDepthQuad(FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.fs").c_str());
-//        debugDepthQuadShaderSetting(debugDepthQuad, scene.shadowMaps[0].getDepthMap());
-//        renderQuad();
-
+        // render everything 渲染所有
         renderer.draw(scene);
 
         // render Dear ImGui 渲染 Dear ImGui

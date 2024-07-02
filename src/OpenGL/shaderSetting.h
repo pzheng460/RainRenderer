@@ -6,9 +6,9 @@
 #include <utils/shader.h>
 #include <utils/light.h>
 #include <vector>
-#include "ShadowMap.h"
+#include "FrameBuffer.h"
 
-inline void phongShaderSetting(Shader& shader, const Camera& camera, std::vector<Light>& lights, std::vector<ShadowMap>& shadowMaps, bool shadowActive = false) {
+inline void phongShaderSetting(Shader& shader, const Camera& camera, std::vector<Light>& lights, std::vector<FrameBuffer>& shadowMapFrameBuffers, bool shadowActive = false) {
     shader.use();
     if (shadowActive) {
         shader.setBool("shadowActive", shadowActive);
@@ -35,9 +35,9 @@ inline void phongShaderSetting(Shader& shader, const Camera& camera, std::vector
     shader.setInt("size", lights.size());
 
     if (shadowActive) {
-        for (unsigned int i = 0; i < shadowMaps.size(); ++i) {
+        for (unsigned int i = 0; i < shadowMapFrameBuffers.size(); ++i) {
             glActiveTexture(GL_TEXTURE4 + i);
-            glBindTexture(GL_TEXTURE_2D, shadowMaps[i].getDepthMap());
+            glBindTexture(GL_TEXTURE_2D, shadowMapFrameBuffers[i].getTextureDepthBuffer()->getTexture());
         }
     }
 }

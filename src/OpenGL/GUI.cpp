@@ -144,8 +144,6 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
             ImGui::Checkbox("HDR", &HDRActive);
             // Bloom 泛光
             ImGui::Checkbox("Bloom", &bloomActive);
-            // PBR
-            ImGui::Checkbox("PBR", &pbrActive);
         }
         if (renderingPath != FORWARDRENDERING) { ImGui::EndDisabled(); }
 
@@ -171,6 +169,9 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
         }
         if (ImGui::RadioButton("Environment Mapping", mode == ENVIRONMENTMAPPING)) {
             mode = ENVIRONMENTMAPPING;
+        }
+        if (ImGui::RadioButton("PBR", mode == PBR)) {
+            mode = PBR;
         }
 
         if (mode != BLINNPHONG) { ImGui::BeginDisabled(); }
@@ -206,8 +207,7 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
             // load models
             stbi_set_flip_vertically_on_load(false); // tell stb_image.h to flip loaded texture's on the y-axis 告诉 stb_image.h 在 y 轴上翻转加载的纹理
             AssimpModel::Model ourModel(modelFilePath);
-            Shader shader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
-            auto object = std::make_unique<Object>(ourModel, shader);
+            auto object = std::make_unique<Object>(ourModel);
             scene.addObject(std::move(object));
         }
 

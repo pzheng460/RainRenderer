@@ -1,24 +1,15 @@
 #include "Scene.h"
 #include "shaderSetting.h"
 
-void Scene::drawScene(Shader& shader, bool drawFloor, bool drawPBRObject) {
+void Scene::draw(Shader& shader, bool drawFloor) {
     // render floor 渲染地板
     if (drawFloor) {
-        floor.setShader(shader);
-        floor.draw();
+        floor.draw(shader);
     }
 
     // render objects 渲染物体
     for (auto& obj : objects) {
-        if (auto pbrObj = dynamic_cast<PBRObject*>(obj.get())) {
-            if (drawPBRObject) {
-                PBRShaderSetting(obj->getShader(), lights, skybox.getIrradianceMap(), skybox.getPrefilterMap(), skybox.getBRDFLUTTexture());
-                pbrObj->draw();
-            }
-        } else {
-            obj->setShader(shader);
-            obj->draw();
-        }
+        obj->draw(shader);
     }
 }
 
@@ -28,8 +19,6 @@ void Scene::addObject(std::unique_ptr<Object>&& object) {
 
 void Scene::addLight(const Light& light) {
     lights.push_back(light);
-    ShadowMap shadowMap;
-    shadowMaps.push_back(shadowMap);
 }
 
 void Scene::setFloor(const Object& floor) {

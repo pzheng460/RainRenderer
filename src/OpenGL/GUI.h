@@ -21,7 +21,8 @@ enum renderMode {
     PHONG,
     BLINNPHONG,
     DEPTH,
-    ENVIRONMENTMAPPING
+    ENVIRONMENTMAPPING,
+    PBR
 };
 
 enum skyboxLoadMode {
@@ -56,9 +57,6 @@ public:
         return controlActive;
     }
 
-    bool IsPBRActive() const {
-        return pbrActive;
-    }
 
     bool IsSkyBoxActive() const {
         return skyBoxActive;
@@ -107,8 +105,6 @@ private:
     Camera camera = Camera(glm::vec3(0.0f, 10.0f, 30.0f));
 
     bool controlActive = false;
-
-    bool pbrActive = false;
 
     bool skyBoxActive = false;
     bool lightActive = true;

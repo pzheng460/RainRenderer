@@ -3,7 +3,7 @@
 
 #include "FrameBuffer.h"
 
-class MSAATexture final : public Texture {
+class MSAAColorTexture final : public ColorTexture {
 public:
     void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
 private:
@@ -19,7 +19,7 @@ private:
 
 class MSAAFrameBuffer final : public FrameBuffer {
 public:
-    MSAAFrameBuffer(int numOfColorAttachments = 1, int numOfDepthAttachments = 0);
+    MSAAFrameBuffer(int numOfColorTextureAttachments = 1, int numOfDepthTextureAttachments = 0, int numOfRenderBufferObjectDepth = 1);
     void bindColorTextureAttachment() override;
     void bindRenderBufferDepthAttachment() override;
     void generateFrameBuffer(int SCR_WIDTH, int SCR_HEIGHT) override;

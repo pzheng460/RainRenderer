@@ -8,21 +8,19 @@
 #include <random>
 #include <utils/camera.h>
 
-class NoiseTexture : public Texture {
+class NoiseTexture : public ColorTexture {
 public:
-    NoiseTexture() = default;
     void generateNoiseTexture(std::vector<glm::vec3>& ssaoNoise);
 };
 
-class SSAOTexture : public Texture {
+class SSAOColorTexture : public ColorTexture {
 public:
-    SSAOTexture() = default;
     void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
 };
 
 class SSAOFrameBuffer : public FrameBuffer {
 public:
-    SSAOFrameBuffer(int numOfColorAttachments = 1, int numOfDepthAttachments = 0);
+    SSAOFrameBuffer(int numOfColorTextureAttachments = 1, int numOfDepthTextureAttachments = 0, int numOfRenderBufferObjectDepth = 0);
 };
 
 class SSAO {

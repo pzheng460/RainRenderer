@@ -1,7 +1,6 @@
 #include "GeometryFrameBuffer.h"
 
-void GeometryPositionTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
-    glGenTextures(1, &texture);
+void GeometryPositionColorTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -11,8 +10,7 @@ void GeometryPositionTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void GeometryNormalTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
-    glGenTextures(1, &texture);
+void GeometryNormalColorTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -20,8 +18,7 @@ void GeometryNormalTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void GeometryAlbedoSpecTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
-    glGenTextures(1, &texture);
+void GeometryAlbedoSpecColorTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -29,12 +26,12 @@ void GeometryAlbedoSpecTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-GeometryFrameBuffer::GeometryFrameBuffer(int numOfColorAttachments, int numOfDepthAttachments)
-        : FrameBuffer(numOfColorAttachments, numOfDepthAttachments) {
-    std::unique_ptr<GeometryPositionTexture> texturePositionColorBuffer = std::make_unique<GeometryPositionTexture>();
+GeometryFrameBuffer::GeometryFrameBuffer(int numOfColorTextureAttachments, int numOfDepthTextureAttachments, int numOfRenderBufferObjectDepth) :
+    FrameBuffer(numOfColorTextureAttachments, numOfDepthTextureAttachments, numOfRenderBufferObjectDepth) {
+    auto texturePositionColorBuffer = std::make_unique<GeometryPositionColorTexture>();
     textureColorBuffers[0] = std::move(texturePositionColorBuffer);
-    std::unique_ptr<GeometryNormalTexture> textureNormalColorBuffer = std::make_unique<GeometryNormalTexture>();
+    auto textureNormalColorBuffer = std::make_unique<GeometryNormalColorTexture>();
     textureColorBuffers[1] = std::move(textureNormalColorBuffer);
-    std::unique_ptr<GeometryAlbedoSpecTexture> textureAlbedoSpecColorBuffer = std::make_unique<GeometryAlbedoSpecTexture>();
+    auto textureAlbedoSpecColorBuffer = std::make_unique<GeometryAlbedoSpecColorTexture>();
     textureColorBuffers[2] = std::move(textureAlbedoSpecColorBuffer);
 }

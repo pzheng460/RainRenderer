@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include <iostream>
 
+# pragma one
+
 // renders (and builds at first invocation) a sphere
 // -------------------------------------------------
 unsigned int sphereVAO = 0;

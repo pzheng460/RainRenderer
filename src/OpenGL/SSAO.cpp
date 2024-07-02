@@ -10,7 +10,6 @@
 #include "shaderSetting.h"
 
 void NoiseTexture::generateNoiseTexture(std::vector<glm::vec3>& ssaoNoise) {
-    glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
     // set texture options
@@ -20,8 +19,7 @@ void NoiseTexture::generateNoiseTexture(std::vector<glm::vec3>& ssaoNoise) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
-void SSAOTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
-    glGenTextures(1, &texture);
+void SSAOColorTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RED, GL_FLOAT, NULL);
     // set texture options
@@ -30,10 +28,10 @@ void SSAOTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-SSAOFrameBuffer::SSAOFrameBuffer(int numOfColorAttachments, int numOfDepthAttachments) :
-    FrameBuffer(numOfColorAttachments, numOfDepthAttachments) {
-    for (int i = 0; i < numOfColorAttachments; i++) {
-        std::unique_ptr<SSAOTexture> textureColorBuffer = std::make_unique<SSAOTexture>();
+SSAOFrameBuffer::SSAOFrameBuffer(int numOfColorTextureAttachments, int numOfDepthTextureAttachments, int numOfRenderBufferObjectDepth) :
+    FrameBuffer(numOfColorTextureAttachments, numOfDepthTextureAttachments, numOfRenderBufferObjectDepth) {
+    for (int i = 0; i < numOfColorTextureAttachments; i++) {
+        auto textureColorBuffer = std::make_unique<SSAOColorTexture>();
         textureColorBuffers[i] = std::move(textureColorBuffer);
     }
 }
@@ -100,7 +98,6 @@ void SSAO::ssaoBlurShaderSetting() {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, ssaoFrameBuffer.getTextureColorBuffer()[0]->getTexture());
 }
-
 
 void SSAO::generateSampleKernel() {
     for (unsigned int i = 0; i < 64; ++i)

@@ -22,15 +22,14 @@ enum ImplicitGeometryType {
 class Object {
 public:
     Object() = default;
-    Object(const AssimpModel::Model& model, const Shader& shader);
-    Object(ImplicitGeometryType geometryType, const Shader& shader, bool initializeTextures = true, std::string texturePath = "");
+    Object(const AssimpModel::Model& model);
+    Object(ImplicitGeometryType geometryType, bool initializeTextures = true, std::string texturePath = "");
     virtual ~Object() = default;
 
     void setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
-    void setShader(const Shader& shader) { this->shader = shader; }  // 设置着色器（Shader）
     void setScale(float scale) { this->scale = scale; }  // 设置缩放
 
-    virtual void draw();
+    virtual void draw(Shader& shader);
 
     const glm::mat4 getModelMatrix() const {
         return modelMatrix;
@@ -44,16 +43,11 @@ public:
         return projectionMatrix;
     }
 
-    Shader& getShader() {
-        return shader;
-    }
-
 protected:
     void generateModel(ImplicitGeometryType geometryType);
     void loadTextures(std::vector<AssimpModel::Texture>& textures,
                       const std::string& diffusePath);
     AssimpModel::Texture loadTexture(const std::string& path, const std::string& typeName);
-    Shader shader;
     AssimpModel::Model model;
     ImplicitGeometryType geometryType;
 

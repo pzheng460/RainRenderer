@@ -3,23 +3,23 @@
 
 #include "FrameBuffer.h"
 
-class GeometryPositionTexture final : public Texture {
+class GeometryPositionColorTexture final : public ColorTexture {
 public:
     void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
 };
 
-class GeometryNormalTexture final : public Texture {
+class GeometryNormalColorTexture final : public ColorTexture {
 public:
     void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
 };
 
-class GeometryAlbedoSpecTexture final : public Texture {
+class GeometryAlbedoSpecColorTexture final : public ColorTexture {
 public:
     void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
 };
 
 class GeometryFrameBuffer : public FrameBuffer {
 public:
-    GeometryFrameBuffer(int numOfColorAttachments = 1, int numOfDepthAttachments = 0);
+    GeometryFrameBuffer(int numOfColorTextureAttachments = 3, int numOfDepthTextureAttachments = 0, int numOfRenderBufferObjectDepth = 0);
 };
 #endif // GEOMETRYFRAMEBUFFER_H

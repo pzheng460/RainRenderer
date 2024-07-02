@@ -10,13 +10,12 @@
 #include <utils/filesystem.h>
 #include "Object.h"
 #include "PBRObject.h"
-#include "ShadowMap.h"
 
 class Scene {
 public:
     Scene() = default;
 
-    void drawScene(Shader& shader, bool drawFloor = true, bool drawPBRObject = false);
+    void draw(Shader& shader, bool drawFloor = true);
 
     // Add objects and lights to the scene
     void addObject(std::unique_ptr<Object>&& object);
@@ -32,7 +31,6 @@ public:
 
     std::vector<std::unique_ptr<Object>> objects;
     std::vector<Light> lights;
-    std::vector<ShadowMap> shadowMaps;
     Object floor;
     Skybox skybox;
 };
