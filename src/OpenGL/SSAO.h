@@ -8,13 +8,13 @@
 #include <random>
 #include <utils/camera.h>
 
-class NoiseTexture : public Textures {
+class NoiseTexture : public Texture {
 public:
     NoiseTexture() = default;
     void generateNoiseTexture(std::vector<glm::vec3>& ssaoNoise);
 };
 
-class SSAOTexture : public Textures {
+class SSAOTexture : public Texture {
 public:
     SSAOTexture() = default;
     void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;

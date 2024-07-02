@@ -1,7 +1,7 @@
 #include "FrameBuffer.h"
 #include <iostream>
 
-void Textures::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
+void Texture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
@@ -10,8 +10,6 @@ void Textures::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);  // we clamp to the edge as the blur filter would otherwise sample repeated texture values!
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -29,7 +27,7 @@ void RenderBufferObjectDepth::generateRenderBufferObject(int SCR_WIDTH, int SCR_
 FrameBuffer::FrameBuffer(int numOfColorAttachments, int numOfDepthAttachments) :
     numOfColorAttachments(numOfColorAttachments), numOfDepthAttachments(numOfDepthAttachments) {
     for (int i = 0; i < numOfColorAttachments; i++) {
-        std::unique_ptr<Textures> textureColorBuffer = std::make_unique<Textures>();
+        auto textureColorBuffer = std::make_unique<Texture>();
         textureColorBuffers.push_back(std::move(textureColorBuffer));
     }
     rboDepth = std::make_unique<RenderBufferObjectDepth>();

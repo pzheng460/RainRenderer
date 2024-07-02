@@ -205,7 +205,7 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
 
             // load models
             stbi_set_flip_vertically_on_load(false); // tell stb_image.h to flip loaded texture's on the y-axis 告诉 stb_image.h 在 y 轴上翻转加载的纹理
-            Model ourModel(modelFilePath);
+            AssimpModel::Model ourModel(modelFilePath);
             Shader shader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
             auto object = std::make_unique<Object>(ourModel, shader);
             scene.addObject(std::move(object));

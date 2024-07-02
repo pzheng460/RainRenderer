@@ -10,9 +10,9 @@
 
 #include <vector>
 
-class Textures {
+class Texture {
 public:
-    Textures() = default;
+    Texture() = default;
     virtual void generateTexture(int SCR_WIDTH, int SCR_HEIGHT);
     unsigned int getTexture() {
         return texture;
@@ -51,7 +51,7 @@ public:
 
     virtual void generateFrameBuffer(int SCR_WIDTH, int SCR_HEIGHT);
 
-    std::vector<std::unique_ptr<Textures>>& getTextureColorBuffer() {
+    std::vector<std::unique_ptr<Texture>>& getTextureColorBuffer() {
         return textureColorBuffers;
     }
 
@@ -72,7 +72,7 @@ protected:
     int numOfColorAttachments;
     int numOfDepthAttachments;
 
-    std::vector<std::unique_ptr<Textures>> textureColorBuffers;
+    std::vector<std::unique_ptr<Texture>> textureColorBuffers;
     std::unique_ptr<RenderBufferObjectDepth> rboDepth;
 };
 

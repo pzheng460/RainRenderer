@@ -3,7 +3,7 @@
 
 #include "FrameBuffer.h"
 
-class MSAATexture final : public Textures {
+class MSAATexture final : public Texture {
 public:
     void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
 private:

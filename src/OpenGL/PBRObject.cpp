@@ -2,7 +2,7 @@
 #include <iostream>
 #include "render_implicit_geometry.h"
 
-PBRObject::PBRObject(const Model& model, const Shader& shader)
+PBRObject::PBRObject(const AssimpModel::Model& model, const Shader& shader)
         : Object(model, shader) {
 //    loadPBRTextures();
 }
@@ -17,7 +17,7 @@ PBRObject::PBRObject(ImplicitGeometryType geometryType, const Shader& shader)
                     FileSystem::getPath("resources/textures/pbr/rusted_iron/ao.png"));
 }
 
-void PBRObject::loadPBRTextures(std::vector<Texture>& textures, const std::string& albedoPath, const std::string& normalPath, const std::string& metallicPath, const std::string& roughnessPath, const std::string& aoPath) {
+void PBRObject::loadPBRTextures(std::vector<AssimpModel::Texture>& textures, const std::string& albedoPath, const std::string& normalPath, const std::string& metallicPath, const std::string& roughnessPath, const std::string& aoPath) {
     // Load PBR textures
     textures.push_back(loadTexture(albedoPath, "albedoMap"));
     textures.push_back(loadTexture(normalPath, "normalMap"));

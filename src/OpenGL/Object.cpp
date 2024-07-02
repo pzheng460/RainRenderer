@@ -1,7 +1,7 @@
 #include "Object.h"
 #include "GeometryGenerator.h"
 
-Object::Object(const Model& model, const Shader& shader)
+Object::Object(const AssimpModel::Model& model, const Shader& shader)
         : model(model), shader(shader), geometryType(MODEL) {
 }
 
@@ -51,10 +51,10 @@ void Object::generateModel(ImplicitGeometryType geometryType) {
     }
 }
 
-void Object::loadTextures(std::vector<Texture>& textures,
+void Object::loadTextures(std::vector<AssimpModel::Texture>& textures,
                                            const std::string& diffusePath) {
     std::cout << "Loading texture from path: " << diffusePath << std::endl;
-    Texture texture = loadTexture(diffusePath, "texture_diffuse");
+    AssimpModel::Texture texture = loadTexture(diffusePath, "texture_diffuse");
     if (texture.id != 0) { // 检查纹理是否加载成功
         textures.push_back(texture);
         std::cout << "Texture loaded successfully." << std::endl;
@@ -63,8 +63,8 @@ void Object::loadTextures(std::vector<Texture>& textures,
     }
 }
 
-Texture Object::loadTexture(const std::string& path, const std::string& typeName) {
-    Texture texture;
+AssimpModel::Texture Object::loadTexture(const std::string& path, const std::string& typeName) {
+    AssimpModel::Texture texture;
     texture.id = TextureFromFile(path.c_str(), "");
     texture.type = typeName;
     texture.path = path.c_str();

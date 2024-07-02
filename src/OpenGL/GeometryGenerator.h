@@ -7,10 +7,10 @@
 
 class GeometryGenerator {
 public:
-    static Model generateSphere();
-    static Model generateCube();
-    static Model generateQuad();
-    static Model generatePlane();
+    static AssimpModel::Model generateSphere();
+    static AssimpModel::Model generateCube();
+    static AssimpModel::Model generateQuad();
+    static AssimpModel::Model generatePlane();
 private:
     GeometryGenerator() = default;
 };

@@ -2,10 +2,10 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-Model GeometryGenerator::generateSphere() {
-    std::vector<Vertex> vertices;
+AssimpModel::Model GeometryGenerator::generateSphere() {
+    std::vector<AssimpModel::Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
+    std::vector<AssimpModel::Texture> textures;
 
     const unsigned int X_SEGMENTS = 64;
     const unsigned int Y_SEGMENTS = 64;
@@ -19,7 +19,7 @@ Model GeometryGenerator::generateSphere() {
             float yPos = std::cos(ySegment * PI);
             float zPos = std::sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
 
-            Vertex vertex;
+            AssimpModel::Vertex vertex;
             vertex.Position = glm::vec3(xPos, yPos, zPos);
             vertex.Normal = glm::vec3(xPos, yPos, zPos);
             vertex.TexCoords = glm::vec2(xSegment, ySegment);
@@ -43,15 +43,15 @@ Model GeometryGenerator::generateSphere() {
         oddRow = !oddRow;
     }
 
-    vector<Mesh> meshes = { Mesh(vertices, indices, textures) };
+    std::vector<AssimpModel::Mesh> meshes = { AssimpModel::Mesh(vertices, indices, textures) };
 
-    return Model(meshes);
+    return AssimpModel::Model(meshes);
 }
 
-Model GeometryGenerator::generateCube() {
-    std::vector<Vertex> vertices(24);
+AssimpModel::Model GeometryGenerator::generateCube() {
+    std::vector<AssimpModel::Vertex> vertices(24);
     std::vector<unsigned int> indices(36);
-    std::vector<Texture> textures;
+    std::vector<AssimpModel::Texture> textures;
 
     float verticesData[] = {
             // positions          // normals           // texcoords
@@ -102,7 +102,7 @@ Model GeometryGenerator::generateCube() {
     };
 
     for (unsigned int i = 0; i < 36; ++i) {
-        Vertex vertex;
+        AssimpModel::Vertex vertex;
         vertex.Position = glm::vec3(verticesData[i * 8], verticesData[i * 8 + 1], verticesData[i * 8 + 2]);
         vertex.Normal = glm::vec3(verticesData[i * 8 + 3], verticesData[i * 8 + 4], verticesData[i * 8 + 5]);
         vertex.TexCoords = glm::vec2(verticesData[i * 8 + 6], verticesData[i * 8 + 7]);
@@ -113,15 +113,15 @@ Model GeometryGenerator::generateCube() {
         indices.push_back(indicesData[i]);
     }
 
-    vector<Mesh> meshes = { Mesh(vertices, indices, textures) };
+    std::vector<AssimpModel::Mesh> meshes = { AssimpModel::Mesh(vertices, indices, textures) };
 
-    return Model(meshes);
+    return AssimpModel::Model(meshes);
 }
 
-Model GeometryGenerator::generateQuad() {
-    std::vector<Vertex> vertices(4);
+AssimpModel::Model GeometryGenerator::generateQuad() {
+    std::vector<AssimpModel::Vertex> vertices(4);
     std::vector<unsigned int> indices(6);
-    std::vector<Texture> textures;
+    std::vector<AssimpModel::Texture> textures;
 
     float verticesData[] = {
             // positions        // normals           // texcoords
@@ -135,7 +135,7 @@ Model GeometryGenerator::generateQuad() {
     };
 
     for (unsigned int i = 0; i < 4; ++i) {
-        Vertex vertex;
+        AssimpModel::Vertex vertex;
         vertex.Position = glm::vec3(verticesData[i * 8], verticesData[i * 8 + 1], verticesData[i * 8 + 2]);
         vertex.Normal = glm::vec3(verticesData[i * 8 + 3], verticesData[i * 8 + 4], verticesData[i * 8 + 5]);
         vertex.TexCoords = glm::vec2(verticesData[i * 8 + 6], verticesData[i * 8 + 7]);
@@ -146,17 +146,17 @@ Model GeometryGenerator::generateQuad() {
         indices.push_back(indicesData[i]);
     }
 
-    vector<Mesh> meshes = { Mesh(vertices, indices, textures) };
+    vector<AssimpModel::Mesh> meshes = { AssimpModel::Mesh(vertices, indices, textures) };
 
-    return Model(meshes);
+    return AssimpModel::Model(meshes);
 }
 
 // renderPlane()
 // -----------------------------------------
-Model GeometryGenerator::generatePlane() {
-    std::vector<Vertex> vertices;
+AssimpModel::Model GeometryGenerator::generatePlane() {
+    std::vector<AssimpModel::Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
+    std::vector<AssimpModel::Texture> textures;
 
     float planeVertices[] = {
             // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
@@ -171,7 +171,7 @@ Model GeometryGenerator::generatePlane() {
     unsigned int indicesData[] = {0, 2, 1, 3, 5, 4};
 
     for (unsigned int i = 0; i < 6; ++i) {
-        Vertex vertex;
+        AssimpModel::Vertex vertex;
         vertex.Position = glm::vec3(planeVertices[i * 5], planeVertices[i * 5 + 1], planeVertices[i * 5 + 2]);
         vertex.TexCoords = glm::vec2(planeVertices[i * 5 + 3], planeVertices[i * 5 + 4]);
         vertices.push_back(vertex);
@@ -181,7 +181,7 @@ Model GeometryGenerator::generatePlane() {
         indices.push_back(indicesData[i]);
     }
 
-    vector<Mesh> meshes = { Mesh(vertices, indices, textures) };
+    std::vector<AssimpModel::Mesh> meshes = { AssimpModel::Mesh(vertices, indices, textures) };
 
-    return Model(meshes);
+    return AssimpModel::Model(meshes);
 }

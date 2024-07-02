@@ -3,17 +3,17 @@
 
 #include "FrameBuffer.h"
 
-class GeometryPositionTexture final : public Textures {
+class GeometryPositionTexture final : public Texture {
 public:
     void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
 };
 
-class GeometryNormalTexture final : public Textures {
+class GeometryNormalTexture final : public Texture {
 public:
     void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
 };
 
-class GeometryAlbedoSpecTexture final : public Textures {
+class GeometryAlbedoSpecTexture final : public Texture {
 public:
     void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
 };

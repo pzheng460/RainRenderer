@@ -22,7 +22,7 @@ enum ImplicitGeometryType {
 class Object {
 public:
     Object() = default;
-    Object(const Model& model, const Shader& shader);
+    Object(const AssimpModel::Model& model, const Shader& shader);
     Object(ImplicitGeometryType geometryType, const Shader& shader, bool initializeTextures = true, std::string texturePath = "");
     virtual ~Object() = default;
 
@@ -50,11 +50,11 @@ public:
 
 protected:
     void generateModel(ImplicitGeometryType geometryType);
-    void loadTextures(std::vector<Texture>& textures,
+    void loadTextures(std::vector<AssimpModel::Texture>& textures,
                       const std::string& diffusePath);
-    Texture loadTexture(const std::string& path, const std::string& typeName);
+    AssimpModel::Texture loadTexture(const std::string& path, const std::string& typeName);
     Shader shader;
-    Model model;
+    AssimpModel::Model model;
     ImplicitGeometryType geometryType;
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
