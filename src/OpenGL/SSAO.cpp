@@ -53,6 +53,12 @@ void SSAO::init() {
     noiseTexture.generateNoiseTexture(ssaoNoise);
 }
 
+void SSAO::reset(int SCR_WIDTH, int SCR_HEIGHT) {
+    this->SCR_WIDTH = SCR_WIDTH;
+    this->SCR_HEIGHT = SCR_HEIGHT;
+    init();
+}
+
 unsigned int SSAO::draw() {
     // generate SSAO texture 生成SSAO纹理
     ssaoFrameBuffer.bind();

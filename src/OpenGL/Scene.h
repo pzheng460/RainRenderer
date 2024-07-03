@@ -23,11 +23,11 @@ public:
 
     void setSkybox(const Skybox& skybox);
     void setFloor(const Object& floor);
-    const Skybox& getSkybox() const;
 
     // Object management
-    const std::vector<std::unique_ptr<Object>>& getObjects() const;
-    const std::vector<Light>& getLights() const;
+    Skybox& getSkybox();
+    std::vector<std::unique_ptr<Object>>& getObjects();
+    std::vector<Light>& getLights();
 
     std::vector<std::unique_ptr<Object>> objects;
     std::vector<Light> lights;

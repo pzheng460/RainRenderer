@@ -34,7 +34,6 @@ class DepthTexture : public Texture {
 public:
     virtual ~DepthTexture() = default;
     void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
-
 };
 
 class RenderBufferObject {

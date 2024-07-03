@@ -29,14 +29,14 @@ void Scene::setSkybox(const Skybox& skybox) {
     this->skybox = skybox;
 }
 
-const Skybox& Scene::getSkybox() const {
+Skybox& Scene::getSkybox() {
     return skybox;
 }
 
-const std::vector<std::unique_ptr<Object>>& Scene::getObjects() const {
+std::vector<std::unique_ptr<Object>>& Scene::getObjects() {
     return objects;
 }
 
-const std::vector<Light>& Scene::getLights() const {
+std::vector<Light>& Scene::getLights() {
     return lights;
 }

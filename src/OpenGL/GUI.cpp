@@ -181,7 +181,11 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
         }
         if (mode != BLINNPHONG) { ImGui::EndDisabled(); }
 
-        ImGui::Separator(); // 分隔线
+        ImGui::End();
+    }
+
+    {
+        ImGui::Begin("Object");
 
         // 模型导入
         ImGui::Text("Model Import");
@@ -209,6 +213,25 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
             AssimpModel::Model ourModel(modelFilePath);
             auto object = std::make_unique<Object>(ourModel);
             scene.addObject(std::move(object));
+        }
+
+        ImGui::Separator(); // 分隔线
+
+        ImGui::Text("Object Information");
+
+        for (int i = 0; i < scene.getObjects().size(); ++i) {
+            auto object = scene.getObjects()[i].get();
+            ImGui::Text("Object %d", i);
+
+            ImGui::SliderFloat(("PosX##" + std::to_string(i)).c_str(), &object->position.x, -100.0f, 100.0f);
+            ImGui::SliderFloat(("PosY##" + std::to_string(i)).c_str(), &object->position.y, -100.0f, 100.0f);
+            ImGui::SliderFloat(("PosZ##" + std::to_string(i)).c_str(), &object->position.z, -100.0f, 100.0f);
+            ImGui::SliderFloat(("Scale##" + std::to_string(i)).c_str(), &object->scale, 0.01f, 10.0f);
+
+            // delete object 删除物体
+            if (ImGui::Button(("Delete##" + std::to_string(i)).c_str())) {
+                scene.getObjects().erase(scene.getObjects().begin() + i);
+            }
         }
 
         ImGui::End();

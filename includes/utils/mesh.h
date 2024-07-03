@@ -57,6 +57,14 @@ namespace AssimpModel {
             setupMesh();
         }
 
+        Mesh(unsigned int VAO, vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
+        {
+            this->VAO = VAO;
+            this->vertices = vertices;
+            this->indices = indices;
+            this->textures = textures;
+        }
+
         // render the mesh
         void Draw(Shader &shader, GLenum drawMode = GL_TRIANGLES)
         {

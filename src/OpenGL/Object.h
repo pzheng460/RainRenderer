@@ -27,8 +27,6 @@ public:
     virtual ~Object() = default;
 
     void setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
-    void setScale(float scale) { this->scale = scale; }  // 设置缩放
-
     virtual void draw(Shader& shader);
 
     const glm::mat4 getModelMatrix() const {
@@ -42,6 +40,8 @@ public:
     const glm::mat4 getProjectionMatrix() const {
         return projectionMatrix;
     }
+
+    friend class GUI;
 
 protected:
     void generateModel(ImplicitGeometryType geometryType);

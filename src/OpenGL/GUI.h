@@ -16,7 +16,7 @@ enum RenderingPath {
     DEFERREDRENDERING
 };
 
-enum renderMode {
+enum RenderMode {
     BASIC,
     PHONG,
     BLINNPHONG,
@@ -25,7 +25,7 @@ enum renderMode {
     PBR
 };
 
-enum skyboxLoadMode {
+enum SkyboxLoadMode {
     CUBEMAP,
     SPHEREMAP
 };
@@ -45,18 +45,17 @@ public:
         return renderingPath;
     }
 
-    renderMode getMode() const {
+    RenderMode getMode() const {
         return mode;
     }
 
-    skyboxLoadMode getSkyboxLoadMode() const {
+    SkyboxLoadMode getSkyboxLoadMode() const {
         return skyboxMode;
     }
 
     bool IsControlActive() const {
         return controlActive;
     }
-
 
     bool IsSkyBoxActive() const {
         return skyBoxActive;
@@ -98,8 +97,8 @@ public:
     }
 
 private:
-    renderMode mode = BASIC;
-    skyboxLoadMode skyboxMode = SPHEREMAP;
+    RenderMode mode = BASIC;
+    SkyboxLoadMode skyboxMode = SPHEREMAP;
     RenderingPath renderingPath = FORWARDRENDERING;
 
     Camera camera = Camera(glm::vec3(0.0f, 10.0f, 30.0f));
@@ -109,15 +108,14 @@ private:
     bool skyBoxActive = false;
     bool lightActive = true;
     bool floorActive = true;
-    bool shadowActive = false;
 
-    bool outlineActive = false;
     bool normalVisualizationActive = false;
     bool faceCullingActive = false;
     bool MSAAActive = true;
     bool gammaCorrectionActive = false;
     bool HDRActive = false;
     bool bloomActive = false;
+    bool shadowActive = false;
     bool SSAOActive = false;
 };
 

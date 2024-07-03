@@ -27,6 +27,7 @@ class SSAO {
 public:
     SSAO(Camera& camera, int SCR_WIDTH, int SCR_HEIGHT, GeometryFrameBuffer& gFrameBuffer);
     void init();
+    void reset(int SCR_WIDTH, int SCR_HEIGHT);
     unsigned int draw();
 
     void generateSampleKernel();

@@ -14,6 +14,7 @@ void Renderer::init(Scene& scene) {
         pingPongFrameBuffers[i].generateFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
     }
     gFrameBuffer.generateFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
+    ssao.reset(SCR_WIDTH, SCR_HEIGHT);
 }
 
 void Renderer::reset() {
