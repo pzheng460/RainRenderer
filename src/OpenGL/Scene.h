@@ -15,7 +15,7 @@ class Scene {
 public:
     Scene() = default;
 
-    void draw(Shader& shader, bool drawFloor = true);
+    void draw(Shader& shader, bool drawFloor = true, bool setTexture = false);
 
     // Add objects and lights to the scene
     void addObject(std::unique_ptr<Object>&& object);

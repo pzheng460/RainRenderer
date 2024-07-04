@@ -3,19 +3,30 @@
 
 #include <utils/shader.h>
 #include <utils/filesystem.h>
-#include "FrameBuffer.h"
-#include "GeometryFrameBuffer.h"
 #include <random>
 #include <utils/camera.h>
+#include "FrameBuffer.h"
+#include "GeometryFrameBuffer.h"
+#include "Object.h"
 
-class NoiseTexture : public ColorTexture {
+class NoiseTexture : public Texture {
 public:
-    void generateNoiseTexture(std::vector<glm::vec3>& ssaoNoise);
+    NoiseTexture() {
+        internalFormat = GL_RGB16F;
+        format = GL_RGB;
+        type = GL_FLOAT;
+    }
+    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) override;
 };
 
-class SSAOColorTexture : public ColorTexture {
+class SSAOColorTexture : public Texture {
 public:
-    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
+    SSAOColorTexture() {
+        internalFormat = GL_RED;
+        format = GL_RED;
+        type = GL_FLOAT;
+    }
+    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) override;
 };
 
 class SSAOFrameBuffer : public FrameBuffer {

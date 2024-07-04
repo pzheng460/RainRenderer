@@ -57,46 +57,36 @@ namespace AssimpModel {
             setupMesh();
         }
 
-        Mesh(unsigned int VAO, vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
-        {
-            this->VAO = VAO;
-            this->vertices = vertices;
-            this->indices = indices;
-            this->textures = textures;
-        }
-
         // render the mesh
-        void Draw(Shader &shader, GLenum drawMode = GL_TRIANGLES)
+        void Draw(Shader &shader, bool setTexture = false)
         {
-            // bind appropriate textures
-            unsigned int diffuseNr  = 1;
-            unsigned int specularNr = 1;
-            unsigned int normalNr   = 1;
-            unsigned int heightNr   = 1;
-            for (unsigned int i = 0; i < textures.size(); i++)
-            {
-                glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding 激活正确的纹理单元，然后绑定纹理
-                // retrieve texture number (the N in diffuse_textureN) 获取纹理编号（diffuse_textureN中的N）
-                string number;
-                string name = textures[i].type;
-                if (name == "texture_diffuse")
-                    number = std::to_string(diffuseNr++);
-                else if (name == "texture_specular")
-                    number = std::to_string(specularNr++); // transfer unsigned int to string 将无符号整数转换为字符串
-                else if (name == "texture_normal")
-                    number = std::to_string(normalNr++); // transfer unsigned int to string 将无符号整数转换为字符串
-                else if (name == "texture_height")
-                    number = std::to_string(heightNr++); // transfer unsigned int to string 将无符号整数转换为字符串
-
-                // now set the sampler to the correct texture unit 现在将采样器设置为正确的纹理单元
-                glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
-                // and finally bind the texture 并最终绑定纹理
-                glBindTexture(GL_TEXTURE_2D, textures[i].id);
+            shader.use();
+            if (setTexture) {
+                // bind appropriate textures
+                unsigned int diffuseNr  = 1;
+                unsigned int specularNr = 1;
+                unsigned int normalNr   = 1;
+                unsigned int heightNr   = 1;
+                for (unsigned int i = 0; i < textures.size(); i++)
+                {
+                    // retrieve texture number (the N in diffuse_textureN) 获取纹理编号（diffuse_textureN中的N）
+                    string number;
+                    string name = textures[i].type;
+                    if (name == "material.texture_diffuse")
+                        number = std::to_string(diffuseNr++);
+                    else if (name == "material.texture_specular")
+                        number = std::to_string(specularNr++); // transfer unsigned int to string 将无符号整数转换为字符串
+                    else if (name == "material.texture_normal")
+                        number = std::to_string(normalNr++); // transfer unsigned int to string 将无符号整数转换为字符串
+                    else if (name == "material.texture_height")
+                        number = std::to_string(heightNr++); // transfer unsigned int to string 将无符号整数转换为字符串
+                    shader.setTexture(name + number, textures[i].id);
+                }
             }
 
             // draw mesh
             glBindVertexArray(VAO);
-            glDrawElements(drawMode, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
             glBindVertexArray(0);
 
             // always good practice to set everything back to defaults once configured.

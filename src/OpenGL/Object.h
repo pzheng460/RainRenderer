@@ -10,24 +10,25 @@
 #include <utils/light.h>
 #include <stb_image.h>
 #include <string>
+#include "Geometry.h"
+#include "FrameBuffer.h"
 
-enum ImplicitGeometryType {
-    MODEL,
-    SPHERE,
-    CUBE,
-    QUAD,
-    PLANE
+struct GeometryModel {
+    std::shared_ptr<Geometry> geometry;
+    std::vector<AssimpModel::Texture> textures;
 };
 
 class Object {
 public:
     Object() = default;
     Object(const AssimpModel::Model& model);
-    Object(ImplicitGeometryType geometryType, bool initializeTextures = true, std::string texturePath = "");
+    Object(GeometryType geometryType, bool initializeTextures = false, std::string texturePath = "", std::string name = "material.texture_diffuse1");
     virtual ~Object() = default;
 
     void setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
-    virtual void draw(Shader& shader);
+    void addTexture(std::string name, const char* path);
+    void addTexture(std::string name, unsigned int textureID);
+    void draw(Shader& shader, bool setTexture = false);
 
     const glm::mat4 getModelMatrix() const {
         return modelMatrix;
@@ -44,12 +45,8 @@ public:
     friend class GUI;
 
 protected:
-    void generateModel(ImplicitGeometryType geometryType);
-    void loadTextures(std::vector<AssimpModel::Texture>& textures,
-                      const std::string& diffusePath);
-    AssimpModel::Texture loadTexture(const std::string& path, const std::string& typeName);
-    AssimpModel::Model model;
-    ImplicitGeometryType geometryType;
+    unsigned int loadTexture(const char *path);
+    std::variant<AssimpModel::Model, GeometryModel> modelVariant;
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     glm::mat4 viewMatrix {};

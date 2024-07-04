@@ -1,9 +1,12 @@
 #include "FrameBuffer.h"
 #include <iostream>
+#include <cxxabi.h>
 
-void ColorTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
+void ColorTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) {
+    this->width = SCR_WIDTH;
+    this->height = SCR_HEIGHT;
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
     // set texture options
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -12,9 +15,11 @@ void ColorTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void DepthTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
+void DepthTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) {
+    this->width = SCR_WIDTH;
+    this->height = SCR_HEIGHT;
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, data);
     // set texture options
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -36,16 +41,16 @@ FrameBuffer::FrameBuffer(int numOfColorTextureAttachments, int numOfDepthTexture
     numOfColorTextureAttachments(numOfColorTextureAttachments), numOfDepthTextureAttachments(numOfDepthTextureAttachments), numOfRenderBufferObjectDepth(numOfRenderBufferObjectDepth) {
     init();
     for (int i = 0; i < numOfColorTextureAttachments; i++) {
-        auto textureColorBuffer = std::make_unique<ColorTexture>();
+        auto textureColorBuffer = std::make_shared<ColorTexture>();
         textureColorBuffers.push_back(std::move(textureColorBuffer));
     }
     if (numOfDepthTextureAttachments > 0) {
         for (int i = 0; i < numOfDepthTextureAttachments; i++) {
-            textureDepthBuffer = std::make_unique<DepthTexture>();
+            textureDepthBuffer = std::make_shared<DepthTexture>();
         }
     }
     if (numOfRenderBufferObjectDepth > 0) {
-        rboDepth = std::make_unique<RenderBufferObjectDepth>();
+        rboDepth = std::make_shared<RenderBufferObjectDepth>();
     }
 }
 
@@ -77,7 +82,11 @@ void FrameBuffer::bindRenderBufferDepthAttachment() {
 
 bool FrameBuffer::checkComplete() {
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+        int status;
+        char* demangledName = abi::__cxa_demangle(typeid(*this).name(), nullptr, nullptr, &status);
+        std::string typeName = (status == 0) ? demangledName : typeid(*this).name();
+        std::cout << "ERROR::FRAMEBUFFER::" << typeName << " is not complete!" << std::endl;
+        free(demangledName); // free memory
         return false;
     }
     return true;
@@ -88,13 +97,13 @@ void FrameBuffer::generateFrameBuffer(int SCR_WIDTH, int SCR_HEIGHT) {
 
     // create floating point color buffer 创建浮点颜色缓冲区
     for (int i = 0; i < numOfColorTextureAttachments; i++) {
-        textureColorBuffers[i]->generateTexture(SCR_WIDTH, SCR_HEIGHT);
+        textureColorBuffers[i]->generateTexture(SCR_WIDTH, SCR_HEIGHT, nullptr);
     }
     bindColorTextureAttachment();
 
     // create depth texture 创建深度纹理
     if (numOfDepthTextureAttachments > 0) {
-        textureDepthBuffer->generateTexture(SCR_WIDTH, SCR_HEIGHT);
+        textureDepthBuffer->generateTexture(SCR_WIDTH, SCR_HEIGHT, nullptr);
         bindDepthTextureAttachment();
     }
 

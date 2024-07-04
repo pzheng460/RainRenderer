@@ -18,7 +18,7 @@ void main()
     vec4 worldPos = model * vec4(aPos, 1.0);
     FragPos = worldPos.xyz;
     TexCoords = aTexCoords;
-    
+
     mat3 normalMatrix = transpose(inverse(mat3(model)));
     Normal = normalMatrix * (invertedNormals ? -aNormal : aNormal);
 

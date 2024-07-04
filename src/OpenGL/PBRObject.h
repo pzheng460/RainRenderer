@@ -8,12 +8,9 @@
 class PBRObject : public Object {
 public:
     PBRObject(const AssimpModel::Model& model);
-    PBRObject(ImplicitGeometryType geometryType);
+    PBRObject(GeometryType geometryType);
 
-    void draw(Shader& shader) override;
-
-private:
-    void loadPBRTextures(std::vector<AssimpModel::Texture>& textures, const std::string& albedoPath, const std::string& normalPath, const std::string& metallicPath, const std::string& roughnessPath, const std::string& aoPath);
+    void draw(Shader& shader, bool setTexture = false);
 };
 
 #endif // PBROBJECT_H

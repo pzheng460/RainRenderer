@@ -1,8 +1,10 @@
 #include "MSAAFrameBuffer.h"
 
-void MSAAColorTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
+void MSAAColorTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) {
+    this->width = SCR_WIDTH;
+    this->height = SCR_HEIGHT;
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGBA16F, width, height, GL_TRUE);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 }
 
@@ -15,10 +17,10 @@ void MSAARenderBufferObjectDepth::generateRenderBufferObject(int SCR_WIDTH, int 
 MSAAFrameBuffer::MSAAFrameBuffer(int numOfColorTextureAttachments, int numOfDepthTextureAttachments, int numOfRenderBufferObjectDepth) :
     FrameBuffer(numOfColorTextureAttachments, numOfDepthTextureAttachments, numOfRenderBufferObjectDepth) {
     for (int i = 0; i < numOfColorTextureAttachments; i++) {
-        auto textureColorBuffer = std::make_unique<MSAAColorTexture>();
+        auto textureColorBuffer = std::make_shared<MSAAColorTexture>();
         textureColorBuffers[i] = std::move(textureColorBuffer);
     }
-    rboDepth = std::make_unique<MSAARenderBufferObjectDepth>();
+    rboDepth = std::make_shared<MSAARenderBufferObjectDepth>();
 }
 
 void MSAAFrameBuffer::bindColorTextureAttachment() {
@@ -36,7 +38,7 @@ void MSAAFrameBuffer::generateFrameBuffer(int SCR_WIDTH, int SCR_HEIGHT) {
 
     // create floating point color buffer 创建浮点颜色缓冲区
     for (int i = 0; i < numOfColorTextureAttachments; i++) {
-        textureColorBuffers[i]->generateTexture(SCR_WIDTH, SCR_HEIGHT);
+        textureColorBuffers[i]->generateTexture(SCR_WIDTH, SCR_HEIGHT, nullptr);
     }
     bindColorTextureAttachment();
 

@@ -69,7 +69,7 @@ private:
     // Shadow Map
     Shader simpleDepthShader = Shader(FileSystem::getPath("src/OpenGL/shaders/shadow_mapping_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/shadow_mapping_depth.fs").c_str());
     std::vector<FrameBuffer> shadowMapFrameBuffers;
-    const unsigned int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
+    const unsigned int SHADOW_WIDTH = 2560, SHADOW_HEIGHT = 1440;
 
     // Main FrameBuffer
     MSAAFrameBuffer mainMSAAFrameBuffer = MSAAFrameBuffer(2, 0, 1);

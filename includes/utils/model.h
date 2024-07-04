@@ -44,17 +44,10 @@ namespace AssimpModel {
         // constructor for geometry data, directly pass in the meshes(vertices, indices, and textures)
         Model(vector<Mesh> &meshes, bool gamma = false) : meshes(meshes), gammaCorrection(gamma) {}
 
-        void loadTextures(vector<Texture> &textures) {
-            textures_loaded = textures;
-            for (int i = 0; i < meshes.size(); i++) {
-                meshes[i].textures = textures;
-            }
-        }
-
         // draws the model, and thus all its meshes
-        void Draw(Shader &shader, GLenum drawMode = GL_TRIANGLES) {
+        void Draw(Shader &shader, bool setTexture = false) {
             for (unsigned int i = 0; i < meshes.size(); i++)
-                meshes[i].Draw(shader, drawMode);
+                meshes[i].Draw(shader, setTexture);
         }
 
     private:
@@ -156,16 +149,16 @@ namespace AssimpModel {
             // normal: texture_normalN
 
             // 1. diffuse maps
-            vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+            vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "material.texture_diffuse");
             textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
             // 2. specular maps
-            vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+            vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "material.texture_specular");
             textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
             // 3. normal maps
-            std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+            std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "material.texture_normal");
             textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
             // 4. height maps
-            std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+            std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "material.texture_height");
             textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
             // return a mesh object created from the extracted mesh data

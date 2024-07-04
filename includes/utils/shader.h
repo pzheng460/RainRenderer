@@ -8,17 +8,33 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <map>
 
 class Shader
 {
 public:
     unsigned int ID;
+    int lastBindingIndex = 5;
+    std::map<std::string, int> textureNameToUniformLocations;
+    std::string shaderName;
 
     Shader() = default;
     // constructor generates the shader on the fly 构造函数在运行时生成着色器
     // ------------------------------------------------------------------------
     Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr)
     {
+        shaderName = fragmentPath;
+
+        textureNameToUniformLocations["material.texture_diffuse1"] = 0;
+        textureNameToUniformLocations["material.texture_specular1"] = 1;
+        textureNameToUniformLocations["material.texture_normal1"] = 2;
+        textureNameToUniformLocations["material.texture_height1"] = 3;
+
+        textureNameToUniformLocations["albedoMap"] = 0;
+        textureNameToUniformLocations["normalMap"] = 1;
+        textureNameToUniformLocations["metallicMap"] = 2;
+        textureNameToUniformLocations["roughnessMap"] = 3;
+        textureNameToUniformLocations["aoMap"] = 4;
         // 1. retrieve the vertex/fragment source code from filePath 从文件路径检索顶点/片段源代码
         std::string vertexCode;
         std::string fragmentCode;
@@ -175,6 +191,25 @@ public:
     void setMat4(const std::string &name, const glm::mat4 &mat) const
     {
         glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+    }
+    // ------------------------------------------------------------------------
+    void setTexture(const std::string &name, unsigned int texture)
+    {
+        if (textureNameToUniformLocations.count(name) != 0) {
+            glActiveTexture(GL_TEXTURE0 + textureNameToUniformLocations[name]);
+            glBindTexture(GL_TEXTURE_2D, texture);
+        } else {
+            GLint location = glGetUniformLocation(ID, name.c_str());
+            if (location != -1) {
+                glActiveTexture(GL_TEXTURE0 + lastBindingIndex);
+                glUniform1i(location, lastBindingIndex);
+                glBindTexture(GL_TEXTURE_2D, texture);
+                textureNameToUniformLocations[name] = lastBindingIndex;
+                lastBindingIndex++;
+            } else {
+                std::cout << "Texture " << name << " can not be found in shader: " << shaderName << std::endl;
+            }
+        }
     }
 
 private:

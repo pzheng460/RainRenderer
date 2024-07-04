@@ -1,15 +1,15 @@
 #include "Scene.h"
 #include "shaderSetting.h"
 
-void Scene::draw(Shader& shader, bool drawFloor) {
+void Scene::draw(Shader& shader, bool drawFloor, bool setTexture) {
     // render floor 渲染地板
     if (drawFloor) {
-        floor.draw(shader);
+        floor.draw(shader, setTexture);
     }
 
     // render objects 渲染物体
     for (auto& obj : objects) {
-        obj->draw(shader);
+        obj->draw(shader, setTexture);
     }
 }
 

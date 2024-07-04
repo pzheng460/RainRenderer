@@ -6,12 +6,13 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "SSAO.h"
-#include "render_implicit_geometry.h"
 #include "shaderSetting.h"
 
-void NoiseTexture::generateNoiseTexture(std::vector<glm::vec3>& ssaoNoise) {
+void NoiseTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) {
+    this->width = SCR_WIDTH;
+    this->height = SCR_HEIGHT;
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
     // set texture options
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -19,9 +20,11 @@ void NoiseTexture::generateNoiseTexture(std::vector<glm::vec3>& ssaoNoise) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
-void SSAOColorTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT) {
+void SSAOColorTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) {
+    this->width = SCR_WIDTH;
+    this->height = SCR_HEIGHT;
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RED, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
     // set texture options
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -50,7 +53,7 @@ void SSAO::init() {
 
     generateSampleKernel();
     generateSSAONoise();
-    noiseTexture.generateNoiseTexture(ssaoNoise);
+    noiseTexture.generateTexture(4, 4, &ssaoNoise[0]);
 }
 
 void SSAO::reset(int SCR_WIDTH, int SCR_HEIGHT) {
@@ -64,14 +67,15 @@ unsigned int SSAO::draw() {
     ssaoFrameBuffer.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     ssaoShaderSetting();
-    renderQuad();
+    Object screenQuad(QUAD);
+    screenQuad.draw(ssaoShader);
     ssaoFrameBuffer.unbind();
 
     // generate SSAO blur texture to remove noise 生成SSAO模糊纹理以去除噪声
     ssaoBlurFrameBuffer.bind();
     glClear(GL_COLOR_BUFFER_BIT);
     ssaoBlurShaderSetting();
-    renderQuad();
+    screenQuad.draw(ssaoBlurShader);
     ssaoBlurFrameBuffer.unbind();
 
     return ssaoBlurFrameBuffer.getTextureColorBuffer()[0]->getTexture();

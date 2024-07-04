@@ -3,19 +3,34 @@
 
 #include "FrameBuffer.h"
 
-class GeometryPositionColorTexture final : public ColorTexture {
+class GeometryPositionColorTexture final : public Texture {
 public:
-    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
+    GeometryPositionColorTexture() {
+        internalFormat = GL_RGBA16F;
+        format = GL_RGBA;
+        type = GL_FLOAT;
+    }
+    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) override;
 };
 
-class GeometryNormalColorTexture final : public ColorTexture {
+class GeometryNormalColorTexture final : public Texture {
 public:
-    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
+    GeometryNormalColorTexture() {
+        internalFormat = GL_RGBA16F;
+        format = GL_RGBA;
+        type = GL_FLOAT;
+    }
+    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) override;
 };
 
-class GeometryAlbedoSpecColorTexture final : public ColorTexture {
+class GeometryAlbedoSpecColorTexture final : public Texture {
 public:
-    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
+    GeometryAlbedoSpecColorTexture() {
+        internalFormat = GL_RGBA;
+        format = GL_RGBA;
+        type = GL_UNSIGNED_BYTE;
+    }
+    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) override;
 };
 
 class GeometryFrameBuffer : public FrameBuffer {

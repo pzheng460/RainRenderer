@@ -77,6 +77,11 @@ int main()
 
     // load PBR Sphere 加载PBR球体
     auto object = std::make_unique<PBRObject>(SPHERE);
+    object->addTexture("albedoMap", FileSystem::getPath("resources/textures/pbr/rusted_iron/albedo.png").c_str());
+    object->addTexture("normalMap", FileSystem::getPath("resources/textures/pbr/rusted_iron/normal.png").c_str());
+    object->addTexture("metallicMap", FileSystem::getPath("resources/textures/pbr/rusted_iron/metallic.png").c_str());
+    object->addTexture("roughnessMap", FileSystem::getPath("resources/textures/pbr/rusted_iron/roughness.png").c_str());
+    object->addTexture("aoMap", FileSystem::getPath("resources/textures/pbr/rusted_iron/ao.png").c_str());
     scene.addObject(std::move(object));
 
     // load lights 加载光源

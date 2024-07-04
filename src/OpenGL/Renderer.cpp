@@ -1,5 +1,4 @@
 #include "Renderer.h"
-#include "render_implicit_geometry.h"
 #include "shaderSetting.h"
 
 void Renderer::init(Scene& scene) {
@@ -37,11 +36,12 @@ void Renderer::draw(Scene& scene) {
         shadowMapFrameBuffers[i].unbind();
     }
 
-    // debug depth map 调试深度贴图
-//        reset();
-//        Shader debugDepthQuad(FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.fs").c_str());
-//        debugDepthQuadShaderSetting(debugDepthQuad, scene.shadowMaps[0].getDepthMap());
-//        renderQuad();
+//    // debug depth map 调试深度贴图
+//    reset();
+//    Shader debugDepthQuad(FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.fs").c_str());
+//    debugDepthQuadShaderSetting(debugDepthQuad, shadowMapFrameBuffers[0].getTextureDepthBuffer()->getTexture());
+//    Object screenQuadDebug(QUAD);
+//    screenQuadDebug.draw(debugDepthQuad);
 
     if (gui->getRenderingPath() == FORWARDRENDERING) {
         forwardRendering(scene);
@@ -76,7 +76,7 @@ void Renderer::forwardRendering(Scene& scene) {
         mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/pbr.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/pbr.fs").c_str());
         PBRShaderSetting(mainShader, scene.lights, scene.skybox.getIrradianceMap(), scene.skybox.getPrefilterMap(), scene.skybox.getBRDFLUTTexture());
     }
-    scene.draw(mainShader, gui->IsFloorActive());
+    scene.draw(mainShader, gui->IsFloorActive(), true);
     // render normal visualization 渲染法线可视化
     if (gui->IsNormalVisualizationActive()) {
         Shader normalShader(FileSystem::getPath("src/OpenGL/shaders/normal_visualization.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.fs").c_str(), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.gs").c_str());
@@ -100,7 +100,8 @@ void Renderer::forwardRendering(Scene& scene) {
 
     reset();
     finalShaderSetting(finalShader, intermediateFrameBuffer.getTextureColorBuffer()[0]->getTexture(), gui->IsHDRActive(), 10.0f, pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0]->getTexture(), gui->IsBloomActive());
-    renderQuad();
+    Object screenQuad(QUAD);
+    screenQuad.draw(finalShader);
 }
 
 void Renderer::deferredRendering(Scene &scene) {
@@ -114,7 +115,7 @@ void Renderer::deferredRendering(Scene &scene) {
     }
     // render scene 渲染场景
     geometryBufferShaderSetting(gFrameBufferShader, false);
-    scene.draw(gFrameBufferShader, gui->IsFloorActive());
+    scene.draw(gFrameBufferShader, gui->IsFloorActive(), true);
     // render skybox 渲染天空盒，放在最后渲染保证early-z测试
     if (gui->IsSkyBoxActive()) {
         if (gui->getSkyboxLoadMode() == CUBEMAP) {
@@ -132,7 +133,8 @@ void Renderer::deferredRendering(Scene &scene) {
 
     if (firstIteration) firstIteration = false;
     deferredLightingShaderSetting(deferredLightingShader, gFrameBuffer.getTextureColorBuffer()[0]->getTexture(), gFrameBuffer.getTextureColorBuffer()[1]->getTexture(), gFrameBuffer.getTextureColorBuffer()[2]->getTexture(), ssaoColorBufferBlur, gui->getCamera(), scene.lights, gui->IsSSAOActive());
-    renderQuad();
+    Object screenQuad(QUAD);
+    screenQuad.draw(deferredLightingShader);
 }
 
 void Renderer::gaussianBlur() {
@@ -142,15 +144,16 @@ void Renderer::gaussianBlur() {
 
     for (unsigned int i = 0; i < amount; i++)
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, pingPongFrameBuffers[horizontal].getFrameBuffer());
+        pingPongFrameBuffers[horizontal].bind();
         shaderBlur.setInt("horizontal", horizontal);
         glBindTexture(GL_TEXTURE_2D, first_iteration ? intermediateFrameBuffer.getTextureColorBuffer()[1]->getTexture() : pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0]->getTexture());  // bind texture of other framebuffer (or scene if first iteration)
-        renderQuad();
+        Object screenQuad(QUAD);
+        screenQuad.draw(shaderBlur);
         horizontal = !horizontal;
         if (first_iteration)
             first_iteration = false;
+        pingPongFrameBuffers[horizontal].unbind();
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::faceCulling() const {

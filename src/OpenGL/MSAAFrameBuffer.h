@@ -3,14 +3,14 @@
 
 #include "FrameBuffer.h"
 
-class MSAAColorTexture final : public ColorTexture {
+class MSAAColorTexture final : public Texture {
 public:
-    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
+    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) override;
 private:
     int samples = 4;
 };
 
-class MSAARenderBufferObjectDepth final : public RenderBufferObjectDepth {
+class MSAARenderBufferObjectDepth final : public RenderBufferObject {
 public:
     void generateRenderBufferObject(int SCR_WIDTH, int SCR_HEIGHT) override;
 private:

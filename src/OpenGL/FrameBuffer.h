@@ -9,31 +9,23 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <vector>
-
-class Texture {
-public:
-    Texture() {
-        glGenTextures(1, &texture);
-    }
-    virtual ~Texture() {
-        glDeleteTextures(1, &texture);
-    }
-    virtual void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) = 0;
-    unsigned int getTexture() const { return texture; }
-protected:
-    unsigned int texture;
-};
+#include "Texture.h"
 
 class ColorTexture : public Texture {
 public:
+    ColorTexture() {
+        internalFormat = GL_RGBA16F;
+        format = GL_RGBA;
+        type = GL_FLOAT;
+    }
     virtual ~ColorTexture() = default;
-    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
+    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) override;
 };
 
 class DepthTexture : public Texture {
 public:
     virtual ~DepthTexture() = default;
-    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT) override;
+    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) override;
 };
 
 class RenderBufferObject {
@@ -62,84 +54,6 @@ public:
         glDeleteFramebuffers(1, &framebuffer);
     }
 
-    // 移动构造函数
-    FrameBuffer(FrameBuffer&& other) noexcept
-            : framebuffer(other.framebuffer),
-              numOfColorTextureAttachments(other.numOfColorTextureAttachments),
-              numOfDepthTextureAttachments(other.numOfDepthTextureAttachments),
-              numOfRenderBufferObjectDepth(other.numOfRenderBufferObjectDepth),
-              textureColorBuffers(std::move(other.textureColorBuffers)),
-              textureDepthBuffer(std::move(other.textureDepthBuffer)),
-              rboDepth(std::move(other.rboDepth)) {
-        other.framebuffer = 0; // 重置源对象的帧缓冲ID
-    }
-
-    // 移动赋值运算符
-    FrameBuffer& operator=(FrameBuffer&& other) noexcept {
-        if (this != &other) {
-            glDeleteFramebuffers(1, &framebuffer);
-
-            framebuffer = other.framebuffer;
-            numOfColorTextureAttachments = other.numOfColorTextureAttachments;
-            numOfDepthTextureAttachments = other.numOfDepthTextureAttachments;
-            numOfRenderBufferObjectDepth = other.numOfRenderBufferObjectDepth;
-            textureColorBuffers = std::move(other.textureColorBuffers);
-            textureDepthBuffer = std::move(other.textureDepthBuffer);
-            rboDepth = std::move(other.rboDepth);
-
-            other.framebuffer = 0; // 重置源对象的帧缓冲ID
-        }
-        return *this;
-    }
-
-    // 拷贝构造函数
-    FrameBuffer(const FrameBuffer& other)
-            : numOfColorTextureAttachments(other.numOfColorTextureAttachments),
-              numOfDepthTextureAttachments(other.numOfDepthTextureAttachments),
-              numOfRenderBufferObjectDepth(other.numOfRenderBufferObjectDepth) {
-        glGenFramebuffers(1, &framebuffer);
-        // 复制纹理和渲染缓冲对象
-        for (const auto& tex : other.textureColorBuffers) {
-            textureColorBuffers.push_back(std::make_unique<ColorTexture>(*tex));
-        }
-        if (other.textureDepthBuffer) {
-            textureDepthBuffer = std::make_unique<DepthTexture>(*other.textureDepthBuffer);
-        }
-        if (other.rboDepth) {
-            rboDepth = std::make_unique<RenderBufferObjectDepth>(*other.rboDepth);
-        }
-    }
-
-    // 拷贝赋值运算符
-    FrameBuffer& operator=(const FrameBuffer& other) {
-        if (this != &other) {
-            glDeleteFramebuffers(1, &framebuffer);
-            glGenFramebuffers(1, &framebuffer);
-
-            numOfColorTextureAttachments = other.numOfColorTextureAttachments;
-            numOfDepthTextureAttachments = other.numOfDepthTextureAttachments;
-            numOfRenderBufferObjectDepth = other.numOfRenderBufferObjectDepth;
-
-            textureColorBuffers.clear();
-            for (const auto& tex : other.textureColorBuffers) {
-                textureColorBuffers.push_back(std::make_unique<ColorTexture>(*tex));
-            }
-
-            if (other.textureDepthBuffer) {
-                textureDepthBuffer = std::make_unique<DepthTexture>(*other.textureDepthBuffer);
-            } else {
-                textureDepthBuffer.reset();
-            }
-
-            if (other.rboDepth) {
-                rboDepth = std::make_unique<RenderBufferObjectDepth>(*other.rboDepth);
-            } else {
-                rboDepth.reset();
-            }
-        }
-        return *this;
-    }
-
     void init();
     void bind();
     void unbind();
@@ -153,15 +67,15 @@ public:
 
     void transferFrameBuffer(FrameBuffer& targetFrameBuffer, int SCR_WIDTH, int SCR_HEIGHT);
 
-    std::vector<std::unique_ptr<ColorTexture>>& getTextureColorBuffer() {
+    std::vector<std::shared_ptr<Texture>>& getTextureColorBuffer() {
         return textureColorBuffers;
     }
 
-    std::unique_ptr<DepthTexture>& getTextureDepthBuffer() {
+    std::shared_ptr<DepthTexture>& getTextureDepthBuffer() {
         return textureDepthBuffer;
     }
 
-    std::unique_ptr<RenderBufferObjectDepth>& getRboDepth() {
+    std::shared_ptr<RenderBufferObject>& getRboDepth() {
         return rboDepth;
     }
 
@@ -183,9 +97,9 @@ protected:
     int numOfDepthTextureAttachments;
     int numOfRenderBufferObjectDepth;
 
-    std::vector<std::unique_ptr<ColorTexture>> textureColorBuffers;
-    std::unique_ptr<DepthTexture> textureDepthBuffer;
-    std::unique_ptr<RenderBufferObjectDepth> rboDepth;
+    std::vector<std::shared_ptr<Texture>> textureColorBuffers;
+    std::shared_ptr<DepthTexture> textureDepthBuffer;
+    std::shared_ptr<RenderBufferObject> rboDepth;
 };
 
 #endif // FRAMEBUFFER_H
