@@ -3,7 +3,7 @@
 
 #include <glm/glm.hpp>
 #include <utils/filesystem.h>
-#include <utils/camera.h>
+#include "camera.h"
 
 const glm::vec3 AMBIENT = glm::vec3(0.5);
 const glm::vec3 DIFFUSE = glm::vec3(0.5);

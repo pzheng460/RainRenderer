@@ -7,10 +7,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <utils/filesystem.h>
-#include <utils/shader.h>
-#include <utils/camera.h>
-#include <utils/model.h>
-#include <utils/light.h>
+#include "shader.h"
+#include "camera.h"
+#include "model.h"
+#include "light.h"
 
 #include <iostream>
 

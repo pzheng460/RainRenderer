@@ -24,17 +24,6 @@ void Object::addTexture(std::string name, const char* path) {
     }
 }
 
-void Object::addTexture(std::string name, unsigned int textureID) {
-    if (modelVariant.index() == 0) {
-        std::cout << "Unable to add texture to model!\n" << std::endl;
-    } else {
-        AssimpModel::Texture texture;
-        texture.id = textureID;
-        texture.type = name;
-        std::get<GeometryModel>(modelVariant).textures.push_back(texture);
-    }
-}
-
 void Object::setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT) {
     // MVP matrices
     modelMatrix = glm::translate(glm::mat4(1.0f), position);

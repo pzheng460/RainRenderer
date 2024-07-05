@@ -4,14 +4,16 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <utils/shader.h>
-#include <utils/camera.h>
-#include <utils/model.h>
-#include <utils/light.h>
+
 #include <stb_image.h>
+
 #include <string>
 #include "Geometry.h"
 #include "FrameBuffer.h"
+#include "shader.h"
+#include "camera.h"
+#include "model.h"
+#include "light.h"
 
 struct GeometryModel {
     std::shared_ptr<Geometry> geometry;
@@ -27,7 +29,6 @@ public:
 
     void setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
     void addTexture(std::string name, const char* path);
-    void addTexture(std::string name, unsigned int textureID);
     void draw(Shader& shader, bool setTexture = false);
 
     const glm::mat4 getModelMatrix() const {

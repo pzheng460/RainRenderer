@@ -6,10 +6,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <utils/shader.h>
+#include "shader.h"
 
 #include <string>
 #include <vector>
+
 using namespace std;
 
 #define MAX_BONE_INFLUENCE 4

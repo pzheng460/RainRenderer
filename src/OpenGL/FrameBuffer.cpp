@@ -56,7 +56,7 @@ void FrameBuffer::bindDepthTextureAttachment() {
 }
 
 void FrameBuffer::bindRenderBufferDepthAttachment() {
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth->getRBO());
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth->rbo);
 }
 
 bool FrameBuffer::checkComplete() {

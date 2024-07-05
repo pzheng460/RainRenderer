@@ -1,13 +1,15 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include <vector>
-#include "Skybox.h"
-#include <utils/light.h>
-#include <utils/shader.h>
-#include <utils/camera.h>
 #include <glm/glm.hpp>
 #include <utils/filesystem.h>
+
+#include <vector>
+
+#include "Skybox.h"
+#include "light.h"
+#include "shader.h"
+#include "camera.h"
 #include "Object.h"
 #include "PBRObject.h"
 

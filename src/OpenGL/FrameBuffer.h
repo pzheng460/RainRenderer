@@ -54,8 +54,6 @@ public:
         glDeleteRenderbuffers(1, &rbo);
     }
     virtual void generateRenderBufferObject(int SCR_WIDTH, int SCR_HEIGHT) = 0;
-    unsigned int getRBO() const { return rbo; }
-protected:
     unsigned int rbo;
 };
 

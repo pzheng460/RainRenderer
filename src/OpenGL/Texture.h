@@ -19,8 +19,8 @@ public:
         glDeleteTextures(1, &textureID);
     }
 
-    void generateTexture(int width, int height, GLvoid* data);
     virtual void specifyTexture(GLvoid* data) = 0;
+    void generateTexture(int width, int height, GLvoid* data);
     void setSize(int width, int height) {
         this->width = width;
         this->height = height;

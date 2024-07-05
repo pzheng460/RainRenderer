@@ -1,10 +1,11 @@
 #ifndef SSAO_H
 #define SSAO_H
 
-#include <utils/shader.h>
 #include <utils/filesystem.h>
 #include <random>
-#include <utils/camera.h>
+
+#include "shader.h"
+#include "camera.h"
 #include "FrameBuffer.h"
 #include "GeometryFrameBuffer.h"
 #include "Object.h"

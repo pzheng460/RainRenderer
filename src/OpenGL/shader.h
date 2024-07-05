@@ -10,6 +10,8 @@
 #include <iostream>
 #include <map>
 
+#include "Texture.h"
+
 class Shader
 {
 public:

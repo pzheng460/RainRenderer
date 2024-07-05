@@ -4,11 +4,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <utils/shader.h>
-#include <utils/model.h>
-#include <utils/camera.h>
-#include <utils/light.h>
-
+#include "shader.h"
+#include "model.h"
+#include "camera.h"
+#include "light.h"
 #include "Scene.h"
 
 enum RenderingPath {

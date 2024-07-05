@@ -26,7 +26,7 @@ void MSAAFrameBuffer::bindColorTextureAttachment() {
 }
 
 void MSAAFrameBuffer::bindRenderBufferDepthAttachment() {
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboDepth->getRBO());
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboDepth->rbo);
 }
 
 void MSAAFrameBuffer::generateFrameBuffer(int SCR_WIDTH, int SCR_HEIGHT) {

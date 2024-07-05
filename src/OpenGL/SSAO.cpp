@@ -19,7 +19,7 @@ void SSAOColorTexture::specifyTexture(GLvoid *data) {
 SSAOFrameBuffer::SSAOFrameBuffer(int numOfColorTextureAttachments, int numOfDepthTextureAttachments, int numOfRenderBufferObjectDepth) :
     FrameBuffer(numOfColorTextureAttachments, numOfDepthTextureAttachments, numOfRenderBufferObjectDepth) {
     for (int i = 0; i < numOfColorTextureAttachments; i++) {
-        auto textureColorBuffer = std::make_unique<SSAOColorTexture>();
+        auto textureColorBuffer = std::make_shared<SSAOColorTexture>();
         textureColorBuffers[i] = std::move(textureColorBuffer);
     }
 }

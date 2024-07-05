@@ -3,7 +3,7 @@
 
 #include "Object.h"
 #include <utils/filesystem.h>
-#include <utils/light.h>
+#include "light.h"
 
 class PBRObject : public Object {
 public:

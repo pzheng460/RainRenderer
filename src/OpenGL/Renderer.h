@@ -8,13 +8,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <utils/filesystem.h>
+
+#include <utility>
+
 #include "FrameBuffer.h"
 #include "MSAAFrameBuffer.h"
 #include "GeometryFrameBuffer.h"
-#include <utils/filesystem.h>
-#include <utils/shader.h>
-
-#include <utility>
+#include "shader.h"
 #include "Scene.h"
 #include "GUI.h"
 #include "SSAO.h"

@@ -4,9 +4,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <utils/shader.h>
-#include <utils/camera.h>
-#include <utils/model.h>
+#include "shader.h"
+#include "camera.h"
+#include "model.h"
 #include <utils/filesystem.h>
 #include <vector>
 #include <string>

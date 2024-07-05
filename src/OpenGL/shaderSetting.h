@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <utils/shader.h>
-#include <utils/light.h>
+#include "shader.h"
+#include "light.h"
 #include <vector>
 #include "FrameBuffer.h"
 

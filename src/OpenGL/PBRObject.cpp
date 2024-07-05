@@ -1,8 +1,7 @@
 #include "PBRObject.h"
 #include <iostream>
 
-PBRObject::PBRObject(const AssimpModel::Model& model)
-        : Object(model) {}
+PBRObject::PBRObject(const AssimpModel::Model& model) : Object(model) {}
 
 PBRObject::PBRObject(GeometryType geometryType) : Object(geometryType, false) {}
 
