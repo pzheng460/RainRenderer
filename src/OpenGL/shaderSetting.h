@@ -17,7 +17,7 @@ inline void phongShaderSetting(Shader& shader, const Camera& camera, std::vector
     for (unsigned int i = 0; i < lights.size(); ++i)
     {
         if (shadowActive) {
-            shader.setTexture("shadowMaps[" + std::to_string(i) + "]", shadowMapFrameBuffers[i].getTextureDepthBuffer()->getTexture());
+            shader.setTexture("shadowMaps[" + std::to_string(i) + "]", shadowMapFrameBuffers[i].getTextureDepthBuffer()->textureID);
             shader.setMat4("lightSpaceMatrix[" + std::to_string(i) + "]", lights[i].getLightSpaceMatrix());
         }
         shader.setVec3("pointLights[" + std::to_string(i) + "].position", lights[i].getPosition());

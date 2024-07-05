@@ -12,21 +12,28 @@
 class NoiseTexture : public Texture {
 public:
     NoiseTexture() {
+        target = GL_TEXTURE_2D;
         internalFormat = GL_RGB16F;
         format = GL_RGB;
         type = GL_FLOAT;
     }
-    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) override;
+    void specifyTexture(GLvoid* data) override;
 };
 
 class SSAOColorTexture : public Texture {
 public:
     SSAOColorTexture() {
+        target = GL_TEXTURE_2D;
         internalFormat = GL_RED;
         format = GL_RED;
         type = GL_FLOAT;
+
+        minFilter = GL_NEAREST;
+        magFilter = GL_NEAREST;
+        wrapS = GL_CLAMP_TO_EDGE;
+        wrapT = GL_CLAMP_TO_EDGE;
     }
-    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) override;
+    void specifyTexture(GLvoid* data) override;
 };
 
 class SSAOFrameBuffer : public FrameBuffer {

@@ -52,18 +52,18 @@ void Object::draw(Shader& shader, bool setTexture) {
 
     if (modelVariant.index() == 0) {
         std::get<AssimpModel::Model>(modelVariant).Draw(shader, setTexture);
-        if (setTexture) {
-            GLint diffuseLoc = glGetUniformLocation(shader.ID, "material.texture_diffuse1");
-            GLint specularLoc = glGetUniformLocation(shader.ID, "material.texture_specular1");
-            GLint shadowLoc = glGetUniformLocation(shader.ID, "shadowMaps[0]");
-            GLint value1, value2, value3;
-            glGetUniformiv(shader.ID, diffuseLoc, &value1);
-            glGetUniformiv(shader.ID, specularLoc, &value2);
-            glGetUniformiv(shader.ID, shadowLoc, &value3);
-            std::cout << "Diffuse: " << value1 << std::endl;
-            std::cout << "Specular: " << value2 << std::endl;
-            std::cout << "Shadow: " << value3 << std::endl;
-        }
+//        if (setTexture) {
+//            GLint diffuseLoc = glGetUniformLocation(shader.ID, "material.texture_diffuse1");
+//            GLint specularLoc = glGetUniformLocation(shader.ID, "material.texture_specular1");
+//            GLint shadowLoc = glGetUniformLocation(shader.ID, "shadowMaps[0]");
+//            GLint value1, value2, value3;
+//            glGetUniformiv(shader.ID, diffuseLoc, &value1);
+//            glGetUniformiv(shader.ID, specularLoc, &value2);
+//            glGetUniformiv(shader.ID, shadowLoc, &value3);
+//            std::cout << "Diffuse: " << value1 << std::endl;
+//            std::cout << "Specular: " << value2 << std::endl;
+//            std::cout << "Shadow: " << value3 << std::endl;
+//        }
     } else {
         if (setTexture) {
             for (int i = 0; i < std::get<GeometryModel>(modelVariant).textures.size(); ++i) {

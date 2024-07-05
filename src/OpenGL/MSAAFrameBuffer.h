@@ -5,7 +5,11 @@
 
 class MSAAColorTexture final : public Texture {
 public:
-    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) override;
+    MSAAColorTexture() {
+        target = GL_TEXTURE_2D_MULTISAMPLE;
+        internalFormat = GL_RGBA16F;
+    }
+    void specifyTexture(GLvoid* data) override;
 private:
     int samples = 4;
 };

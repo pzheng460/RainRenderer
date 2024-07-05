@@ -11,21 +11,38 @@
 #include <vector>
 #include "Texture.h"
 
-class ColorTexture : public Texture {
+class ColorTexture final : public Texture {
 public:
     ColorTexture() {
+        target = GL_TEXTURE_2D;
         internalFormat = GL_RGBA16F;
         format = GL_RGBA;
         type = GL_FLOAT;
+
+        minFilter = GL_LINEAR;
+        magFilter = GL_LINEAR;
+        wrapS = GL_CLAMP_TO_EDGE;
+        wrapT = GL_CLAMP_TO_EDGE;
     }
-    virtual ~ColorTexture() = default;
-    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) override;
+    void specifyTexture(GLvoid* data) override;
 };
 
-class DepthTexture : public Texture {
+class DepthTexture final : public Texture {
 public:
-    virtual ~DepthTexture() = default;
-    void generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) override;
+    DepthTexture() {
+        target = GL_TEXTURE_2D;
+        internalFormat = GL_DEPTH_COMPONENT;
+        format = GL_DEPTH_COMPONENT;
+        type = GL_FLOAT;
+
+        minFilter = GL_NEAREST;
+        magFilter = GL_NEAREST;
+        wrapS = GL_CLAMP_TO_BORDER;
+        wrapT = GL_CLAMP_TO_BORDER;
+
+        setBorderColor(1.0f, 1.0f, 1.0f, 1.0f);
+    }
+    void specifyTexture(GLvoid* data) override;
 };
 
 class RenderBufferObject {

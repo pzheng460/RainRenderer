@@ -1,11 +1,7 @@
 #include "MSAAFrameBuffer.h"
 
-void MSAAColorTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) {
-    this->width = SCR_WIDTH;
-    this->height = SCR_HEIGHT;
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGBA16F, width, height, GL_TRUE);
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+void MSAAColorTexture::specifyTexture(GLvoid *data) {
+    glTexImage2DMultisample(target, samples, internalFormat, width, height, GL_TRUE);
 }
 
 void MSAARenderBufferObjectDepth::generateRenderBufferObject(int SCR_WIDTH, int SCR_HEIGHT) {
@@ -25,7 +21,7 @@ MSAAFrameBuffer::MSAAFrameBuffer(int numOfColorTextureAttachments, int numOfDept
 
 void MSAAFrameBuffer::bindColorTextureAttachment() {
     for (int i = 0; i < numOfColorTextureAttachments; i++) {
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D_MULTISAMPLE, textureColorBuffers[i]->getTexture(), 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D_MULTISAMPLE, textureColorBuffers[i]->textureID, 0);
     }
 }
 

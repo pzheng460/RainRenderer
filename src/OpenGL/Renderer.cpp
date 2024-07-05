@@ -99,7 +99,7 @@ void Renderer::forwardRendering(Scene& scene) {
     }
 
     reset();
-    finalShaderSetting(finalShader, intermediateFrameBuffer.getTextureColorBuffer()[0]->getTexture(), gui->IsHDRActive(), 10.0f, pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0]->getTexture(), gui->IsBloomActive());
+    finalShaderSetting(finalShader, intermediateFrameBuffer.getTextureColorBuffer()[0]->textureID, gui->IsHDRActive(), 10.0f, pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0]->textureID, gui->IsBloomActive());
     Object screenQuad(QUAD);
     screenQuad.draw(finalShader);
 }
@@ -132,7 +132,14 @@ void Renderer::deferredRendering(Scene &scene) {
     }
 
     if (firstIteration) firstIteration = false;
-    deferredLightingShaderSetting(deferredLightingShader, gFrameBuffer.getTextureColorBuffer()[0]->getTexture(), gFrameBuffer.getTextureColorBuffer()[1]->getTexture(), gFrameBuffer.getTextureColorBuffer()[2]->getTexture(), ssaoColorBufferBlur, gui->getCamera(), scene.lights, gui->IsSSAOActive());
+    deferredLightingShaderSetting(deferredLightingShader,
+                                  gFrameBuffer.getTextureColorBuffer()[0]->textureID,
+                                  gFrameBuffer.getTextureColorBuffer()[1]->textureID,
+                                  gFrameBuffer.getTextureColorBuffer()[2]->textureID,
+                                  ssaoColorBufferBlur,
+                                  gui->getCamera(),
+                                  scene.lights,
+                                  gui->IsSSAOActive());
     Object screenQuad(QUAD);
     screenQuad.draw(deferredLightingShader);
 }
@@ -146,7 +153,7 @@ void Renderer::gaussianBlur() {
     {
         pingPongFrameBuffers[horizontal].bind();
         shaderBlur.setInt("horizontal", horizontal);
-        glBindTexture(GL_TEXTURE_2D, first_iteration ? intermediateFrameBuffer.getTextureColorBuffer()[1]->getTexture() : pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0]->getTexture());  // bind texture of other framebuffer (or scene if first iteration)
+        glBindTexture(GL_TEXTURE_2D, first_iteration ? intermediateFrameBuffer.getTextureColorBuffer()[1]->textureID : pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0]->textureID);  // bind texture of other framebuffer (or scene if first iteration)
         Object screenQuad(QUAD);
         screenQuad.draw(shaderBlur);
         horizontal = !horizontal;

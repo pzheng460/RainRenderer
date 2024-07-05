@@ -8,27 +8,12 @@
 #include "SSAO.h"
 #include "shaderSetting.h"
 
-void NoiseTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) {
-    this->width = SCR_WIDTH;
-    this->height = SCR_HEIGHT;
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
-    // set texture options
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+void NoiseTexture::specifyTexture(GLvoid *data) {
+    glTexImage2D(target, 0, internalFormat, width, height, 0, format, type, data);
 }
 
-void SSAOColorTexture::generateTexture(int SCR_WIDTH, int SCR_HEIGHT, GLvoid* data) {
-    this->width = SCR_WIDTH;
-    this->height = SCR_HEIGHT;
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
-    // set texture options
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glBindTexture(GL_TEXTURE_2D, 0);
+void SSAOColorTexture::specifyTexture(GLvoid *data) {
+    glTexImage2D(target, 0, internalFormat, width, height, 0, format, type, data);
 }
 
 SSAOFrameBuffer::SSAOFrameBuffer(int numOfColorTextureAttachments, int numOfDepthTextureAttachments, int numOfRenderBufferObjectDepth) :
@@ -78,7 +63,7 @@ unsigned int SSAO::draw() {
     screenQuad.draw(ssaoBlurShader);
     ssaoBlurFrameBuffer.unbind();
 
-    return ssaoBlurFrameBuffer.getTextureColorBuffer()[0]->getTexture();
+    return ssaoBlurFrameBuffer.getTextureColorBuffer()[0]->textureID;
 }
 
 void SSAO::ssaoShaderSetting() {
@@ -94,11 +79,11 @@ void SSAO::ssaoShaderSetting() {
     ssaoShader.setMat4("projection", projectionMatrix);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, gFrameBuffer.getTextureColorBuffer()[0]->getTexture());
+    glBindTexture(gFrameBuffer.getTextureColorBuffer()[0]->target, gFrameBuffer.getTextureColorBuffer()[0]->textureID);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, gFrameBuffer.getTextureColorBuffer()[1]->getTexture());
+    glBindTexture(gFrameBuffer.getTextureColorBuffer()[0]->target, gFrameBuffer.getTextureColorBuffer()[1]->textureID);
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, noiseTexture.getTexture());
+    glBindTexture(gFrameBuffer.getTextureColorBuffer()[0]->target, noiseTexture.textureID);
 }
 
 void SSAO::ssaoBlurShaderSetting() {
@@ -106,7 +91,7 @@ void SSAO::ssaoBlurShaderSetting() {
     ssaoBlurShader.setInt("ssaoInput", 0);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, ssaoFrameBuffer.getTextureColorBuffer()[0]->getTexture());
+    glBindTexture(ssaoFrameBuffer.getTextureColorBuffer()[0]->target, ssaoFrameBuffer.getTextureColorBuffer()[0]->textureID);
 }
 
 void SSAO::generateSampleKernel() {
