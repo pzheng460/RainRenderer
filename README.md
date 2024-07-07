@@ -1,6 +1,9 @@
 # Rein Renderer
 This renderer is based on Learn OpenGL [https://learnopengl.com](https://learnopengl.com). 
 
+## Design Disciplines
+- Every polymorphic class should have an enum class for type identification.
+
 ## Windows building
 All relevant libraries are found in /libs and all DLLs found in /dlls (pre-)compiled for Windows. 
 The CMake script knows where to find the libraries so just run CMake script and generate project of choice.

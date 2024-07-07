@@ -1,24 +1,23 @@
 #include "Renderer.h"
 #include "shaderSetting.h"
+#include "Common.h"
 
-void Renderer::init(Scene& scene) {
-    for (int i = 0; i < scene.lights.size(); ++i) {
-        shadowMapFrameBuffers.emplace_back(0, 1, 0);
-        shadowMapFrameBuffers.back().generateFrameBuffer(SHADOW_WIDTH, SHADOW_HEIGHT);
+void Renderer::init() {
+    for (auto& shadowMapFrameBuffer : shadowMapFrameBuffers) {
+        shadowMapFrameBuffer.generateFrameBuffer(SHADOW_WIDTH, SHADOW_HEIGHT);
     }
-
-    mainMSAAFrameBuffer.generateFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
-    intermediateFrameBuffer.generateFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
+    mainMSAAFrameBuffer.generateFrameBuffer(width, height);
+    intermediateFrameBuffer.generateFrameBuffer(width, height);
     for (int i = 0; i < 2; ++i) {
-        pingPongFrameBuffers[i].generateFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
+        pingPongFrameBuffers[i].generateFrameBuffer(width, height);
     }
-    gFrameBuffer.generateFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
-    ssao.reset(SCR_WIDTH, SCR_HEIGHT);
+    gFrameBuffer.generateFrameBuffer(width, height);
+    ssao.reset(width, height);
 }
 
 void Renderer::reset() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+    glViewport(0, 0, width, height);
 }
 
 void Renderer::draw(Scene& scene) {
@@ -39,16 +38,18 @@ void Renderer::draw(Scene& scene) {
 //    // debug depth map 调试深度贴图
 //    reset();
 //    Shader debugDepthQuad(FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.fs").c_str());
-//    debugDepthQuadShaderSetting(debugDepthQuad, shadowMapFrameBuffers[0].getTextureDepthBuffer()->getTexture());
-//    Object screenQuadDebug(QUAD);
+//    debugDepthQuadShaderSetting(debugDepthQuad, shadowMapFrameBuffers[0].textureDepthBuffer->textureID);
+//    Model screenQuadModel(GeometryType::QUAD);
+//    Object screenQuadDebug(screenQuadModel);
 //    screenQuadDebug.draw(debugDepthQuad);
 
-    if (gui->getRenderingPath() == FORWARDRENDERING) {
+    if (gui->getRenderingPath() == RenderingPath::FORWARD_RENDERING) {
         forwardRendering(scene);
-    } else if (gui->getRenderingPath() == DEFERREDRENDERING) {
+    } else if (gui->getRenderingPath() == RenderingPath::DEFERRED_RENDERING) {
         deferredRendering(scene);
     }
 }
+
 void Renderer::forwardRendering(Scene& scene) {
     mainMSAAFrameBuffer.bind();
     reset();
@@ -59,20 +60,20 @@ void Renderer::forwardRendering(Scene& scene) {
         }
     }
     // render scene 渲染场景
-    if (gui->getMode() == BASIC) {
+    if (gui->getMode() == RenderMode::BASIC) {
         mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
-    } else if (gui->getMode() == PHONG) {
+    } else if (gui->getMode() == RenderMode::PHONG) {
         mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/phong.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/phong.fs").c_str());
         phongShaderSetting(mainShader, gui->getCamera(), scene.lights, shadowMapFrameBuffers);
-    } else if (gui->getMode() == BLINNPHONG) {
+    } else if (gui->getMode() == RenderMode::BLINN_PHONG) {
         mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/blinn_phong.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/blinn_phong.fs").c_str());
         phongShaderSetting(mainShader, gui->getCamera(), scene.lights, shadowMapFrameBuffers, gui->IsShadowActive());
-    } else if (gui->getMode() == DEPTH) {
+    } else if (gui->getMode() == RenderMode::DEPTH) {
         mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/depth_testing.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/depth_testing.fs").c_str());
-    } else if (gui->getMode() == ENVIRONMENTMAPPING) {
+    } else if (gui->getMode() == RenderMode::ENVIRONMENT_MAPPING) {
         mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/environment_mapping.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/environment_mapping.fs").c_str());
         phongShaderSetting(mainShader, gui->getCamera(), scene.lights, shadowMapFrameBuffers);
-    } else if (gui->getMode() == PBR) {
+    } else if (gui->getMode() == RenderMode::PBR) {
         mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/pbr.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/pbr.fs").c_str());
         PBRShaderSetting(mainShader, scene.lights, scene.skybox.getIrradianceMap(), scene.skybox.getPrefilterMap(), scene.skybox.getBRDFLUTTexture());
     }
@@ -84,23 +85,24 @@ void Renderer::forwardRendering(Scene& scene) {
     }
     // render skybox 渲染天空盒，放在最后渲染保证early-z测试
     if (gui->IsSkyBoxActive()) {
-        if (gui->getSkyboxLoadMode() == CUBEMAP) {
+        if (gui->getSkyboxLoadMode() == SkyboxLoadMode::CUBEMAP) {
             scene.skybox.drawGeometry();
-        } else if (gui->getSkyboxLoadMode() == SPHEREMAP) {
+        } else if (gui->getSkyboxLoadMode() == SkyboxLoadMode::SPHEREMAP) {
             scene.skybox.draw();
         }
     }
     mainMSAAFrameBuffer.unbind();
 
-    mainMSAAFrameBuffer.transferFrameBuffer(intermediateFrameBuffer, SCR_WIDTH, SCR_HEIGHT);
+    mainMSAAFrameBuffer.transferFrameBuffer(intermediateFrameBuffer);
 
     if (gui->IsBloomActive()) {
         gaussianBlur();
     }
 
     reset();
-    finalShaderSetting(finalShader, intermediateFrameBuffer.getTextureColorBuffer()[0]->textureID, gui->IsHDRActive(), 10.0f, pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0]->textureID, gui->IsBloomActive());
-    Object screenQuad(QUAD);
+    finalShaderSetting(finalShader, intermediateFrameBuffer.textureColorBuffers[0]->textureID, gui->IsHDRActive(), 10.0f, pingPongFrameBuffers[!horizontal].textureColorBuffers[0]->textureID, gui->IsBloomActive());
+    Model screenQuadModel(GeometryType::QUAD);
+    Object screenQuad(screenQuadModel);
     screenQuad.draw(finalShader);
 }
 
@@ -118,9 +120,9 @@ void Renderer::deferredRendering(Scene &scene) {
     scene.draw(gFrameBufferShader, gui->IsFloorActive(), true);
     // render skybox 渲染天空盒，放在最后渲染保证early-z测试
     if (gui->IsSkyBoxActive()) {
-        if (gui->getSkyboxLoadMode() == CUBEMAP) {
+        if (gui->getSkyboxLoadMode() == SkyboxLoadMode::CUBEMAP) {
             scene.skybox.drawGeometry();
-        } else if (gui->getSkyboxLoadMode() == SPHEREMAP) {
+        } else if (gui->getSkyboxLoadMode() == SkyboxLoadMode::SPHEREMAP) {
             scene.skybox.draw();
         }
     }
@@ -133,14 +135,15 @@ void Renderer::deferredRendering(Scene &scene) {
 
     if (firstIteration) firstIteration = false;
     deferredLightingShaderSetting(deferredLightingShader,
-                                  gFrameBuffer.getTextureColorBuffer()[0]->textureID,
-                                  gFrameBuffer.getTextureColorBuffer()[1]->textureID,
-                                  gFrameBuffer.getTextureColorBuffer()[2]->textureID,
+                                  gFrameBuffer.textureColorBuffers[0]->textureID,
+                                  gFrameBuffer.textureColorBuffers[1]->textureID,
+                                  gFrameBuffer.textureColorBuffers[2]->textureID,
                                   ssaoColorBufferBlur,
                                   gui->getCamera(),
                                   scene.lights,
                                   gui->IsSSAOActive());
-    Object screenQuad(QUAD);
+    Model screenQuadModel(GeometryType::QUAD);
+    Object screenQuad(screenQuadModel);
     screenQuad.draw(deferredLightingShader);
 }
 
@@ -153,8 +156,9 @@ void Renderer::gaussianBlur() {
     {
         pingPongFrameBuffers[horizontal].bind();
         shaderBlur.setInt("horizontal", horizontal);
-        glBindTexture(GL_TEXTURE_2D, first_iteration ? intermediateFrameBuffer.getTextureColorBuffer()[1]->textureID : pingPongFrameBuffers[!horizontal].getTextureColorBuffer()[0]->textureID);  // bind texture of other framebuffer (or scene if first iteration)
-        Object screenQuad(QUAD);
+        glBindTexture(GL_TEXTURE_2D, first_iteration ? intermediateFrameBuffer.textureColorBuffers[1]->textureID : pingPongFrameBuffers[!horizontal].textureColorBuffers[0]->textureID);  // bind texture of other framebuffer (or scene if first iteration)
+        Model screenQuadModel(GeometryType::QUAD);
+        Object screenQuad(screenQuadModel);
         screenQuad.draw(shaderBlur);
         horizontal = !horizontal;
         if (first_iteration)

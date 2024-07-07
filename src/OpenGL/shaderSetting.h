@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "shader.h"
-#include "light.h"
+#include "Shader.h"
+#include "Light.h"
 #include <vector>
 #include "FrameBuffer.h"
 
@@ -17,7 +17,7 @@ inline void phongShaderSetting(Shader& shader, const Camera& camera, std::vector
     for (unsigned int i = 0; i < lights.size(); ++i)
     {
         if (shadowActive) {
-            shader.setTexture("shadowMaps[" + std::to_string(i) + "]", shadowMapFrameBuffers[i].getTextureDepthBuffer()->textureID);
+            shader.setTexture("shadowMaps[" + std::to_string(i) + "]", shadowMapFrameBuffers[i].textureDepthBuffer.get());
             shader.setMat4("lightSpaceMatrix[" + std::to_string(i) + "]", lights[i].getLightSpaceMatrix());
         }
         shader.setVec3("pointLights[" + std::to_string(i) + "].position", lights[i].getPosition());
@@ -41,24 +41,16 @@ inline void shadowMapShaderSetting(Shader& shader, const Light& light) {
 }
 
 inline void PBRShaderSetting(Shader& shader, std::vector<Light> lights, unsigned int irradianceMap, unsigned int prefilterMap, unsigned int brdfLUTTexture) {
-    shader.use();
-//    shader.setInt("albedoMap", 0);
-//    shader.setInt("normalMap", 1);
-//    shader.setInt("metallicMap", 2);
-//    shader.setInt("roughnessMap", 3);
-//    shader.setInt("aoMap", 4);
-//    shader.setInt("irradianceMap", 5);
-//    shader.setInt("prefilterMap", 6);
-//    shader.setInt("brdfLUT", 7);
-    shader.setTexture("irradianceMap", irradianceMap);
-    shader.setTexture("prefilterMap", prefilterMap);
-    shader.setTexture("brdfLUT", brdfLUTTexture);
-
-    for (unsigned int i = 0; i < lights.size(); ++i)
-    {
-        shader.setVec3("lightPositions[" + std::to_string(i) + "]", lights[i].getPosition());
-        shader.setVec3("lightColors[" + std::to_string(i) + "]", lights[i].getColor());
-    }
+//    shader.use();
+//    shader.setTexture("irradianceMap", irradianceMap);
+//    shader.setTexture("prefilterMap", prefilterMap);
+//    shader.setTexture("brdfLUT", brdfLUTTexture);
+//
+//    for (unsigned int i = 0; i < lights.size(); ++i)
+//    {
+//        shader.setVec3("lightPositions[" + std::to_string(i) + "]", lights[i].getPosition());
+//        shader.setVec3("lightColors[" + std::to_string(i) + "]", lights[i].getColor());
+//    }
 
     // bind pre-computed IBL data
 //    glActiveTexture(GL_TEXTURE5);

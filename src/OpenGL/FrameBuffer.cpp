@@ -1,40 +1,22 @@
 #include "FrameBuffer.h"
 #include <iostream>
-#include <cxxabi.h>
-
-void ColorTexture::specifyTexture(GLvoid *data) {
-    glTexImage2D(target, 0, internalFormat, width, height, 0, format, type, data);
-}
-
-void DepthTexture::specifyTexture(GLvoid *data) {
-    glTexImage2D(target, 0, internalFormat, width, height, 0, format, type, data);
-}
-
-void RenderBufferObjectDepth::generateRenderBufferObject(int SCR_WIDTH, int SCR_HEIGHT) {
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-}
 
 FrameBuffer::FrameBuffer(int numOfColorTextureAttachments, int numOfDepthTextureAttachments, int numOfRenderBufferObjectDepth) :
     numOfColorTextureAttachments(numOfColorTextureAttachments), numOfDepthTextureAttachments(numOfDepthTextureAttachments), numOfRenderBufferObjectDepth(numOfRenderBufferObjectDepth) {
-    init();
+    glGenFramebuffers(1, &framebuffer);
     for (int i = 0; i < numOfColorTextureAttachments; i++) {
-        auto textureColorBuffer = std::make_shared<ColorTexture>();
-        textureColorBuffers.push_back(std::move(textureColorBuffer));
+        auto textureColorBufferPtr = TextureFactory::createTexture(TextureFactoryType::TEXTURE_COMMON_COLOR_ATTACHMENT);
+        textureColorBuffers.push_back(std::shared_ptr<Texture>(textureColorBufferPtr));
     }
     if (numOfDepthTextureAttachments > 0) {
         for (int i = 0; i < numOfDepthTextureAttachments; i++) {
-            textureDepthBuffer = std::make_shared<DepthTexture>();
+            auto textureDepthBufferPtr = TextureFactory::createTexture(TextureFactoryType::TEXTURE_COMMON_DEPTH_ATTACHMENT);
+            textureDepthBuffer = std::shared_ptr<Texture>(textureDepthBufferPtr);
         }
     }
     if (numOfRenderBufferObjectDepth > 0) {
         rboDepth = std::make_shared<RenderBufferObjectDepth>();
     }
-}
-
-void FrameBuffer::init() {
-    glGenFramebuffers(1, &framebuffer);
 }
 
 void FrameBuffer::bind() {
@@ -61,34 +43,31 @@ void FrameBuffer::bindRenderBufferDepthAttachment() {
 
 bool FrameBuffer::checkComplete() {
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        int status;
-        char* demangledName = abi::__cxa_demangle(typeid(*this).name(), nullptr, nullptr, &status);
-        std::string typeName = (status == 0) ? demangledName : typeid(*this).name();
-        std::cout << "ERROR::FRAMEBUFFER::" << typeName << " is not complete!" << std::endl;
-        free(demangledName); // free memory
+        std::cout << "ERROR::FRAMEBUFFER::" << toString(frameBufferFactoryType) << " is not complete!" << std::endl;
         return false;
     }
     return true;
 }
 
-void FrameBuffer::generateFrameBuffer(int SCR_WIDTH, int SCR_HEIGHT) {
+void FrameBuffer::generateFrameBuffer(int newWidth, int newHeight) {
+    setSize(newWidth, newHeight);
     bind();
 
     // create floating point color buffer 创建浮点颜色缓冲区
     for (int i = 0; i < numOfColorTextureAttachments; i++) {
-        textureColorBuffers[i]->generateTexture(SCR_WIDTH, SCR_HEIGHT, nullptr);
+        textureColorBuffers[i]->generateTexture(width, height, nullptr);
     }
     bindColorTextureAttachment();
 
     // create depth texture 创建深度纹理
     if (numOfDepthTextureAttachments > 0) {
-        textureDepthBuffer->generateTexture(SCR_WIDTH, SCR_HEIGHT, nullptr);
+        textureDepthBuffer->generateTexture(this->width, this->height, nullptr);
         bindDepthTextureAttachment();
     }
 
     // create depth buffer (renderbuffer) 创建深度缓冲区（渲染缓冲区）
     if (numOfRenderBufferObjectDepth > 0) {
-        rboDepth->generateRenderBufferObject(SCR_WIDTH, SCR_HEIGHT);
+        rboDepth->generateRenderBufferObject(this->width, this->height);
         bindRenderBufferDepthAttachment();
     }
 
@@ -109,9 +88,69 @@ void FrameBuffer::generateFrameBuffer(int SCR_WIDTH, int SCR_HEIGHT) {
     unbind();
 }
 
-void FrameBuffer::transferFrameBuffer(FrameBuffer& targetFrameBuffer, int SCR_WIDTH, int SCR_HEIGHT) {
+void FrameBuffer::transferFrameBuffer(FrameBuffer& targetFrameBuffer) {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetFrameBuffer.framebuffer);
-    glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    glBlitFramebuffer(0, 0, width, height, 0, 0, targetFrameBuffer.width, targetFrameBuffer.height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+FrameBuffer FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType frameBufferFactoryType) {
+    FrameBuffer frameBuffer;
+    if (frameBufferFactoryType == FrameBufferFactoryType::FRAME_BUFFER_SHADOW_MAP)
+    {
+        frameBuffer = FrameBuffer(0, 1, 0);
+    }
+    else if (frameBufferFactoryType == FrameBufferFactoryType::FRAME_BUFFER_MSAA)
+    {
+        frameBuffer = FrameBuffer(2, 0, 1);
+        for (int i = 0; i < frameBuffer.numOfColorTextureAttachments; i++) {
+            auto textureColorBufferPtr = TextureFactory::createTexture(TextureFactoryType::TEXTURE_MSAA_COLOR_ATTACHMENT);
+            auto textureColorBuffer = std::shared_ptr<Texture>(textureColorBufferPtr);
+            frameBuffer.textureColorBuffers[i] = std::move(textureColorBuffer);
+        }
+        frameBuffer.rboDepth = std::make_shared<RenderBufferObjectDepthMultiSample>();
+    }
+    else if (frameBufferFactoryType == FrameBufferFactoryType::FRAME_BUFFER_INTERMEDIATE)
+    {
+        frameBuffer = FrameBuffer(2, 0, 0);
+    }
+    else if (frameBufferFactoryType == FrameBufferFactoryType::FRAME_BUFFER_PING_PONG)
+    {
+        frameBuffer = FrameBuffer(1, 0, 0);
+    }
+    else if (frameBufferFactoryType == FrameBufferFactoryType::FRAME_BUFFER_GEOMETRY)
+    {
+        frameBuffer = FrameBuffer(3, 0, 1);
+        auto texturePositionColorBuffer = TextureFactory::createTexture(TextureFactoryType::TEXTURE_GEOMETRY_POSITION_COLOR_ATTACHMENT);
+        frameBuffer.textureColorBuffers[0] = std::shared_ptr<Texture>(texturePositionColorBuffer);
+        auto textureNormalColorBuffer = TextureFactory::createTexture(TextureFactoryType::TEXTURE_GEOMETRY_NORMAL_COLOR_ATTACHMENT);
+        frameBuffer.textureColorBuffers[1] = std::shared_ptr<Texture>(textureNormalColorBuffer);
+        auto textureAlbedoSpecColorBuffer = TextureFactory::createTexture(TextureFactoryType::TEXTURE_GEOMETRY_ALBEDO_SPEC_COLOR_ATTACHMENT);
+        frameBuffer.textureColorBuffers[2] = std::shared_ptr<Texture>(textureAlbedoSpecColorBuffer);
+    }
+    else if (frameBufferFactoryType == FrameBufferFactoryType::FRAME_BUFFER_SSAO)
+    {
+        frameBuffer = FrameBuffer(1, 0, 0);
+        for (int i = 0; i < frameBuffer.numOfColorTextureAttachments; i++) {
+            auto textureColorBufferPtr = TextureFactory::createTexture(TextureFactoryType::TEXTURE_SSAO_COLOR_ATTACHMENT);
+            auto textureColorBuffer = std::shared_ptr<Texture>(textureColorBufferPtr);
+            frameBuffer.textureColorBuffers[i] = std::move(textureColorBuffer);
+        }
+    }
+    else if (frameBufferFactoryType == FrameBufferFactoryType::FRAME_BUFFER_SSAO_BLUR)
+    {
+        frameBuffer = FrameBuffer(1, 0, 0);
+        for (int i = 0; i < frameBuffer.numOfColorTextureAttachments; i++) {
+            auto textureColorBufferPtr = TextureFactory::createTexture(TextureFactoryType::TEXTURE_SSAO_COLOR_ATTACHMENT);
+            auto textureColorBuffer = std::shared_ptr<Texture>(textureColorBufferPtr);
+            frameBuffer.textureColorBuffers[i] = std::move(textureColorBuffer);
+        }
+    }
+    else
+    {
+        std::cerr << "FrameBufferFactoryType not found" << std::endl;
+    }
+    frameBuffer.frameBufferFactoryType = frameBufferFactoryType;
+    return frameBuffer;
 }

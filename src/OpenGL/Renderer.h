@@ -15,7 +15,7 @@
 #include "FrameBuffer.h"
 #include "MSAAFrameBuffer.h"
 #include "GeometryFrameBuffer.h"
-#include "shader.h"
+#include "Shader.h"
 #include "Scene.h"
 #include "GUI.h"
 #include "SSAO.h"
@@ -25,10 +25,18 @@
 class Renderer {
 public:
     Renderer() = default;
-    Renderer(int SCR_WIDTH, int SCR_HEIGHT, std::shared_ptr<GUI>& gui) : SCR_WIDTH(SCR_WIDTH), SCR_HEIGHT(SCR_HEIGHT), gui(gui) {}
+    Renderer(int width, int height, std::shared_ptr<GUI>& gui, Scene& scene) :
+            width(width), height(height), gui(gui) {
+        for (int i = 0; i < scene.lights.size(); ++i) {
+            shadowMapFrameBuffers.emplace_back(FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_SHADOW_MAP));
+        }
+        for (int i = 0; i < 2; ++i) {
+            pingPongFrameBuffers.emplace_back(FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_PING_PONG));
+        }
+    }
     ~Renderer() = default;
 
-    void init(Scene& scene);
+    void init();
     void reset();
     void draw(Scene& scene);
     void forwardRendering(Scene& scene);
@@ -40,12 +48,9 @@ public:
     void MSAA() const;
     void gammaCorrection() const;
 
-    // GUI
-    std::shared_ptr<GUI> gui;
-
-    void setFrameBufferSize(pair<int, int> size) {
-        SCR_WIDTH = size.first;
-        SCR_HEIGHT = size.second;
+    void setSize(int newWidth, int newHeight) {
+        width = newWidth;
+        height = newHeight;
     }
 
     FrameBuffer& getMainMSAAFrameBuffer() {
@@ -63,31 +68,34 @@ private:
     // Main Shader
     Shader mainShader;
 
-    int SCR_WIDTH, SCR_HEIGHT;
+    // GUI
+    std::shared_ptr<GUI> gui;
+
+    int width, height;
 
     bool firstIteration = true;
 
     // Shadow Map
     Shader simpleDepthShader = Shader(FileSystem::getPath("src/OpenGL/shaders/shadow_mapping_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/shadow_mapping_depth.fs").c_str());
     std::vector<FrameBuffer> shadowMapFrameBuffers;
-    const unsigned int SHADOW_WIDTH = 2560, SHADOW_HEIGHT = 1440;
+    const int SHADOW_WIDTH = 2560, SHADOW_HEIGHT = 1440;
 
     // Main FrameBuffer
-    MSAAFrameBuffer mainMSAAFrameBuffer = MSAAFrameBuffer(2, 0, 1);
-    FrameBuffer intermediateFrameBuffer = FrameBuffer(2, 0, 0);
+    FrameBuffer mainMSAAFrameBuffer = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_MSAA);
+    FrameBuffer intermediateFrameBuffer = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_INTERMEDIATE);
 
     // Bloom
     Shader shaderBlur = Shader(FileSystem::getPath("src/OpenGL/shaders/blur.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/blur.fs").c_str());
-    std::vector<FrameBuffer> pingPongFrameBuffers = std::vector<FrameBuffer>(2);
+    std::vector<FrameBuffer> pingPongFrameBuffers;
     bool horizontal = true, first_iteration = true;
     unsigned int amount = 10;
 
     // G-Buffer
     Shader gFrameBufferShader = Shader(FileSystem::getPath("src/OpenGL/shaders/g_buffer.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/g_buffer.fs").c_str());
-    GeometryFrameBuffer gFrameBuffer = GeometryFrameBuffer(3, 0, 1);
+    FrameBuffer gFrameBuffer = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_GEOMETRY);
 
     // SSAO
-    SSAO ssao = SSAO(gui->getCamera(), SCR_WIDTH, SCR_HEIGHT, gFrameBuffer);
+    SSAO ssao = SSAO(gui->getCamera(), width, height, gFrameBuffer);
 
     // Deferred lighting
     Shader deferredLightingShader = Shader(FileSystem::getPath("src/OpenGL/shaders/deferred_shading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/deferred_shading.fs").c_str());

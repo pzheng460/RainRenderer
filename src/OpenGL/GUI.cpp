@@ -27,7 +27,7 @@ void GUI::init(GLFWwindow* window) {
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f); // 背景颜色
 }
 
-void GUI::render(std::string& modelFilePath, Scene& scene) {
+void GUI::render(Scene& scene) {
     ImGui_ImplOpenGL3_NewFrame(); // OpenGL 渲染 ImGui
     ImGui_ImplGlfw_NewFrame(); // GLFW 渲染 ImGui
     ImGui::NewFrame(); // ImGui 新帧
@@ -82,12 +82,12 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
 
         // Rendering Path 渲染路径
         ImGui::Text("Rendering Path");
-        if (ImGui::RadioButton("Forward Rendering", renderingPath == FORWARDRENDERING)) {
-            renderingPath = FORWARDRENDERING;
+        if (ImGui::RadioButton("Forward Rendering", renderingPath == RenderingPath::FORWARD_RENDERING)) {
+            renderingPath = RenderingPath::FORWARD_RENDERING;
         }
-        if (ImGui::RadioButton("Deferred Rendering", renderingPath == DEFERREDRENDERING)) {
-            renderingPath = DEFERREDRENDERING;
-            mode = BLINNPHONG;
+        if (ImGui::RadioButton("Deferred Rendering", renderingPath == RenderingPath::DEFERRED_RENDERING)) {
+            renderingPath = RenderingPath::DEFERRED_RENDERING;
+            mode = RenderMode::BLINN_PHONG;
         }
 
         ImGui::Separator(); // 分隔线
@@ -98,10 +98,10 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
         if (!skyBoxActive) { ImGui::BeginDisabled(); }
         {
             ImGui::Text("Skybox Load Mode");
-            if (ImGui::RadioButton("Cube Map", skyboxMode == CUBEMAP)) {
-                skyboxMode = CUBEMAP;
+            if (ImGui::RadioButton("Cube Map", skyboxMode == SkyboxLoadMode::CUBEMAP)) {
+                skyboxMode = SkyboxLoadMode::CUBEMAP;
                 Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/skybox.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/skybox.fs").c_str());
-                vector<std::string> faces =
+                std::vector<std::string> faces =
                         {
                                 FileSystem::getPath("resources/textures/skybox/right.jpg"),
                                 FileSystem::getPath("resources/textures/skybox/left.jpg"),
@@ -114,8 +114,8 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
                 scene.setSkybox(skybox);
             }
             ImGui::SameLine();
-            if (ImGui::RadioButton("Sphere Map", skyboxMode == SPHEREMAP)) {
-                skyboxMode = SPHEREMAP;
+            if (ImGui::RadioButton("Sphere Map", skyboxMode == SkyboxLoadMode::SPHEREMAP)) {
+                skyboxMode = SkyboxLoadMode::SPHEREMAP;
                 Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/background.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/background.fs").c_str());
                 Skybox skybox(skyboxShader, FileSystem::getPath("resources/textures/hdr/newport_loft.hdr"));
                 scene.setSkybox(skybox);
@@ -134,7 +134,7 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
         // Gamma Correction 伽马校正
         ImGui::Checkbox("Gamma Correction", &gammaCorrectionActive);
 
-        if (renderingPath != FORWARDRENDERING) { ImGui::BeginDisabled(); }
+        if (renderingPath != RenderingPath::FORWARD_RENDERING) { ImGui::BeginDisabled(); }
         {
             // normal visualization 法线可视化
             ImGui::Checkbox("Normal", &normalVisualizationActive);
@@ -145,41 +145,41 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
             // Bloom 泛光
             ImGui::Checkbox("Bloom", &bloomActive);
         }
-        if (renderingPath != FORWARDRENDERING) { ImGui::EndDisabled(); }
+        if (renderingPath != RenderingPath::FORWARD_RENDERING) { ImGui::EndDisabled(); }
 
-        if (renderingPath != DEFERREDRENDERING) { ImGui::BeginDisabled(); }
+        if (renderingPath != RenderingPath::DEFERRED_RENDERING) { ImGui::BeginDisabled(); }
         {
             // SSAO 屏幕空间环境光遮蔽
             ImGui::Checkbox("SSAO", &SSAOActive);
         }
-        if (renderingPath != DEFERREDRENDERING) { ImGui::EndDisabled(); }
+        if (renderingPath != RenderingPath::DEFERRED_RENDERING) { ImGui::EndDisabled(); }
 
         ImGui::Text("Render Mode");
-        if (ImGui::RadioButton("Basic", mode == BASIC)) {
-            mode = BASIC;
+        if (ImGui::RadioButton("Basic", mode == RenderMode::BASIC)) {
+            mode = RenderMode::BASIC;
         }
-        if (ImGui::RadioButton("Phong", mode == PHONG)) {
-            mode = PHONG;
+        if (ImGui::RadioButton("Phong", mode == RenderMode::PHONG)) {
+            mode = RenderMode::PHONG;
         }
-        if (ImGui::RadioButton("Blinn-Phong", mode == BLINNPHONG)) {
-            mode = BLINNPHONG;
+        if (ImGui::RadioButton("Blinn-Phong", mode == RenderMode::BLINN_PHONG)) {
+            mode = RenderMode::BLINN_PHONG;
         }
-        if (ImGui::RadioButton("Depth", mode == DEPTH)) {
-            mode = DEPTH;
+        if (ImGui::RadioButton("Depth", mode == RenderMode::DEPTH)) {
+            mode = RenderMode::DEPTH;
         }
-        if (ImGui::RadioButton("Environment Mapping", mode == ENVIRONMENTMAPPING)) {
-            mode = ENVIRONMENTMAPPING;
+        if (ImGui::RadioButton("Environment Mapping", mode == RenderMode::ENVIRONMENT_MAPPING)) {
+            mode = RenderMode::ENVIRONMENT_MAPPING;
         }
-        if (ImGui::RadioButton("PBR", mode == PBR)) {
-            mode = PBR;
+        if (ImGui::RadioButton("PBR", mode == RenderMode::PBR)) {
+            mode = RenderMode::PBR;
         }
 
-        if (mode != BLINNPHONG) { ImGui::BeginDisabled(); }
+        if (mode != RenderMode::BLINN_PHONG) { ImGui::BeginDisabled(); }
         {
             ImGui::Text("Shadow");
             ImGui::Checkbox("Shadow", &shadowActive);
         }
-        if (mode != BLINNPHONG) { ImGui::EndDisabled(); }
+        if (mode != RenderMode::BLINN_PHONG) { ImGui::EndDisabled(); }
 
         ImGui::End();
     }
@@ -193,16 +193,16 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
         ImGui::InputText("File Path", filePath, sizeof(filePath));
         if (ImGui::Button("Open File Dialog")) {
             const char *filterPatterns[] = {"*.obj", "*.fbx", "*.dae", "*.pmx"};
-            const char *selectedFilePath = tinyfd_openFileDialog(
-                    "Select Model File", "", 4, filterPatterns, NULL, 0);
+            const char *selectedFilePath = tinyfd_openFileDialog("Select Model File", "", 4, filterPatterns, NULL, 0);
             if (selectedFilePath) {
                 strncpy(filePath, selectedFilePath, sizeof(filePath) - 1);
                 filePath[sizeof(filePath) - 1] = '\0'; // 确保字符串以 null 结尾
             }
         }
         if (ImGui::Button("Load Model")) {
+            std::string modelFilePath;
             if (strlen(filePath) == 0) {
-                modelFilePath = FileSystem::getPath(modelFilePath); // 使用默认的模型文件路径
+                modelFilePath = FileSystem::getPath(std::string(DEFAULT_FILE_PATH)); // 使用默认的模型文件路径
                 strcpy(filePath, modelFilePath.c_str());
             } else {
                 modelFilePath = std::string(filePath); // 更新模型文件路径
@@ -210,7 +210,7 @@ void GUI::render(std::string& modelFilePath, Scene& scene) {
 
             // load models
             stbi_set_flip_vertically_on_load(false); // tell stb_image.h to flip loaded texture's on the y-axis 告诉 stb_image.h 在 y 轴上翻转加载的纹理
-            AssimpModel::Model ourModel(modelFilePath);
+            Model ourModel(modelFilePath);
             auto object = std::make_unique<Object>(ourModel);
             scene.addObject(std::move(object));
         }

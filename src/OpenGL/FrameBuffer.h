@@ -10,111 +10,88 @@
 
 #include <vector>
 #include "Texture.h"
-
-class ColorTexture final : public Texture {
-public:
-    ColorTexture() {
-        target = GL_TEXTURE_2D;
-        internalFormat = GL_RGBA16F;
-        format = GL_RGBA;
-        type = GL_FLOAT;
-
-        minFilter = GL_LINEAR;
-        magFilter = GL_LINEAR;
-        wrapS = GL_CLAMP_TO_EDGE;
-        wrapT = GL_CLAMP_TO_EDGE;
-    }
-    void specifyTexture(GLvoid* data) override;
-};
-
-class DepthTexture final : public Texture {
-public:
-    DepthTexture() {
-        target = GL_TEXTURE_2D;
-        internalFormat = GL_DEPTH_COMPONENT;
-        format = GL_DEPTH_COMPONENT;
-        type = GL_FLOAT;
-
-        minFilter = GL_NEAREST;
-        magFilter = GL_NEAREST;
-        wrapS = GL_CLAMP_TO_BORDER;
-        wrapT = GL_CLAMP_TO_BORDER;
-
-        setBorderColor(1.0f, 1.0f, 1.0f, 1.0f);
-    }
-    void specifyTexture(GLvoid* data) override;
-};
-
-class RenderBufferObject {
-public:
-    RenderBufferObject() {
-        glGenRenderbuffers(1, &rbo);
-    }
-    virtual ~RenderBufferObject() {
-        glDeleteRenderbuffers(1, &rbo);
-    }
-    virtual void generateRenderBufferObject(int SCR_WIDTH, int SCR_HEIGHT) = 0;
-    unsigned int rbo;
-};
-
-class RenderBufferObjectDepth : public RenderBufferObject {
-public:
-    void generateRenderBufferObject(int SCR_WIDTH, int SCR_HEIGHT) override;
-};
+#include "RenderBufferObject.h"
+#include "Common.h"
 
 class FrameBuffer {
 public:
-    FrameBuffer(int numOfColorTextureAttachments = 1, int numOfDepthTextureAttachments = 0, int numOfRenderBufferObjectDepth = 0);
+    explicit FrameBuffer(int numOfColorTextureAttachments = 1, int numOfDepthTextureAttachments = 0, int numOfRenderBufferObjectDepth = 0);
     virtual ~FrameBuffer() {
         glDeleteFramebuffers(1, &framebuffer);
     }
 
-    void init();
+    // 禁用拷贝构造函数和拷贝赋值运算符
+    FrameBuffer(const FrameBuffer& other) = delete;
+    FrameBuffer& operator=(const FrameBuffer& other) = delete;
+
+    // 移动构造函数
+    FrameBuffer(FrameBuffer&& other) noexcept
+            : numOfColorTextureAttachments(other.numOfColorTextureAttachments),
+              numOfDepthTextureAttachments(other.numOfDepthTextureAttachments),
+              numOfRenderBufferObjectDepth(other.numOfRenderBufferObjectDepth),
+              width(other.width),
+              height(other.height),
+              textureColorBuffers(std::move(other.textureColorBuffers)),
+              textureDepthBuffer(std::move(other.textureDepthBuffer)),
+              rboDepth(std::move(other.rboDepth)),
+              frameBufferFactoryType(other.frameBufferFactoryType) {
+        framebuffer = other.framebuffer;
+        other.framebuffer = 0;
+    }
+
+    // 移动赋值运算符
+    FrameBuffer& operator=(FrameBuffer&& other) noexcept {
+        if (this != &other) {
+            glDeleteFramebuffers(1, &framebuffer);
+            numOfColorTextureAttachments = other.numOfColorTextureAttachments;
+            numOfDepthTextureAttachments = other.numOfDepthTextureAttachments;
+            numOfRenderBufferObjectDepth = other.numOfRenderBufferObjectDepth;
+            width = other.width;
+            height = other.height;
+            textureColorBuffers = std::move(other.textureColorBuffers);
+            textureDepthBuffer = std::move(other.textureDepthBuffer);
+            rboDepth = std::move(other.rboDepth);
+            frameBufferFactoryType = other.frameBufferFactoryType;
+            framebuffer = other.framebuffer;
+            other.framebuffer = 0;
+        }
+        return *this;
+    }
+
+    void setSize(int newWidth, int newHeight) {
+        this->width = newWidth;
+        this->height = newHeight;
+    }
+
     void bind();
     void unbind();
 
-    virtual void bindColorTextureAttachment();
-    virtual void bindDepthTextureAttachment();
-    virtual void bindRenderBufferDepthAttachment();
-    virtual void generateFrameBuffer(int SCR_WIDTH, int SCR_HEIGHT);
+    void bindColorTextureAttachment();
+    void bindDepthTextureAttachment();
+    void bindRenderBufferDepthAttachment();
+    void generateFrameBuffer(int newWidth, int newHeight);
 
     bool checkComplete();
 
-    void transferFrameBuffer(FrameBuffer& targetFrameBuffer, int SCR_WIDTH, int SCR_HEIGHT);
+    void transferFrameBuffer(FrameBuffer& targetFrameBuffer);
 
-    std::vector<std::shared_ptr<Texture>>& getTextureColorBuffer() {
-        return textureColorBuffers;
-    }
-
-    std::shared_ptr<DepthTexture>& getTextureDepthBuffer() {
-        return textureDepthBuffer;
-    }
-
-    std::shared_ptr<RenderBufferObject>& getRboDepth() {
-        return rboDepth;
-    }
-
-    int getNumOfColorTextureAttachments() {
-        return numOfColorTextureAttachments;
-    }
-
-    int getNumOfDepthTextureAttachments() {
-        return numOfDepthTextureAttachments;
-    }
-
-    unsigned int getFrameBuffer() {
-        return framebuffer;
-    }
-
-protected:
     unsigned int framebuffer = 0;
     int numOfColorTextureAttachments;
     int numOfDepthTextureAttachments;
     int numOfRenderBufferObjectDepth;
 
     std::vector<std::shared_ptr<Texture>> textureColorBuffers;
-    std::shared_ptr<DepthTexture> textureDepthBuffer;
+    std::shared_ptr<Texture> textureDepthBuffer;
     std::shared_ptr<RenderBufferObject> rboDepth;
+
+    FrameBufferFactoryType frameBufferFactoryType;
+
+    int width, height;
+};
+
+class FrameBufferFactory {
+public:
+    static FrameBuffer createFrameBuffer(FrameBufferFactoryType frameBufferFactoryType);
 };
 
 #endif // FRAMEBUFFER_H

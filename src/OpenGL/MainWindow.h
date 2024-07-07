@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include "camera.h"
+#include "Camera.h"
 #include "GUI.h"
 
 class MainWindow {
@@ -16,7 +16,7 @@ public:
 
     bool shouldClose() const;
     void preRender();
-    pair<int, int> reset();
+    std::pair<int, int> reset();
     void processInput(GLFWwindow *window);
     void swapBuffersAndPollEvents() const;
 
@@ -38,8 +38,8 @@ public:
 
 private:
     // window settings
-    unsigned int width;
-    unsigned int height;
+    int width;
+    int height;
     std::string title;
     GLFWwindow* window;
 

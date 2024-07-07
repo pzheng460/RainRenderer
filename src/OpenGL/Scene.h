@@ -7,11 +7,10 @@
 #include <vector>
 
 #include "Skybox.h"
-#include "light.h"
-#include "shader.h"
-#include "camera.h"
+#include "Light.h"
+#include "Shader.h"
+#include "Camera.h"
 #include "Object.h"
-#include "PBRObject.h"
 
 class Scene {
 public:

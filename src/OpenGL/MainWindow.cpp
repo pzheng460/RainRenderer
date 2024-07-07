@@ -103,7 +103,7 @@ void MainWindow::preRender() {
     processInput(window);
 }
 
-pair<int, int> MainWindow::reset() {
+std::pair<int, int> MainWindow::reset() {
     // 设置清屏颜色
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     // 清空颜色缓冲、深度缓冲、模板缓冲
@@ -112,9 +112,10 @@ pair<int, int> MainWindow::reset() {
     // update stencil buffer 保证默认情况下，不会更新模板缓冲区
     glStencilMask(0x00);
 
-//    glViewport(0, 0, width, height);
     int scrWidth, scrHeight;
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
+    width = scrWidth;
+    height = scrHeight;
     // set viewport to the size of the framebuffer 设置视口大小为帧缓冲区的大小
     // 参数：左下角的横坐标x，左下角的纵坐标y，宽度，高度
     glViewport(0, 0, scrWidth, scrHeight);
@@ -167,8 +168,7 @@ void MainWindow::mouse_callback(GLFWwindow* window, double xposIn, double yposIn
 // whenever the mouse scroll wheel scrolls, this callback is called
 void MainWindow::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    if (!gui->IsControlActive())
-    {
+    if (!gui->IsControlActive()) {
         return;
     }
     gui->getCamera().ProcessMouseScroll(static_cast<float>(yoffset));
@@ -205,16 +205,15 @@ void MainWindow::processInput(GLFWwindow *window)
         spaceKeyPressed = false;
     }
 
-    if (gui->IsControlActive())
-    {
+    if (gui->IsControlActive()) {
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            gui->getCamera().ProcessKeyboard(FORWARD, deltaTime);
+            gui->getCamera().ProcessKeyboard(Camera_Movement::FORWARD, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            gui->getCamera().ProcessKeyboard(BACKWARD, deltaTime);
+            gui->getCamera().ProcessKeyboard(Camera_Movement::BACKWARD, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            gui->getCamera().ProcessKeyboard(LEFT, deltaTime);
+            gui->getCamera().ProcessKeyboard(Camera_Movement::LEFT, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            gui->getCamera().ProcessKeyboard(RIGHT, deltaTime);
+            gui->getCamera().ProcessKeyboard(Camera_Movement::RIGHT, deltaTime);
     }
 }
 

@@ -8,42 +8,29 @@
 #include "SSAO.h"
 #include "shaderSetting.h"
 
-void NoiseTexture::specifyTexture(GLvoid *data) {
-    glTexImage2D(target, 0, internalFormat, width, height, 0, format, type, data);
-}
-
-void SSAOColorTexture::specifyTexture(GLvoid *data) {
-    glTexImage2D(target, 0, internalFormat, width, height, 0, format, type, data);
-}
-
-SSAOFrameBuffer::SSAOFrameBuffer(int numOfColorTextureAttachments, int numOfDepthTextureAttachments, int numOfRenderBufferObjectDepth) :
-    FrameBuffer(numOfColorTextureAttachments, numOfDepthTextureAttachments, numOfRenderBufferObjectDepth) {
-    for (int i = 0; i < numOfColorTextureAttachments; i++) {
-        auto textureColorBuffer = std::make_shared<SSAOColorTexture>();
-        textureColorBuffers[i] = std::move(textureColorBuffer);
-    }
-}
-
-SSAO::SSAO(Camera& camera, int SCR_WIDTH, int SCR_HEIGHT, GeometryFrameBuffer& gFrameBuffer) :
+SSAO::SSAO(Camera& camera, int width, int height, FrameBuffer& gFrameBuffer) :
     camera(camera),
-    SCR_WIDTH(SCR_WIDTH),
-    SCR_HEIGHT(SCR_HEIGHT),
+    width(width),
+    height(height),
     gFrameBuffer(gFrameBuffer) {
     init();
 }
 
 void SSAO::init() {
-    ssaoFrameBuffer.generateFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
-    ssaoBlurFrameBuffer.generateFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
+    ssaoFrameBuffer.generateFrameBuffer(width, height);
+    ssaoBlurFrameBuffer.generateFrameBuffer(width, height);
 
     generateSampleKernel();
     generateSSAONoise();
-    noiseTexture.generateTexture(4, 4, &ssaoNoise[0]);
+
+    Texture* noiseTexturePtr = TextureFactory::createTexture(TextureFactoryType::TEXTURE_SSAO_NOISE);
+    noiseTexture = std::shared_ptr<Texture>(noiseTexturePtr);
+    noiseTexture->generateTexture(4, 4, &ssaoNoise[0]);
 }
 
-void SSAO::reset(int SCR_WIDTH, int SCR_HEIGHT) {
-    this->SCR_WIDTH = SCR_WIDTH;
-    this->SCR_HEIGHT = SCR_HEIGHT;
+void SSAO::reset(int newWidth, int newHeight) {
+    this->width = newWidth;
+    this->height = newHeight;
     init();
 }
 
@@ -52,7 +39,8 @@ unsigned int SSAO::draw() {
     ssaoFrameBuffer.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     ssaoShaderSetting();
-    Object screenQuad(QUAD);
+    Model screenQuadModel(GeometryType::QUAD);
+    Object screenQuad(screenQuadModel);
     screenQuad.draw(ssaoShader);
     ssaoFrameBuffer.unbind();
 
@@ -63,7 +51,7 @@ unsigned int SSAO::draw() {
     screenQuad.draw(ssaoBlurShader);
     ssaoBlurFrameBuffer.unbind();
 
-    return ssaoBlurFrameBuffer.getTextureColorBuffer()[0]->textureID;
+    return ssaoBlurFrameBuffer.textureColorBuffers[0]->textureID;
 }
 
 void SSAO::ssaoShaderSetting() {
@@ -75,15 +63,15 @@ void SSAO::ssaoShaderSetting() {
     // Send kernel + rotation
     for (unsigned int i = 0; i < 64; ++i)
         ssaoShader.setVec3("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
-    auto projectionMatrix = glm::perspective(glm::radians(camera.Zoom), float(SCR_WIDTH / SCR_HEIGHT), 0.1f, 100.0f);
+    auto projectionMatrix = glm::perspective(glm::radians(camera.Zoom), float(width / height), 0.1f, 100.0f);
     ssaoShader.setMat4("projection", projectionMatrix);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(gFrameBuffer.getTextureColorBuffer()[0]->target, gFrameBuffer.getTextureColorBuffer()[0]->textureID);
+    glBindTexture(gFrameBuffer.textureColorBuffers[0]->target, gFrameBuffer.textureColorBuffers[0]->textureID);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(gFrameBuffer.getTextureColorBuffer()[0]->target, gFrameBuffer.getTextureColorBuffer()[1]->textureID);
+    glBindTexture(gFrameBuffer.textureColorBuffers[0]->target, gFrameBuffer.textureColorBuffers[1]->textureID);
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(gFrameBuffer.getTextureColorBuffer()[0]->target, noiseTexture.textureID);
+    glBindTexture(gFrameBuffer.textureColorBuffers[0]->target, noiseTexture->textureID);
 }
 
 void SSAO::ssaoBlurShaderSetting() {
@@ -91,12 +79,11 @@ void SSAO::ssaoBlurShaderSetting() {
     ssaoBlurShader.setInt("ssaoInput", 0);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(ssaoFrameBuffer.getTextureColorBuffer()[0]->target, ssaoFrameBuffer.getTextureColorBuffer()[0]->textureID);
+    glBindTexture(ssaoFrameBuffer.textureColorBuffers[0]->target, ssaoFrameBuffer.textureColorBuffers[0]->textureID);
 }
 
 void SSAO::generateSampleKernel() {
-    for (unsigned int i = 0; i < 64; ++i)
-    {
+    for (unsigned int i = 0; i < 64; ++i) {
         glm::vec3 sample(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, randomFloats(generator));
         sample = glm::normalize(sample);
         sample *= randomFloats(generator);
@@ -110,8 +97,7 @@ void SSAO::generateSampleKernel() {
 }
 
 void SSAO::generateSSAONoise() {
-    for (unsigned int i = 0; i < 16; i++)
-    {
+    for (unsigned int i = 0; i < 16; i++) {
         glm::vec3 noise(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, 0.0f); // rotate around z-axis (in tangent space)
         ssaoNoise.push_back(noise);
     }

@@ -195,17 +195,17 @@ public:
         glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
     // ------------------------------------------------------------------------
-    void setTexture(const std::string &name, unsigned int texture)
+    void setTexture(const std::string &name, Texture* texture)
     {
         if (textureNameToUniformLocations.count(name) != 0) {
             glActiveTexture(GL_TEXTURE0 + textureNameToUniformLocations[name]);
-            glBindTexture(GL_TEXTURE_2D, texture);
+            glBindTexture(texture->target, texture->textureID);
         } else {
             GLint location = glGetUniformLocation(ID, name.c_str());
             if (location != -1) {
                 glActiveTexture(GL_TEXTURE0 + lastBindingIndex);
                 glUniform1i(location, lastBindingIndex);
-                glBindTexture(GL_TEXTURE_2D, texture);
+                glBindTexture(texture->target, texture->textureID);
                 textureNameToUniformLocations[name] = lastBindingIndex;
                 lastBindingIndex++;
             } else {
@@ -217,7 +217,7 @@ public:
 private:
     // utility function for checking shader compilation/linking errors.
     // ------------------------------------------------------------------------
-    void checkCompileErrors(GLuint shader, std::string type)
+    void checkCompileErrors(GLuint shader, const std::string& type)
     {
         GLint success;
         GLchar infoLog[1024];

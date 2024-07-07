@@ -4,37 +4,19 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "shader.h"
-#include "model.h"
-#include "camera.h"
-#include "light.h"
+#include "Shader.h"
+#include "Model.h"
+#include "Camera.h"
+#include "Light.h"
 #include "Scene.h"
-
-enum RenderingPath {
-    FORWARDRENDERING,
-    DEFERREDRENDERING
-};
-
-enum RenderMode {
-    BASIC,
-    PHONG,
-    BLINNPHONG,
-    DEPTH,
-    ENVIRONMENTMAPPING,
-    PBR
-};
-
-enum SkyboxLoadMode {
-    CUBEMAP,
-    SPHEREMAP
-};
+#include "Common.h"
 
 class GUI {
 public:
     GUI();
     ~GUI();
     void init(GLFWwindow* window);
-    void render(std::string& modelFilePath, Scene& scene);
+    void render(Scene& scene);
 
     Camera& getCamera() {
         return camera;
@@ -96,9 +78,9 @@ public:
     }
 
 private:
-    RenderMode mode = BASIC;
-    SkyboxLoadMode skyboxMode = SPHEREMAP;
-    RenderingPath renderingPath = FORWARDRENDERING;
+    RenderMode mode = RenderMode::BASIC;
+    SkyboxLoadMode skyboxMode = SkyboxLoadMode::SPHEREMAP;
+    RenderingPath renderingPath = RenderingPath::FORWARD_RENDERING;
 
     Camera camera = Camera(glm::vec3(0.0f, 10.0f, 30.0f));
 

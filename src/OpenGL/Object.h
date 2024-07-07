@@ -10,25 +10,18 @@
 #include <string>
 #include "Geometry.h"
 #include "FrameBuffer.h"
-#include "shader.h"
-#include "camera.h"
-#include "model.h"
-#include "light.h"
-
-struct GeometryModel {
-    std::shared_ptr<Geometry> geometry;
-    std::vector<AssimpModel::Texture> textures;
-};
+#include "Shader.h"
+#include "Camera.h"
+#include "Model.h"
+#include "Light.h"
 
 class Object {
 public:
     Object() = default;
-    Object(const AssimpModel::Model& model);
-    Object(GeometryType geometryType, bool initializeTextures = false, std::string texturePath = "", std::string name = "material.texture_diffuse1");
+    explicit Object(Model& model) : model(model) {}
     virtual ~Object() = default;
 
     void setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
-    void addTexture(std::string name, const char* path);
     void draw(Shader& shader, bool setTexture = false);
 
     const glm::mat4 getModelMatrix() const {
@@ -46,8 +39,7 @@ public:
     friend class GUI;
 
 protected:
-    unsigned int loadTexture(const char *path);
-    std::variant<AssimpModel::Model, GeometryModel> modelVariant;
+    Model model;
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     glm::mat4 viewMatrix {};
