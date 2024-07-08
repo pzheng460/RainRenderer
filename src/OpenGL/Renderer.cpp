@@ -37,11 +37,10 @@ void Renderer::draw(Scene& scene) {
 
 //    // debug depth map 调试深度贴图
 //    reset();
-//    Shader debugDepthQuad(FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.fs").c_str());
 //    debugDepthQuadShaderSetting(debugDepthQuad, shadowMapFrameBuffers[0].textureDepthBuffer->textureID);
 //    Model screenQuadModel(GeometryType::QUAD);
 //    Object screenQuadDebug(screenQuadModel);
-//    screenQuadDebug.draw(debugDepthQuad);
+//    screenQuadDebug.draw(shaderShadowMapDebug);
 
     if (gui->getRenderingPath() == RenderingPath::FORWARD_RENDERING) {
         forwardRendering(scene);
@@ -162,14 +161,13 @@ void Renderer::deferredRendering(Scene &scene) {
 
 void Renderer::gaussianBlur() {
     first_iteration = true;
-    shaderBloom.use();
-    shaderBloom.setInt("image", 0);
 
     for (unsigned int i = 0; i < amount; i++)
     {
         pingPongFrameBuffers[horizontal].bind();
+        shaderBloom.use();
+        shaderBloom.setTexture("image", first_iteration ? intermediateFrameBuffer.textureColorBuffers[1].get() : pingPongFrameBuffers[!horizontal].textureColorBuffers[0].get());
         shaderBloom.setInt("horizontal", horizontal);
-        glBindTexture(GL_TEXTURE_2D, first_iteration ? intermediateFrameBuffer.textureColorBuffers[1]->textureID : pingPongFrameBuffers[!horizontal].textureColorBuffers[0]->textureID);  // bind texture of other framebuffer (or scene if first iteration)
         Model screenQuadModel(GeometryType::QUAD);
         Object screenQuad(screenQuadModel);
         screenQuad.draw(shaderBloom);
