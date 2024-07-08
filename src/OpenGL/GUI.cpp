@@ -98,8 +98,8 @@ void GUI::render(Scene& scene) {
         if (!skyBoxActive) { ImGui::BeginDisabled(); }
         {
             ImGui::Text("Skybox Load Mode");
-            if (ImGui::RadioButton("Cube Map", skyboxMode == SkyboxLoadMode::CUBEMAP)) {
-                skyboxMode = SkyboxLoadMode::CUBEMAP;
+            if (ImGui::RadioButton("Cube Map", skyboxMode == SkyboxLoadMode::CUBE_MAP)) {
+                skyboxMode = SkyboxLoadMode::CUBE_MAP;
                 Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/skybox.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/skybox.fs").c_str());
                 std::vector<std::string> faces =
                         {
@@ -114,8 +114,8 @@ void GUI::render(Scene& scene) {
                 scene.setSkybox(skybox);
             }
             ImGui::SameLine();
-            if (ImGui::RadioButton("Sphere Map", skyboxMode == SkyboxLoadMode::SPHEREMAP)) {
-                skyboxMode = SkyboxLoadMode::SPHEREMAP;
+            if (ImGui::RadioButton("Sphere Map", skyboxMode == SkyboxLoadMode::SPHERE_MAP)) {
+                skyboxMode = SkyboxLoadMode::SPHERE_MAP;
                 Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/background.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/background.fs").c_str());
                 Skybox skybox(skyboxShader, FileSystem::getPath("resources/textures/hdr/newport_loft.hdr"));
                 scene.setSkybox(skybox);
@@ -133,6 +133,10 @@ void GUI::render(Scene& scene) {
         ImGui::Checkbox("Face Culling", &faceCullingActive);
         // Gamma Correction 伽马校正
         ImGui::Checkbox("Gamma Correction", &gammaCorrectionActive);
+        // HDR 高动态范围
+        ImGui::Checkbox("HDR", &HDRActive);
+        // Bloom 泛光
+        ImGui::Checkbox("Bloom", &bloomActive);
 
         if (renderingPath != RenderingPath::FORWARD_RENDERING) { ImGui::BeginDisabled(); }
         {
@@ -140,10 +144,6 @@ void GUI::render(Scene& scene) {
             ImGui::Checkbox("Normal", &normalVisualizationActive);
             // MSAA 抗锯齿
             ImGui::Checkbox("MSAA", &MSAAActive);
-            // HDR 高动态范围
-            ImGui::Checkbox("HDR", &HDRActive);
-            // Bloom 泛光
-            ImGui::Checkbox("Bloom", &bloomActive);
         }
         if (renderingPath != RenderingPath::FORWARD_RENDERING) { ImGui::EndDisabled(); }
 

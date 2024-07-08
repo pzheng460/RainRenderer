@@ -13,8 +13,6 @@
 #include <utility>
 
 #include "FrameBuffer.h"
-#include "MSAAFrameBuffer.h"
-#include "GeometryFrameBuffer.h"
 #include "Shader.h"
 #include "Scene.h"
 #include "GUI.h"
@@ -76,7 +74,8 @@ private:
     bool firstIteration = true;
 
     // Shadow Map
-    Shader simpleDepthShader = Shader(FileSystem::getPath("src/OpenGL/shaders/shadow_mapping_depth.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/shadow_mapping_depth.fs").c_str());
+    Shader ShaderShadowMap = ShaderFactory::createShader(ShaderFactoryType::SHADER_SHADOW_MAP);
+    Shader shaderShadowMapDebug = ShaderFactory::createShader(ShaderFactoryType::SHADER_SHADOW_MAP_DEBUG);
     std::vector<FrameBuffer> shadowMapFrameBuffers;
     const int SHADOW_WIDTH = 2560, SHADOW_HEIGHT = 1440;
 
@@ -84,24 +83,27 @@ private:
     FrameBuffer mainMSAAFrameBuffer = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_MSAA);
     FrameBuffer intermediateFrameBuffer = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_INTERMEDIATE);
 
+    // Normal Visualization
+    Shader shaderNormalVisualization = ShaderFactory::createShader(ShaderFactoryType::SHADER_NORMAL_VISUALIZATION);
+
     // Bloom
-    Shader shaderBlur = Shader(FileSystem::getPath("src/OpenGL/shaders/blur.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/blur.fs").c_str());
+    Shader shaderBloom = ShaderFactory::createShader(ShaderFactoryType::SHADER_BLOOM);
     std::vector<FrameBuffer> pingPongFrameBuffers;
     bool horizontal = true, first_iteration = true;
     unsigned int amount = 10;
 
     // G-Buffer
-    Shader gFrameBufferShader = Shader(FileSystem::getPath("src/OpenGL/shaders/g_buffer.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/g_buffer.fs").c_str());
+    Shader gFrameBufferShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_GEOMETRY);
     FrameBuffer gFrameBuffer = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_GEOMETRY);
 
     // SSAO
     SSAO ssao = SSAO(gui->getCamera(), width, height, gFrameBuffer);
 
     // Deferred lighting
-    Shader deferredLightingShader = Shader(FileSystem::getPath("src/OpenGL/shaders/deferred_shading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/deferred_shading.fs").c_str());
+    Shader deferredLightingShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_DEFERRED_LIGHTING);
 
     // Final
-    Shader finalShader = Shader(FileSystem::getPath("src/OpenGL/shaders/final.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/final.fs").c_str());
+    Shader finalShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_FINAL);
 };
 
-#endif // _RENDERER_H
+#endif // RENDERER_H

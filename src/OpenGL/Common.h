@@ -47,8 +47,8 @@ enum class RenderMode {
 };
 
 enum class SkyboxLoadMode {
-    CUBEMAP,
-    SPHEREMAP
+    CUBE_MAP,
+    SPHERE_MAP
 };
 
 enum class GeometryType {
@@ -80,10 +80,10 @@ enum class TextureFactoryType {
 
 std::string toString(TextureFactoryType textureFactoryType);
 
-constexpr const char* DIFFUSE_NAME = "material.texture_diffuse";
-constexpr const char* SPECULAR_NAME = "material.texture_specular";
-constexpr const char* NORMAL_NAME = "material.texture_normal";
-constexpr const char* HEIGHT_NAME = "material.texture_height";
+constexpr const char* DIFFUSE_NAME = "material.texture_diffuse1";
+constexpr const char* SPECULAR_NAME = "material.texture_specular1";
+constexpr const char* NORMAL_NAME = "material.texture_normal1";
+constexpr const char* HEIGHT_NAME = "material.texture_height1";
 
 constexpr const char* PBR_ALBEDO_NAME = "albedoMap";
 constexpr const char* PBR_NORMAL_NAME = "normalMap";
@@ -95,9 +95,13 @@ constexpr const char* PBR_PREFILTER_NAME = "prefilterMap";
 constexpr const char* PBR_BRDF_LUT_NAME = "brdfLUT";
 
 enum class RenderBufferObjectType {
-    DEPTH_STENCIL,
-    DEPTH,
-    STENCIL
+    RENDER_BUFFER_OBJECT,
+    RENDER_BUFFER_OBJECT_MULTI_SAMPLE
+};
+
+enum class RenderBufferObjectFactoryType {
+    RENDER_BUFFER_OBJECT_DEPTH,
+    RENDER_BUFFER_OBJECT_DEPTH_MULTI_SAMPLE,
 };
 
 enum class FrameBufferFactoryType {
@@ -111,5 +115,37 @@ enum class FrameBufferFactoryType {
 };
 
 std::string toString(FrameBufferFactoryType frameBufferFactoryType);
+
+enum class ShaderFactoryType {
+    SHADER_LIGHT,
+
+    SHADER_SKYBOX_CUBE_MAP,
+    SHADER_SKYBOX_SPHERE_MAP,
+    SHADER_SPHERE_MAP_TO_CUBE_MAP,
+    SHADER_IRRADIANCE_MAP,
+    SHADER_PREFILTER_MAP,
+    SHADER_BRDF_LUT,
+
+    SHADER_SHADOW_MAP,
+    SHADER_SHADOW_MAP_DEBUG,
+
+    SHADER_BASIC,
+    SHADER_PHONG,
+    SHADER_BLINN_PHONG,
+    SHADER_DEPTH_TESTING,
+    SHADER_ENVIRONMENT_MAPPING,
+    SHADER_PBR,
+    SHADER_NORMAL_VISUALIZATION,
+
+    SHADER_BLOOM,
+    SHADER_FINAL,
+
+    SHADER_GEOMETRY,
+    SHADER_DEFERRED_LIGHTING,
+    SHADER_SSAO,
+    SHADER_SSAO_BLUR,
+};
+
+std::string toString(ShaderFactoryType shaderFactoryType);
 
 #endif // COMMON_H

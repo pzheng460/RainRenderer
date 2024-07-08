@@ -42,7 +42,7 @@ int main()
     Scene scene;
 
     // load skybox 加载天空盒
-    if (gui->getSkyboxLoadMode() == SkyboxLoadMode::CUBEMAP) {
+    if (gui->getSkyboxLoadMode() == SkyboxLoadMode::CUBE_MAP) {
         Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/skybox.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/skybox.fs").c_str());
         std::vector<std::string> faces =
                 {
@@ -55,7 +55,7 @@ int main()
                 };
         Skybox skybox(skyboxShader, faces);
         scene.setSkybox(skybox);
-    } else if (gui->getSkyboxLoadMode() == SkyboxLoadMode::SPHEREMAP) {
+    } else if (gui->getSkyboxLoadMode() == SkyboxLoadMode::SPHERE_MAP) {
         Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/background.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/background.fs").c_str());
         Skybox skybox(skyboxShader, FileSystem::getPath("resources/textures/hdr/newport_loft.hdr"));
         scene.setSkybox(skybox);

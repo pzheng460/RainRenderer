@@ -111,7 +111,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     return Mesh(vertices, indices, textures);
 }
 
-std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string variableName) {
+std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& variableName) {
     std::vector<std::shared_ptr<Texture>> textures;
     for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
         aiString str;

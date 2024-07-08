@@ -1,15 +1,15 @@
 #include "RenderBufferObject.h"
 
-void RenderBufferObjectDepth::generateRenderBufferObject(int newWidth, int newHeight) {
+void RenderBufferObject::generateRenderBufferObject(int newWidth, int newHeight) {
     setSize(newWidth, newHeight);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+    glRenderbufferStorage(GL_RENDERBUFFER, internalFormat, width, height);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
-void RenderBufferObjectDepthMultiSample::generateRenderBufferObject(int newWidth, int newHeight) {
+void RenderBufferObjectMultiSample::generateRenderBufferObject(int newWidth, int newHeight) {
     setSize(newWidth, newHeight);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH24_STENCIL8, width, height);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, internalFormat, width, height);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }

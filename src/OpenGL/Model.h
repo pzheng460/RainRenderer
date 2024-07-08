@@ -69,7 +69,7 @@ private:
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 
     // checks all material textures of a given type and loads the textures if they're not loaded yet.
-    std::vector<std::shared_ptr<Texture>> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string variableName);
+    std::vector<std::shared_ptr<Texture>> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& variableName);
 
     std::shared_ptr<Texture> loadTexture2DFromFile(const std::string& filename);
     std::shared_ptr<Texture> loadTexture(const std::string& path, TextureFactoryType textureFactoryType);

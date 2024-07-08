@@ -1,13 +1,14 @@
 #ifndef SSAO_H
 #define SSAO_H
 
+#pragma once
+
 #include <utils/filesystem.h>
 #include <random>
 
 #include "Shader.h"
 #include "Camera.h"
 #include "FrameBuffer.h"
-#include "GeometryFrameBuffer.h"
 #include "Object.h"
 
 class SSAO {
@@ -22,12 +23,16 @@ public:
 
     void ssaoShaderSetting();
     void ssaoBlurShaderSetting();
+
+    FrameBuffer& getSSAOBlurFrameBuffer() {
+        return ssaoBlurFrameBuffer;
+    }
 private:
     int width, height;
     Camera& camera;
     FrameBuffer& gFrameBuffer;
-    Shader ssaoShader = Shader(FileSystem::getPath("src/OpenGL/shaders/ssao.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/ssao.fs").c_str());
-    Shader ssaoBlurShader = Shader(FileSystem::getPath("src/OpenGL/shaders/ssao.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/ssao_blur.fs").c_str());
+    Shader ssaoShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_SSAO);
+    Shader ssaoBlurShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_SSAO_BLUR);
     FrameBuffer ssaoFrameBuffer = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_SSAO);
     FrameBuffer ssaoBlurFrameBuffer = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_SSAO_BLUR);
     std::uniform_real_distribution<GLfloat> randomFloats = std::uniform_real_distribution<GLfloat>(0.0, 1.0); // generates random floats between 0.0 and 1.0

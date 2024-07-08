@@ -30,8 +30,8 @@ void Renderer::draw(Scene& scene) {
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         shadowMapFrameBuffers[i].bind();
         glClear(GL_DEPTH_BUFFER_BIT);
-        shadowMapShaderSetting(simpleDepthShader, scene.lights[i]);
-        scene.draw(simpleDepthShader, gui->IsFloorActive());
+        shadowMapShaderSetting(ShaderShadowMap, scene.lights[i]);
+        scene.draw(ShaderShadowMap, gui->IsFloorActive());
         shadowMapFrameBuffers[i].unbind();
     }
 
@@ -48,6 +48,16 @@ void Renderer::draw(Scene& scene) {
     } else if (gui->getRenderingPath() == RenderingPath::DEFERRED_RENDERING) {
         deferredRendering(scene);
     }
+
+    if (gui->IsBloomActive()) {
+        gaussianBlur();
+    }
+
+    reset();
+    finalShaderSetting(finalShader, intermediateFrameBuffer.textureColorBuffers[0]->textureID, gui->IsHDRActive(), 10.0f, pingPongFrameBuffers[!horizontal].textureColorBuffers[0]->textureID, gui->IsBloomActive());
+    Model screenQuadModel(GeometryType::QUAD);
+    Object screenQuad(screenQuadModel);
+    screenQuad.draw(finalShader);
 }
 
 void Renderer::forwardRendering(Scene& scene) {
@@ -61,49 +71,38 @@ void Renderer::forwardRendering(Scene& scene) {
     }
     // render scene 渲染场景
     if (gui->getMode() == RenderMode::BASIC) {
-        mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs").c_str());
+        mainShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_BASIC);
     } else if (gui->getMode() == RenderMode::PHONG) {
-        mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/phong.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/phong.fs").c_str());
+        mainShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_PHONG);
         phongShaderSetting(mainShader, gui->getCamera(), scene.lights, shadowMapFrameBuffers);
     } else if (gui->getMode() == RenderMode::BLINN_PHONG) {
-        mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/blinn_phong.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/blinn_phong.fs").c_str());
+        mainShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_BLINN_PHONG);
         phongShaderSetting(mainShader, gui->getCamera(), scene.lights, shadowMapFrameBuffers, gui->IsShadowActive());
     } else if (gui->getMode() == RenderMode::DEPTH) {
-        mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/depth_testing.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/depth_testing.fs").c_str());
+        mainShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_DEPTH_TESTING);
     } else if (gui->getMode() == RenderMode::ENVIRONMENT_MAPPING) {
-        mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/environment_mapping.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/environment_mapping.fs").c_str());
+        mainShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_ENVIRONMENT_MAPPING);
         phongShaderSetting(mainShader, gui->getCamera(), scene.lights, shadowMapFrameBuffers);
     } else if (gui->getMode() == RenderMode::PBR) {
-        mainShader = Shader(FileSystem::getPath("src/OpenGL/shaders/pbr.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/pbr.fs").c_str());
+        mainShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_PBR);
         PBRShaderSetting(mainShader, scene.lights, scene.skybox.getIrradianceMap(), scene.skybox.getPrefilterMap(), scene.skybox.getBRDFLUTTexture());
     }
     scene.draw(mainShader, gui->IsFloorActive(), true);
     // render normal visualization 渲染法线可视化
     if (gui->IsNormalVisualizationActive()) {
-        Shader normalShader(FileSystem::getPath("src/OpenGL/shaders/normal_visualization.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.fs").c_str(), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.gs").c_str());
-        scene.draw(normalShader);
+        scene.draw(shaderNormalVisualization);
     }
     // render skybox 渲染天空盒，放在最后渲染保证early-z测试
     if (gui->IsSkyBoxActive()) {
-        if (gui->getSkyboxLoadMode() == SkyboxLoadMode::CUBEMAP) {
+        if (gui->getSkyboxLoadMode() == SkyboxLoadMode::CUBE_MAP) {
             scene.skybox.drawGeometry();
-        } else if (gui->getSkyboxLoadMode() == SkyboxLoadMode::SPHEREMAP) {
+        } else if (gui->getSkyboxLoadMode() == SkyboxLoadMode::SPHERE_MAP) {
             scene.skybox.draw();
         }
     }
     mainMSAAFrameBuffer.unbind();
 
     mainMSAAFrameBuffer.transferFrameBuffer(intermediateFrameBuffer);
-
-    if (gui->IsBloomActive()) {
-        gaussianBlur();
-    }
-
-    reset();
-    finalShaderSetting(finalShader, intermediateFrameBuffer.textureColorBuffers[0]->textureID, gui->IsHDRActive(), 10.0f, pingPongFrameBuffers[!horizontal].textureColorBuffers[0]->textureID, gui->IsBloomActive());
-    Model screenQuadModel(GeometryType::QUAD);
-    Object screenQuad(screenQuadModel);
-    screenQuad.draw(finalShader);
 }
 
 void Renderer::deferredRendering(Scene &scene) {
@@ -120,9 +119,9 @@ void Renderer::deferredRendering(Scene &scene) {
     scene.draw(gFrameBufferShader, gui->IsFloorActive(), true);
     // render skybox 渲染天空盒，放在最后渲染保证early-z测试
     if (gui->IsSkyBoxActive()) {
-        if (gui->getSkyboxLoadMode() == SkyboxLoadMode::CUBEMAP) {
+        if (gui->getSkyboxLoadMode() == SkyboxLoadMode::CUBE_MAP) {
             scene.skybox.drawGeometry();
-        } else if (gui->getSkyboxLoadMode() == SkyboxLoadMode::SPHEREMAP) {
+        } else if (gui->getSkyboxLoadMode() == SkyboxLoadMode::SPHERE_MAP) {
             scene.skybox.draw();
         }
     }
@@ -132,6 +131,10 @@ void Renderer::deferredRendering(Scene &scene) {
     if (firstIteration || gui->IsSSAOActive()) {
         ssaoColorBufferBlur = ssao.draw();
     }
+
+    ssao.getSSAOBlurFrameBuffer().transferFrameBuffer(intermediateFrameBuffer);
+    intermediateFrameBuffer.bind();
+    reset();
 
     if (firstIteration) firstIteration = false;
     deferredLightingShaderSetting(deferredLightingShader,
@@ -145,21 +148,23 @@ void Renderer::deferredRendering(Scene &scene) {
     Model screenQuadModel(GeometryType::QUAD);
     Object screenQuad(screenQuadModel);
     screenQuad.draw(deferredLightingShader);
+
+    intermediateFrameBuffer.unbind();
 }
 
 void Renderer::gaussianBlur() {
     first_iteration = true;
-    shaderBlur.use();
-    shaderBlur.setInt("image", 0);
+    shaderBloom.use();
+    shaderBloom.setInt("image", 0);
 
     for (unsigned int i = 0; i < amount; i++)
     {
         pingPongFrameBuffers[horizontal].bind();
-        shaderBlur.setInt("horizontal", horizontal);
+        shaderBloom.setInt("horizontal", horizontal);
         glBindTexture(GL_TEXTURE_2D, first_iteration ? intermediateFrameBuffer.textureColorBuffers[1]->textureID : pingPongFrameBuffers[!horizontal].textureColorBuffers[0]->textureID);  // bind texture of other framebuffer (or scene if first iteration)
         Model screenQuadModel(GeometryType::QUAD);
         Object screenQuad(screenQuadModel);
-        screenQuad.draw(shaderBlur);
+        screenQuad.draw(shaderBloom);
         horizontal = !horizontal;
         if (first_iteration)
             first_iteration = false;

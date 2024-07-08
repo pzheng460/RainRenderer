@@ -30,3 +30,38 @@ std::string toString(FrameBufferFactoryType frameBufferFactoryType) {
             return "UNKNOWN";
     }
 }
+
+std::string toString(ShaderFactoryType shaderFactoryType) {
+    switch (shaderFactoryType) {
+        CASE_STR(ShaderFactoryType::SHADER_LIGHT);
+
+        CASE_STR(ShaderFactoryType::SHADER_SKYBOX_CUBE_MAP);
+        CASE_STR(ShaderFactoryType::SHADER_SKYBOX_SPHERE_MAP);
+        CASE_STR(ShaderFactoryType::SHADER_SPHERE_MAP_TO_CUBE_MAP);
+        CASE_STR(ShaderFactoryType::SHADER_IRRADIANCE_MAP);
+        CASE_STR(ShaderFactoryType::SHADER_PREFILTER_MAP);
+        CASE_STR(ShaderFactoryType::SHADER_BRDF_LUT);
+
+        CASE_STR(ShaderFactoryType::SHADER_SHADOW_MAP);
+        CASE_STR(ShaderFactoryType::SHADER_SHADOW_MAP_DEBUG);
+
+        CASE_STR(ShaderFactoryType::SHADER_BASIC);
+        CASE_STR(ShaderFactoryType::SHADER_PHONG);
+        CASE_STR(ShaderFactoryType::SHADER_BLINN_PHONG);
+        CASE_STR(ShaderFactoryType::SHADER_DEPTH_TESTING);
+        CASE_STR(ShaderFactoryType::SHADER_ENVIRONMENT_MAPPING);
+        CASE_STR(ShaderFactoryType::SHADER_PBR);
+        CASE_STR(ShaderFactoryType::SHADER_NORMAL_VISUALIZATION);
+
+        CASE_STR(ShaderFactoryType::SHADER_BLOOM);
+        CASE_STR(ShaderFactoryType::SHADER_FINAL);
+
+        CASE_STR(ShaderFactoryType::SHADER_GEOMETRY);
+        CASE_STR(ShaderFactoryType::SHADER_DEFERRED_LIGHTING);
+        CASE_STR(ShaderFactoryType::SHADER_SSAO);
+        CASE_STR(ShaderFactoryType::SHADER_SSAO_BLUR);
+
+        default:
+            return "UNKNOWN";
+    }
+}

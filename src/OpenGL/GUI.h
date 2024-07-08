@@ -79,7 +79,7 @@ public:
 
 private:
     RenderMode mode = RenderMode::BASIC;
-    SkyboxLoadMode skyboxMode = SkyboxLoadMode::SPHEREMAP;
+    SkyboxLoadMode skyboxMode = SkyboxLoadMode::SPHERE_MAP;
     RenderingPath renderingPath = RenderingPath::FORWARD_RENDERING;
 
     Camera camera = Camera(glm::vec3(0.0f, 10.0f, 30.0f));

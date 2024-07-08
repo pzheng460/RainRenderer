@@ -56,6 +56,7 @@ public:
 
     std::string path;
     TextureType textureType;
+    TextureFactoryType textureFactoryType;
     std::string variableName;
 };
 
@@ -162,7 +163,7 @@ public:
         } else {
             std::cerr << "TextureFactoryType not found!" << std::endl;
         }
-
+        if (texture != nullptr) texture->textureFactoryType = textureFactoryType;
         return texture;
     }
 };
