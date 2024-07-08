@@ -53,7 +53,7 @@ void Renderer::draw(Scene& scene) {
         gaussianBlur();
     }
 
-    reset();
+//    reset();
     finalShaderSetting(finalShader, intermediateFrameBuffer.textureColorBuffers[0]->textureID, gui->IsHDRActive(), 10.0f, pingPongFrameBuffers[!horizontal].textureColorBuffers[0]->textureID, gui->IsBloomActive());
     Model screenQuadModel(GeometryType::QUAD);
     Object screenQuad(screenQuadModel);
@@ -101,30 +101,17 @@ void Renderer::forwardRendering(Scene& scene) {
         }
     }
     mainMSAAFrameBuffer.unbind();
-
-    mainMSAAFrameBuffer.transferFrameBuffer(intermediateFrameBuffer);
+    for (int i = 0; i < intermediateFrameBuffer.numOfColorTextureAttachments; ++i) {
+        mainMSAAFrameBuffer.transferFrameBuffer(intermediateFrameBuffer, GL_COLOR_BUFFER_BIT, i, i);
+    }
 }
 
 void Renderer::deferredRendering(Scene &scene) {
     gFrameBuffer.bind();
     reset();
-    // render lights 渲染光源
-    if (gui->IsLightActive()) {
-        for (int i = 0; i < scene.lights.size(); ++i) {
-            scene.lights[i].draw();
-        }
-    }
     // render scene 渲染场景
     geometryBufferShaderSetting(gFrameBufferShader, false);
     scene.draw(gFrameBufferShader, gui->IsFloorActive(), true);
-    // render skybox 渲染天空盒，放在最后渲染保证early-z测试
-    if (gui->IsSkyBoxActive()) {
-        if (gui->getSkyboxLoadMode() == SkyboxLoadMode::CUBE_MAP) {
-            scene.skybox.drawGeometry();
-        } else if (gui->getSkyboxLoadMode() == SkyboxLoadMode::SPHERE_MAP) {
-            scene.skybox.draw();
-        }
-    }
     gFrameBuffer.unbind();
 
     unsigned int ssaoColorBufferBlur;
@@ -132,9 +119,12 @@ void Renderer::deferredRendering(Scene &scene) {
         ssaoColorBufferBlur = ssao.draw();
     }
 
-    ssao.getSSAOBlurFrameBuffer().transferFrameBuffer(intermediateFrameBuffer);
+//    ssao.getSSAOBlurFrameBuffer().transferFrameBuffer(intermediateFrameBuffer, GL_COLOR_BUFFER_BIT, 0, 0);
     intermediateFrameBuffer.bind();
-    reset();
+    // 指定要清空的颜色缓冲区
+    GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+    glDrawBuffers(4, drawBuffers);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     if (firstIteration) firstIteration = false;
     deferredLightingShaderSetting(deferredLightingShader,
@@ -145,10 +135,28 @@ void Renderer::deferredRendering(Scene &scene) {
                                   gui->getCamera(),
                                   scene.lights,
                                   gui->IsSSAOActive());
+
     Model screenQuadModel(GeometryType::QUAD);
     Object screenQuad(screenQuadModel);
     screenQuad.draw(deferredLightingShader);
 
+    gFrameBuffer.transferFrameBuffer(intermediateFrameBuffer, GL_DEPTH_BUFFER_BIT);
+
+    intermediateFrameBuffer.bind();
+    // render lights 渲染光源
+    if (gui->IsLightActive()) {
+        for (int i = 0; i < scene.lights.size(); ++i) {
+            scene.lights[i].draw();
+        }
+    }
+    // render skybox 渲染天空盒，放在最后渲染保证early-z测试
+    if (gui->IsSkyBoxActive()) {
+        if (gui->getSkyboxLoadMode() == SkyboxLoadMode::CUBE_MAP) {
+            scene.skybox.drawGeometry();
+        } else if (gui->getSkyboxLoadMode() == SkyboxLoadMode::SPHERE_MAP) {
+            scene.skybox.draw();
+        }
+    }
     intermediateFrameBuffer.unbind();
 }
 

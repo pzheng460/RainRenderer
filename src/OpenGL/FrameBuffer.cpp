@@ -89,22 +89,25 @@ void FrameBuffer::generateFrameBuffer(int newWidth, int newHeight) {
     unbind();
 }
 
-void FrameBuffer::transferFrameBuffer(FrameBuffer& targetFrameBuffer) {
+void FrameBuffer::transferFrameBuffer(FrameBuffer& dstFrameBuffer, GLenum target, int srcIndex, int dstIndex) {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetFrameBuffer.framebuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFrameBuffer.framebuffer);
 
-//    if (numOfColorTextureAttachments != targetFrameBuffer.numOfColorTextureAttachments) {
-//        std::cerr << "numOfColorTextureAttachments not equal" << std::endl;
-//        std::cout << "numOfColorTextureAttachments: " << numOfColorTextureAttachments << std::endl;
-//        std::cout << "targetFrameBuffer.numOfColorTextureAttachments: " << targetFrameBuffer.numOfColorTextureAttachments << std::endl;
-//    }
-//    int transferNumOfColorTextureAttachments = std::min(numOfColorTextureAttachments, targetFrameBuffer.numOfColorTextureAttachments);
-//    for (int i = 0; i < transferNumOfColorTextureAttachments; i++) {
-//        glReadBuffer(GL_COLOR_ATTACHMENT0 + i);
-//        glDrawBuffer(GL_COLOR_ATTACHMENT0 + i);
-//        glBlitFramebuffer(0, 0, width, height, 0, 0, targetFrameBuffer.width, targetFrameBuffer.height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-//    }
-    glBlitFramebuffer(0, 0, width, height, 0, 0, targetFrameBuffer.width, targetFrameBuffer.height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    if (target == GL_COLOR_BUFFER_BIT)
+    {
+        glReadBuffer(GL_COLOR_ATTACHMENT0 + srcIndex);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0 + dstIndex);
+        glBlitFramebuffer(0, 0, width, height, 0, 0, dstFrameBuffer.width, dstFrameBuffer.height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    }
+    else if (target == GL_DEPTH_BUFFER_BIT)
+    {
+        glBlitFramebuffer(0, 0, width, height, 0, 0, dstFrameBuffer.width, dstFrameBuffer.height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    }
+    else
+    {
+        std::cerr << "FrameBuffer transferFrameBuffer target not found" << std::endl;
+    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -127,7 +130,7 @@ FrameBuffer FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType frameBu
     }
     else if (frameBufferFactoryType == FrameBufferFactoryType::FRAME_BUFFER_INTERMEDIATE)
     {
-        frameBuffer = FrameBuffer(2, 0, 0);
+        frameBuffer = FrameBuffer(2, 0, 1);
     }
     else if (frameBufferFactoryType == FrameBufferFactoryType::FRAME_BUFFER_PING_PONG)
     {

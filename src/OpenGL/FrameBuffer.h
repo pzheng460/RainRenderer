@@ -73,7 +73,7 @@ public:
 
     bool checkComplete();
 
-    void transferFrameBuffer(FrameBuffer& targetFrameBuffer);
+    void transferFrameBuffer(FrameBuffer& dstFrameBuffer, GLenum target, int srcIndex = 0, int dstIndex = 0);
 
     unsigned int framebuffer = 0;
     int numOfColorTextureAttachments;
