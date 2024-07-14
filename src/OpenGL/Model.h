@@ -55,9 +55,9 @@ public:
     }
 
     // draws the model, and thus all its meshes
-    void draw(Shader& shader, bool setTexture = false) {
+    void draw(Shader* shader = nullptr) {
         for (unsigned int i = 0; i < meshes.size(); i++)
-            meshes[i].draw(shader, setTexture);
+            meshes[i].draw(shader);
     }
 
 private:

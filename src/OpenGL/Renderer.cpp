@@ -1,18 +1,107 @@
 #include "Renderer.h"
-#include "shaderSetting.h"
 #include "Common.h"
 
-void Renderer::init() {
-    for (auto& shadowMapFrameBuffer : shadowMapFrameBuffers) {
-        shadowMapFrameBuffer.generateFrameBuffer(SHADOW_WIDTH, SHADOW_HEIGHT);
+Renderer::Renderer(int width, int height, GUI& gui, Scene& scene)
+        : gui(gui)
+        , width(width)
+        , height(height)
+        , scene(scene) {
+    auto frameBufferDefaultPtr = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_DEFAULT);
+    frameBufferDefault = std::shared_ptr<FrameBuffer>(frameBufferDefaultPtr);
+    auto frameBufferMSAAPtr = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_MSAA);
+    frameBufferMSAA = std::shared_ptr<FrameBuffer>(frameBufferMSAAPtr);
+    auto frameBufferIntermediatePtr = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_INTERMEDIATE);
+    frameBufferIntermediate = std::shared_ptr<FrameBuffer>(frameBufferIntermediatePtr);
+    auto frameBufferGeometryPtr = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_GEOMETRY);
+    frameBufferGeometry = std::shared_ptr<FrameBuffer>(frameBufferGeometryPtr);
+    auto frameBufferSSAOPtr = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_SSAO);
+    frameBufferSSAO = std::shared_ptr<FrameBuffer>(frameBufferSSAOPtr);
+    auto frameBufferSSAOBlurPtr = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_SSAO_BLUR);
+    frameBufferSSAOBlur = std::shared_ptr<FrameBuffer>(frameBufferSSAOBlurPtr);
+    for (int i = 0; i < scene.lights.size(); ++i) {
+        frameBufferShadowMaps.emplace_back(FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_SHADOW_MAP));
     }
-    mainMSAAFrameBuffer.generateFrameBuffer(width, height);
-    intermediateFrameBuffer.generateFrameBuffer(width, height);
     for (int i = 0; i < 2; ++i) {
-        pingPongFrameBuffers[i].generateFrameBuffer(width, height);
+        frameBufferBlooms.emplace_back(FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_PING_PONG));
     }
-    gFrameBuffer.generateFrameBuffer(width, height);
-    ssao.reset(width, height);
+
+    auto shaderLightPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_LIGHT);
+    shaderLight = std::shared_ptr<Shader>(shaderLightPtr);
+    auto shaderSkyboxCubeMapPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_SKYBOX_CUBE_MAP);
+    shaderSkyboxCubeMap = std::shared_ptr<Shader>(shaderSkyboxCubeMapPtr);
+    auto shaderSkyboxSphereMapPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_SKYBOX_SPHERE_MAP);
+    shaderSkyboxSphereMap = std::shared_ptr<Shader>(shaderSkyboxSphereMapPtr);
+    auto shaderSkyboxSphereMapToCubeMapPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_SPHERE_MAP_TO_CUBE_MAP);
+    shaderSkyboxSphereMapToCubeMap = std::shared_ptr<Shader>(shaderSkyboxSphereMapToCubeMapPtr);
+    auto shaderIrradiancePtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_IRRADIANCE_MAP);
+    shaderIrradiance = std::shared_ptr<Shader>(shaderIrradiancePtr);
+    auto shaderPrefilterPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_PREFILTER_MAP);
+    shaderPrefilter = std::shared_ptr<Shader>(shaderPrefilterPtr);
+    auto shaderBRDFLUTPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_BRDF_LUT);
+    shaderBRDFLUT = std::shared_ptr<Shader>(shaderBRDFLUTPtr);
+    auto shaderShadowMapPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_SHADOW_MAP);
+    shaderShadowMap = std::shared_ptr<Shader>(shaderShadowMapPtr);
+    auto shaderShadowMapDebugPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_SHADOW_MAP_DEBUG);
+    shaderShadowMapDebug = std::shared_ptr<Shader>(shaderShadowMapDebugPtr);
+    auto shaderBasicPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_BASIC);
+    shaderBasic = std::shared_ptr<Shader>(shaderBasicPtr);
+    auto shaderPhongPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_PHONG);
+    shaderPhong = std::shared_ptr<Shader>(shaderPhongPtr);
+    auto shaderBlinnPhongPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_BLINN_PHONG);
+    shaderBlinnPhong = std::shared_ptr<Shader>(shaderBlinnPhongPtr);
+    auto shaderNormalVisualizationPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_NORMAL_VISUALIZATION);
+    shaderNormalVisualization = std::shared_ptr<Shader>(shaderNormalVisualizationPtr);
+    auto shaderBloomPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_BLOOM);
+    shaderBloom = std::shared_ptr<Shader>(shaderBloomPtr);
+    auto shaderGeometryPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_GEOMETRY);
+    shaderGeometry = std::shared_ptr<Shader>(shaderGeometryPtr);
+    auto shaderSSAOPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_SSAO);
+    shaderSSAO = std::shared_ptr<Shader>(shaderSSAOPtr);
+    auto shaderSSAOBlurPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_SSAO_BLUR);
+    shaderSSAOBlur = std::shared_ptr<Shader>(shaderSSAOBlurPtr);
+    auto shaderDeferredLightingPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_DEFERRED_LIGHTING);
+    shaderDeferredLighting = std::shared_ptr<Shader>(shaderDeferredLightingPtr);
+    auto shaderPostProcessingPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_POST_PROCESSING);
+    shaderPostProcessing = std::shared_ptr<Shader>(shaderPostProcessingPtr);
+
+    Model screenQuadModel(GeometryType::QUAD);
+    screenQuad = std::make_unique<Object>(screenQuadModel);
+
+    setSize(width, height);
+    init();
+}
+
+void Renderer::setSize(int newWidth, int newHeight) {
+    this->width = newWidth;
+    this->height = newHeight;
+
+    frameBufferDefault->width = width;
+    frameBufferDefault->height = height;
+    for (auto& shadowMapFrameBuffer : frameBufferShadowMaps) {
+        shadowMapFrameBuffer->setSize(SHADOW_WIDTH, SHADOW_HEIGHT);
+    }
+    frameBufferMSAA->setSize(width, height);
+    frameBufferIntermediate->setSize(width, height);
+    for (int i = 0; i < 2; ++i) {
+        frameBufferBlooms[i]->setSize(width, height);
+    }
+    frameBufferGeometry->setSize(width, height);
+    frameBufferSSAO->setSize(width, height);
+    frameBufferSSAOBlur->setSize(width, height);
+}
+
+void Renderer::init() {
+    for (auto& frameBufferShadowMap : frameBufferShadowMaps) {
+        frameBufferShadowMap->init();
+    }
+    frameBufferMSAA->init();
+    frameBufferIntermediate->init();
+    for (int i = 0; i < 2; ++i) {
+        frameBufferBlooms[i]->init();
+    }
+    frameBufferGeometry->init();
+    frameBufferSSAO->init();
+    frameBufferSSAOBlur->init();
 }
 
 void Renderer::reset() {
@@ -20,166 +109,117 @@ void Renderer::reset() {
     glViewport(0, 0, width, height);
 }
 
-void Renderer::draw(Scene& scene) {
+void Renderer::draw() {
     MSAA();
     faceCulling();
     gammaCorrection();
 
-    // render shadow map 渲染阴影贴图
-    for (int i = 0; i < scene.lights.size(); ++i) {
-        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-        shadowMapFrameBuffers[i].bind();
-        glClear(GL_DEPTH_BUFFER_BIT);
-        shadowMapShaderSetting(ShaderShadowMap, scene.lights[i]);
-        scene.draw(ShaderShadowMap, gui->IsFloorActive());
-        shadowMapFrameBuffers[i].unbind();
+    renderShadowMap();
+
+//    renderShadowMapDebug();
+
+    if (gui.renderingPath == RenderingPath::FORWARD_RENDERING) {
+        forwardRendering();
+    } else if (gui.renderingPath == RenderingPath::DEFERRED_RENDERING) {
+        deferredRendering();
     }
 
-//    // debug depth map 调试深度贴图
-//    reset();
-//    debugDepthQuadShaderSetting(debugDepthQuad, shadowMapFrameBuffers[0].textureDepthBuffer->textureID);
-//    Model screenQuadModel(GeometryType::QUAD);
-//    Object screenQuadDebug(screenQuadModel);
-//    screenQuadDebug.draw(shaderShadowMapDebug);
-
-    if (gui->getRenderingPath() == RenderingPath::FORWARD_RENDERING) {
-        forwardRendering(scene);
-    } else if (gui->getRenderingPath() == RenderingPath::DEFERRED_RENDERING) {
-        deferredRendering(scene);
+    if (gui.bloomActive) {
+        renderBloom();
     }
 
-    if (gui->IsBloomActive()) {
-        gaussianBlur();
-    }
-
-//    reset();
-    finalShaderSetting(finalShader, intermediateFrameBuffer.textureColorBuffers[0]->textureID, gui->IsHDRActive(), 10.0f, pingPongFrameBuffers[!horizontal].textureColorBuffers[0]->textureID, gui->IsBloomActive());
-    Model screenQuadModel(GeometryType::QUAD);
-    Object screenQuad(screenQuadModel);
-    screenQuad.draw(finalShader);
+    renderPostPossing();
 }
 
-void Renderer::forwardRendering(Scene& scene) {
-    mainMSAAFrameBuffer.bind();
-    reset();
-    // render lights 渲染光源
-    if (gui->IsLightActive()) {
-        for (int i = 0; i < scene.lights.size(); ++i) {
-            scene.lights[i].draw();
-        }
-    }
+void Renderer::forwardRendering() {
     // render scene 渲染场景
-    if (gui->getMode() == RenderMode::BASIC) {
-        mainShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_BASIC);
-    } else if (gui->getMode() == RenderMode::PHONG) {
-        mainShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_PHONG);
-        phongShaderSetting(mainShader, gui->getCamera(), scene.lights, shadowMapFrameBuffers);
-    } else if (gui->getMode() == RenderMode::BLINN_PHONG) {
-        mainShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_BLINN_PHONG);
-        phongShaderSetting(mainShader, gui->getCamera(), scene.lights, shadowMapFrameBuffers, gui->IsShadowActive());
-    } else if (gui->getMode() == RenderMode::DEPTH) {
-        mainShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_DEPTH_TESTING);
-    } else if (gui->getMode() == RenderMode::ENVIRONMENT_MAPPING) {
-        mainShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_ENVIRONMENT_MAPPING);
-        phongShaderSetting(mainShader, gui->getCamera(), scene.lights, shadowMapFrameBuffers);
-    } else if (gui->getMode() == RenderMode::PBR) {
-        mainShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_PBR);
-        PBRShaderSetting(mainShader, scene.lights, scene.skybox.getIrradianceMap(), scene.skybox.getPrefilterMap(), scene.skybox.getBRDFLUTTexture());
-    }
-    scene.draw(mainShader, gui->IsFloorActive(), true);
-    // render normal visualization 渲染法线可视化
-    if (gui->IsNormalVisualizationActive()) {
-        scene.draw(shaderNormalVisualization);
-    }
-    // render skybox 渲染天空盒，放在最后渲染保证early-z测试
-    if (gui->IsSkyBoxActive()) {
-        if (gui->getSkyboxLoadMode() == SkyboxLoadMode::CUBE_MAP) {
-            scene.skybox.drawGeometry();
-        } else if (gui->getSkyboxLoadMode() == SkyboxLoadMode::SPHERE_MAP) {
-            scene.skybox.draw();
-        }
-    }
-    mainMSAAFrameBuffer.unbind();
-    for (int i = 0; i < intermediateFrameBuffer.numOfColorTextureAttachments; ++i) {
-        mainMSAAFrameBuffer.transferFrameBuffer(intermediateFrameBuffer, GL_COLOR_BUFFER_BIT, i, i);
-    }
-}
-
-void Renderer::deferredRendering(Scene &scene) {
-    gFrameBuffer.bind();
-    reset();
-    // render scene 渲染场景
-    geometryBufferShaderSetting(gFrameBufferShader, false);
-    scene.draw(gFrameBufferShader, gui->IsFloorActive(), true);
-    gFrameBuffer.unbind();
-
-    unsigned int ssaoColorBufferBlur;
-    if (firstIteration || gui->IsSSAOActive()) {
-        ssaoColorBufferBlur = ssao.draw();
-    }
-
-//    ssao.getSSAOBlurFrameBuffer().transferFrameBuffer(intermediateFrameBuffer, GL_COLOR_BUFFER_BIT, 0, 0);
-    intermediateFrameBuffer.bind();
-    // 指定要清空的颜色缓冲区
-    GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
-    glDrawBuffers(4, drawBuffers);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    if (firstIteration) firstIteration = false;
-    deferredLightingShaderSetting(deferredLightingShader,
-                                  gFrameBuffer.textureColorBuffers[0]->textureID,
-                                  gFrameBuffer.textureColorBuffers[1]->textureID,
-                                  gFrameBuffer.textureColorBuffers[2]->textureID,
-                                  ssaoColorBufferBlur,
-                                  gui->getCamera(),
-                                  scene.lights,
-                                  gui->IsSSAOActive());
-
-    Model screenQuadModel(GeometryType::QUAD);
-    Object screenQuad(screenQuadModel);
-    screenQuad.draw(deferredLightingShader);
-
-    gFrameBuffer.transferFrameBuffer(intermediateFrameBuffer, GL_DEPTH_BUFFER_BIT);
-
-    intermediateFrameBuffer.bind();
-    // render lights 渲染光源
-    if (gui->IsLightActive()) {
-        for (int i = 0; i < scene.lights.size(); ++i) {
-            scene.lights[i].draw();
-        }
-    }
-    // render skybox 渲染天空盒，放在最后渲染保证early-z测试
-    if (gui->IsSkyBoxActive()) {
-        if (gui->getSkyboxLoadMode() == SkyboxLoadMode::CUBE_MAP) {
-            scene.skybox.drawGeometry();
-        } else if (gui->getSkyboxLoadMode() == SkyboxLoadMode::SPHERE_MAP) {
-            scene.skybox.draw();
-        }
-    }
-    intermediateFrameBuffer.unbind();
-}
-
-void Renderer::gaussianBlur() {
-    first_iteration = true;
-
-    for (unsigned int i = 0; i < amount; i++)
+    if (gui.mode == RenderMode::BASIC)
     {
-        pingPongFrameBuffers[horizontal].bind();
-        shaderBloom.use();
-        shaderBloom.setTexture("image", first_iteration ? intermediateFrameBuffer.textureColorBuffers[1].get() : pingPongFrameBuffers[!horizontal].textureColorBuffers[0].get());
-        shaderBloom.setInt("horizontal", horizontal);
-        Model screenQuadModel(GeometryType::QUAD);
-        Object screenQuad(screenQuadModel);
-        screenQuad.draw(shaderBloom);
-        horizontal = !horizontal;
-        if (first_iteration)
-            first_iteration = false;
-        pingPongFrameBuffers[horizontal].unbind();
+        renderBasic();
     }
+    else if (gui.mode == RenderMode::PHONG)
+    {
+        renderPhong();
+    }
+    else if (gui.mode == RenderMode::BLINN_PHONG)
+    {
+        renderBlinnPhong();
+    }
+    else if (gui.mode == RenderMode::DEPTH)
+    {
+        renderDepthTesting();
+    }
+    else if (gui.mode == RenderMode::ENVIRONMENT_MAPPING)
+    {
+        renderEnvironmentMapping();
+    }
+    else if (gui.mode == RenderMode::PBR)
+    {
+        renderPBR();
+    }
+    else
+    {
+        std::cout << "Unknown render mode! Change to Basic mode" << std::endl;
+        renderBasic();
+    }
+    frameBufferMSAA->bind();
+    // render lights 渲染光源
+    if (gui.lightActive) {
+        renderLight();
+    }
+    frameBufferMSAA->unbind();
+
+    // render normal visualization 渲染法线可视化
+    if (gui.normalVisualizationActive) {
+        renderNormalVisualization();
+    }
+
+//    // render skybox 渲染天空盒，放在最后渲染保证early-z测试
+//    frameBufferMSAA->bind();
+//    if (gui.skyBoxActive) {
+//        if (gui.skyboxMode == SkyboxLoadMode::CUBE_MAP) {
+//            scene.skybox.drawGeometry();
+//        } else if (gui.skyboxMode == SkyboxLoadMode::SPHERE_MAP) {
+//            scene.skybox.draw();
+//        }
+//    }
+//    frameBufferMSAA->unbind();
+
+    for (int i = 0; i < frameBufferIntermediate->numOfColorTextureAttachments; ++i) {
+        frameBufferMSAA->transferFrameBuffer(*frameBufferIntermediate, GL_COLOR_BUFFER_BIT, i, i);
+    }
+}
+
+void Renderer::deferredRendering() {
+    renderGeometry();
+
+    if (gui.SSAOActive) {
+        renderSSAO();
+        renderSSAOBlur();
+    }
+
+    renderDeferredLighting();
+
+    frameBufferGeometry->transferFrameBuffer(*frameBufferIntermediate, GL_DEPTH_BUFFER_BIT);
+
+    frameBufferIntermediate->bind();
+    // render lights 渲染光源
+    if (gui.lightActive) {
+        renderLight();
+    }
+//    // render skybox 渲染天空盒，放在最后渲染保证early-z测试
+//    if (gui.skyBoxActive) {
+//        if (gui.skyboxMode == SkyboxLoadMode::CUBE_MAP) {
+//            scene.skybox.drawGeometry();
+//        } else if (gui.skyboxMode == SkyboxLoadMode::SPHERE_MAP) {
+//            scene.skybox.draw();
+//        }
+//    }
+    frameBufferIntermediate->unbind();
 }
 
 void Renderer::faceCulling() const {
-    if (gui->IsFaceCullingActive()) {
+    if (gui.faceCullingActive) {
         glEnable(GL_CULL_FACE); // enable face culling 启用面剔除
         glCullFace(GL_BACK); // cull back face 剔除背面
         glFrontFace(GL_CCW); // GL_CCW for counter clock-wise 逆时针
@@ -189,7 +229,7 @@ void Renderer::faceCulling() const {
 }
 
 void Renderer::MSAA() const {
-    if (gui->IsMSAAActive()) {
+    if (gui.MSAAActive) {
         glEnable(GL_MULTISAMPLE);
     } else {
         glDisable(GL_MULTISAMPLE);
@@ -197,7 +237,7 @@ void Renderer::MSAA() const {
 }
 
 void Renderer::gammaCorrection() const {
-    if (gui->IsGammaCorrectionActive()) {
+    if (gui.gammaCorrectionActive) {
         glEnable(GL_FRAMEBUFFER_SRGB);
     } else {
         glDisable(GL_FRAMEBUFFER_SRGB);

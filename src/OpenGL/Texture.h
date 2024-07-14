@@ -23,11 +23,8 @@ public:
     }
 
     virtual void specifyTexture(GLvoid* data) = 0;
-    void generateTexture(int newWidth, int newHeight, GLvoid* data);
-    void setSize(int newWidth, int newHeight) {
-        this->width = newWidth;
-        this->height = newHeight;
-    }
+    void init(GLvoid* data);
+    void setSize(int newWidth, int newHeight);
     void setBorderColor(float r, float g, float b, float a) {
         borderColor[0] = r;
         borderColor[1] = g;

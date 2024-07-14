@@ -9,7 +9,7 @@
 
 class MainWindow {
 public:
-    MainWindow(unsigned int width, unsigned int height, const std::string& title);
+    explicit MainWindow(unsigned int width, unsigned int height, const std::string& title);
     ~MainWindow();
 
     bool init();
@@ -24,28 +24,32 @@ public:
     static void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
     static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-    // GUI
-    static std::shared_ptr<GUI> gui;
-    // control
-    static bool firstMouse;
-    // camera
-    static float lastX;
-    static float lastY;
-
     GLFWwindow* getGLFWwindow() const {
         return window;
     }
 
+    // GUI
+    static std::shared_ptr<GUI> gui;
+
+    // camera
+    static std::shared_ptr<Camera> camera;
 private:
     // window settings
     int width;
     int height;
     std::string title;
-    GLFWwindow* window;
+    GLFWwindow* window = nullptr;
 
     // timing
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
+
+    // control
+    static bool firstMouse;
+    // screen
+    static float lastX;
+    static float lastY;
+
 };
 
 #endif // WINDOW_H

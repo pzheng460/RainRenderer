@@ -52,8 +52,12 @@ public:
     }
 
     // returns the view matrix calculated using Euler Angles and the LookAt Matrix
-    glm::mat4 GetViewMatrix() {
+    auto getViewMatrix() const {
         return glm::lookAt(Position, Position + Front, Up);
+    }
+
+    auto getProjectionMatrix(int scrWidth, int scrHeight) const {
+        return glm::perspective(glm::radians(Zoom), static_cast<float>(scrWidth) / static_cast<float>(scrHeight), 0.1f, 100.0f);
     }
 
     // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)

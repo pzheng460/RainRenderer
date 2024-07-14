@@ -269,7 +269,7 @@ void ModelMesh::createVAO() {
 
 void ModelMesh::draw() {
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 
     // always good practice to set everything back to defaults once configured.
@@ -278,17 +278,28 @@ void ModelMesh::draw() {
 
 Geometry* GeometryFactory::createGeometry(GeometryType geometryType) {
     Geometry* geometry = nullptr;
-    if (geometryType == GeometryType::SPHERE) {
+    if (geometryType == GeometryType::SPHERE)
+    {
         geometry = new Sphere();
-    } else if (geometryType == GeometryType::CUBE) {
+    }
+    else if (geometryType == GeometryType::CUBE)
+    {
         geometry = new Cube();
-    } else if (geometryType == GeometryType::QUAD) {
+    }
+    else if (geometryType == GeometryType::QUAD)
+    {
         geometry = new Quad();
-    } else if (geometryType == GeometryType::PLANE) {
+    }
+    else if (geometryType == GeometryType::PLANE)
+    {
         geometry = new Plane();
-    } else if (geometryType == GeometryType::MODEL_MESH) {
+    }
+    else if (geometryType == GeometryType::MODEL_MESH)
+    {
         geometry = new ModelMesh();
-    } else {
+    }
+    else
+    {
         std::cerr << "Error: Geometry type not supported." << std::endl;
     }
     return geometry;

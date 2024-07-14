@@ -1,8 +1,6 @@
 #include "Texture.h"
 
-void Texture::generateTexture(int newWidth, int newHeight, GLvoid *data) {
-    setSize(newWidth, newHeight);
-
+void Texture::init(GLvoid *data) {
     glBindTexture(target, textureID);
 
     specifyTexture(data);
@@ -20,6 +18,11 @@ void Texture::generateTexture(int newWidth, int newHeight, GLvoid *data) {
     glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, borderColor);
 
     glBindTexture(target, 0);
+}
+
+void Texture::setSize(int newWidth, int newHeight) {
+    width = newWidth;
+    height = newHeight;
 }
 
 void Texture2D::specifyTexture(GLvoid *data) {

@@ -1,42 +1,17 @@
 #include "Scene.h"
-#include "shaderSetting.h"
 
-void Scene::draw(Shader& shader, bool drawFloor, bool setTexture) {
-    // render floor 渲染地板
-    if (drawFloor) {
-        floor.draw(shader, setTexture);
-    }
-
-    // render objects 渲染物体
-    for (auto& obj : objects) {
-        obj->draw(shader, setTexture);
-    }
-}
-
-void Scene::addObject(std::unique_ptr<Object>&& object) {
-    objects.push_back(std::move(object));
+void Scene::addObject(const Object& object) {
+    objects.push_back(std::make_unique<Object>(object));
 }
 
 void Scene::addLight(const Light& light) {
-    lights.push_back(light);
+    lights.push_back(std::make_unique<Light>(light));
 }
 
 void Scene::setFloor(const Object& floor) {
-    this->floor = floor;
+    this->floor = std::make_unique<Object>(floor);
 }
 
 void Scene::setSkybox(const Skybox& skybox) {
-    this->skybox = skybox;
-}
-
-Skybox& Scene::getSkybox() {
-    return skybox;
-}
-
-std::vector<std::unique_ptr<Object>>& Scene::getObjects() {
-    return objects;
-}
-
-std::vector<Light>& Scene::getLights() {
-    return lights;
+    this->skybox = std::make_unique<Skybox>(skybox);
 }

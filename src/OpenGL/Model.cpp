@@ -159,7 +159,8 @@ std::shared_ptr<Texture> Model::loadTexture(const std::string& path, TextureFact
         else if (nrComponents == 4)
             textureLoaded->format = textureLoaded->internalFormat = GL_RGBA; // RGBA图（带alpha值的透明通道）
 
-        textureLoaded->generateTexture(width, height, data);
+        textureLoaded->setSize(width, height);
+        textureLoaded->init(data);
     } else {
         std::cout << "Texture failed to load at path: " << path << std::endl;
     }

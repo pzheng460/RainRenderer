@@ -18,7 +18,7 @@ public:
     virtual ~RenderBufferObject() {
         glDeleteRenderbuffers(1, &rbo);
     }
-    virtual void generateRenderBufferObject(int newWidth, int newHeight);
+    virtual void init();
     void setSize(int newWidth, int newHeight) {
         this->width = newWidth;
         this->height = newHeight;
@@ -35,7 +35,7 @@ public:
     RenderBufferObjectMultiSample() {
         renderBufferObjectType = RenderBufferObjectType::RENDER_BUFFER_OBJECT_MULTI_SAMPLE;
     }
-    void generateRenderBufferObject(int newWidth, int newHeight) override;
+    void init() override;
 private:
     int samples = 4;
 };

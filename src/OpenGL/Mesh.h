@@ -41,7 +41,7 @@ public:
     }
 
     // render the mesh
-    void draw(Shader &shader, bool setTexture = false);
+    void draw(Shader* shader = nullptr);
 
 private:
     std::shared_ptr<Geometry> geometry;

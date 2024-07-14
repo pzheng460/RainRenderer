@@ -105,6 +105,7 @@ enum class RenderBufferObjectFactoryType {
 };
 
 enum class FrameBufferFactoryType {
+    FRAME_BUFFER_DEFAULT,
     FRAME_BUFFER_SHADOW_MAP,
     FRAME_BUFFER_MSAA,
     FRAME_BUFFER_INTERMEDIATE,
@@ -138,7 +139,7 @@ enum class ShaderFactoryType {
     SHADER_NORMAL_VISUALIZATION,
 
     SHADER_BLOOM,
-    SHADER_FINAL,
+    SHADER_POST_PROCESSING,
 
     SHADER_GEOMETRY,
     SHADER_DEFERRED_LIGHTING,

@@ -6,14 +6,6 @@
 #include <stb_image.h>
 #include <tinyfiledialogs.h>
 
-GUI::GUI() {
-    // 初始化其他参数
-}
-
-GUI::~GUI() {
-    // 清理 ImGui 资源
-}
-
 void GUI::init(GLFWwindow* window) {
     // 初始化 ImGui
     const char* glsl_version = "#version 330";
@@ -48,18 +40,18 @@ void GUI::render(Scene& scene) {
 
         // 显示和控制相机参数
         ImGui::Text("Camera Position");
-        ImGui::SliderFloat("X", &camera.Position.x, -30.0f, 30.0f);
-        ImGui::SliderFloat("Y", &camera.Position.y, -30.0f, 30.0f);
-        ImGui::SliderFloat("Z", &camera.Position.z, -30.0f, 30.0f);
+        ImGui::SliderFloat("X", &scene.camera->Position.x, -30.0f, 30.0f);
+        ImGui::SliderFloat("Y", &scene.camera->Position.y, -30.0f, 30.0f);
+        ImGui::SliderFloat("Z", &scene.camera->Position.z, -30.0f, 30.0f);
         ImGui::Text("Camera Yaw");
-        ImGui::SliderFloat("Yaw", &camera.Yaw, -180.0f, 180.0f);
+        ImGui::SliderFloat("Yaw", &scene.camera->Yaw, -180.0f, 180.0f);
         ImGui::Text("Camera Pitch");
-        ImGui::SliderFloat("Pitch", &camera.Pitch, -89.0f, 89.0f);
+        ImGui::SliderFloat("Pitch", &scene.camera->Pitch, -89.0f, 89.0f);
         ImGui::Text("Camera Roll");
-        ImGui::SliderFloat("Roll", &camera.Roll, -180.0f, 180.0f);
+        ImGui::SliderFloat("Roll", &scene.camera->Roll, -180.0f, 180.0f);
 
         // 更新相机的方向
-        camera.updateCameraVectors();
+        scene.camera->updateCameraVectors();
 
         ImGui::Separator(); // 分隔线
 
@@ -67,15 +59,15 @@ void GUI::render(Scene& scene) {
         for (unsigned int i = 0; i < scene.lights.size(); i++)
         {
             ImGui::Text("Light %d Position", i);
-            ImGui::SliderFloat(("X##" + std::to_string(i)).c_str(), &scene.lights[i].position.x, -20.0f, 20.0f);
-            ImGui::SliderFloat(("Y##" + std::to_string(i)).c_str(), &scene.lights[i].position.y, -20.0f, 20.0f);
-            ImGui::SliderFloat(("Z##" + std::to_string(i)).c_str(), &scene.lights[i].position.z, -20.0f, 20.0f);
+            ImGui::SliderFloat(("X##" + std::to_string(i)).c_str(), &scene.lights[i]->position.x, -20.0f, 20.0f);
+            ImGui::SliderFloat(("Y##" + std::to_string(i)).c_str(), &scene.lights[i]->position.y, -20.0f, 20.0f);
+            ImGui::SliderFloat(("Z##" + std::to_string(i)).c_str(), &scene.lights[i]->position.z, -20.0f, 20.0f);
 
             ImGui::Text("Light %d Color", i);
-            ImGui::ColorEdit3(("Color##" + std::to_string(i)).c_str(), (float*)&scene.lights[i].color);
+            ImGui::ColorEdit3(("Color##" + std::to_string(i)).c_str(), (float*)&scene.lights[i]->color);
 
-            scene.lights[i].updateLightColor();
-            scene.lights[i].updateLightSpaceMatrix();
+            scene.lights[i]->updateLightColor();
+            scene.lights[i]->updateLightSpaceMatrix();
         }
 
         ImGui::Separator(); // 分隔线
@@ -100,25 +92,25 @@ void GUI::render(Scene& scene) {
             ImGui::Text("Skybox Load Mode");
             if (ImGui::RadioButton("Cube Map", skyboxMode == SkyboxLoadMode::CUBE_MAP)) {
                 skyboxMode = SkyboxLoadMode::CUBE_MAP;
-                Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/skybox.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/skybox.fs").c_str());
-                std::vector<std::string> faces =
-                        {
-                                FileSystem::getPath("resources/textures/skybox/right.jpg"),
-                                FileSystem::getPath("resources/textures/skybox/left.jpg"),
-                                FileSystem::getPath("resources/textures/skybox/top.jpg"),
-                                FileSystem::getPath("resources/textures/skybox/bottom.jpg"),
-                                FileSystem::getPath("resources/textures/skybox/front.jpg"),
-                                FileSystem::getPath("resources/textures/skybox/back.jpg")
-                        };
-                Skybox skybox(skyboxShader, faces);
-                scene.setSkybox(skybox);
+//                Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/skybox.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/skybox.fs").c_str());
+//                std::vector<std::string> faces =
+//                        {
+//                                FileSystem::getPath("resources/textures/skybox/right.jpg"),
+//                                FileSystem::getPath("resources/textures/skybox/left.jpg"),
+//                                FileSystem::getPath("resources/textures/skybox/top.jpg"),
+//                                FileSystem::getPath("resources/textures/skybox/bottom.jpg"),
+//                                FileSystem::getPath("resources/textures/skybox/front.jpg"),
+//                                FileSystem::getPath("resources/textures/skybox/back.jpg")
+//                        };
+//                Skybox skybox(skyboxShader, faces);
+//                scene.setSkybox(skybox);
             }
             ImGui::SameLine();
             if (ImGui::RadioButton("Sphere Map", skyboxMode == SkyboxLoadMode::SPHERE_MAP)) {
                 skyboxMode = SkyboxLoadMode::SPHERE_MAP;
-                Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/background.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/background.fs").c_str());
-                Skybox skybox(skyboxShader, FileSystem::getPath("resources/textures/hdr/newport_loft.hdr"));
-                scene.setSkybox(skybox);
+//                Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/background.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/background.fs").c_str());
+//                Skybox skybox(skyboxShader, FileSystem::getPath("resources/textures/hdr/newport_loft.hdr"));
+//                scene.setSkybox(skybox);
             }
         }
         if (!skyBoxActive) { ImGui::EndDisabled(); }
@@ -211,16 +203,16 @@ void GUI::render(Scene& scene) {
             // load models
             stbi_set_flip_vertically_on_load(false); // tell stb_image.h to flip loaded texture's on the y-axis 告诉 stb_image.h 在 y 轴上翻转加载的纹理
             Model ourModel(modelFilePath);
-            auto object = std::make_unique<Object>(ourModel);
-            scene.addObject(std::move(object));
+            auto object = Object(ourModel);
+            scene.addObject(object);
         }
 
         ImGui::Separator(); // 分隔线
 
         ImGui::Text("Object Information");
 
-        for (int i = 0; i < scene.getObjects().size(); ++i) {
-            auto object = scene.getObjects()[i].get();
+        for (int i = 0; i < scene.objects.size(); ++i) {
+            auto object = scene.objects[i].get();
             ImGui::Text("Object %d", i);
 
             ImGui::SliderFloat(("PosX##" + std::to_string(i)).c_str(), &object->position.x, -100.0f, 100.0f);
@@ -230,7 +222,7 @@ void GUI::render(Scene& scene) {
 
             // delete object 删除物体
             if (ImGui::Button(("Delete##" + std::to_string(i)).c_str())) {
-                scene.getObjects().erase(scene.getObjects().begin() + i);
+                scene.objects.erase(scene.objects.begin() + i);
             }
         }
 

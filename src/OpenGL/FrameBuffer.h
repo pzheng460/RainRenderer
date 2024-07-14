@@ -15,7 +15,8 @@
 
 class FrameBuffer {
 public:
-    explicit FrameBuffer(int numOfColorTextureAttachments = 1, int numOfDepthTextureAttachments = 0, int numOfRenderBufferObjectDepth = 0);
+    explicit FrameBuffer();
+    explicit FrameBuffer(int numOfColorTextureAttachments, int numOfDepthTextureAttachments, int numOfRenderBufferObjectDepth);
     virtual ~FrameBuffer() {
         glDeleteFramebuffers(1, &framebuffer);
     }
@@ -58,27 +59,24 @@ public:
         return *this;
     }
 
-    void setSize(int newWidth, int newHeight) {
-        this->width = newWidth;
-        this->height = newHeight;
-    }
+    void init();
+    void setSize(int newWidth, int newHeight);
+    void setColorTextureAttachment(Texture* texture, int i = 0);
+    void setDepthTextureAttachment(Texture* texture);
+    void setRenderBufferDepthAttachment(RenderBufferObject* rbo);
 
     void bind();
     void unbind();
-
-    void bindColorTextureAttachment();
-    void bindDepthTextureAttachment();
-    void bindRenderBufferDepthAttachment();
-    void generateFrameBuffer(int newWidth, int newHeight);
+    void reset();
 
     bool checkComplete();
 
     void transferFrameBuffer(FrameBuffer& dstFrameBuffer, GLenum target, int srcIndex = 0, int dstIndex = 0);
 
     unsigned int framebuffer = 0;
-    int numOfColorTextureAttachments;
-    int numOfDepthTextureAttachments;
-    int numOfRenderBufferObjectDepth;
+    int numOfColorTextureAttachments = 1;
+    int numOfDepthTextureAttachments = 1;
+    int numOfRenderBufferObjectDepth = 0;
 
     std::vector<std::shared_ptr<Texture>> textureColorBuffers;
     std::shared_ptr<Texture> textureDepthBuffer;
@@ -91,7 +89,7 @@ public:
 
 class FrameBufferFactory {
 public:
-    static FrameBuffer createFrameBuffer(FrameBufferFactoryType frameBufferFactoryType);
+    static FrameBuffer* createFrameBuffer(FrameBufferFactoryType frameBufferFactoryType);
 };
 
 #endif // FRAMEBUFFER_H

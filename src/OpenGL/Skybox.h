@@ -10,16 +10,20 @@
 #include <utils/filesystem.h>
 #include <vector>
 #include <string>
+#include "Object.h"
 
-class Skybox {
+class Skybox : public Object {
 public:
     Skybox() = default;
-    Skybox(const Shader& shader, const std::vector<std::string>& faces);
-    Skybox(const Shader& shader, const std::string& hdrPath);
+    explicit Skybox(const std::vector<std::string>& faces);
+    explicit Skybox(const std::string& hdrPath);
 
-    void setMVP(Camera& camera, float SCR_WIDTH, float SCR_HEIGHT);
-    void draw();
-    void drawGeometry();
+//    void draw();
+//    void drawGeometry();
+
+    unsigned int getCubemapTexture() const {
+      return cubemapTexture;
+    }
 
     unsigned int getIrradianceMap() const {
       return irradianceMap;
@@ -33,20 +37,10 @@ public:
       return brdfLUTTexture;
     }
 
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    glm::mat4 viewMatrix {};
-    glm::mat4 projectionMatrix {};
-
 private:
     unsigned int cubemapTexture;
 
-    Shader skyboxShader;
-    Shader equirectangularToCubemapShader = Shader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/equirectangular_to_cubemap.fs").c_str());
-    Shader irradianceShader = Shader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/irradiance_convolution.fs").c_str());
-    Shader prefilterShader = Shader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/prefilter.fs").c_str());
-    Shader brdfShader = Shader(FileSystem::getPath("src/OpenGL/shaders/brdf.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/brdf.fs").c_str());
     unsigned int envCubemap, irradianceMap, prefilterMap, brdfLUTTexture;
-    glm::vec3 position;
 
     // pbr: set up projection and view matrices for capturing data onto the 6 cubemap face directions
     // ----------------------------------------------------------------------------------------------
@@ -62,14 +56,14 @@ private:
             };
 
     unsigned int captureFBO, captureRBO;
-    void loadCubemap(const std::vector<std::string>& faces);
-
-    void setupFramebuffers();
-    void loadSphereMap(const std::string& hdrPath);
-    void convertSphereMapToCubeMap(unsigned int hdrTexture);
-    void createIrradianceMap();
-    void createPrefilterMap();
-    void generateBRDFLUTTexture();
+//    void loadCubemap(const std::vector<std::string>& faces);
+//
+//    void setupFramebuffers();
+//    void loadSphereMap(const std::string& hdrPath);
+//    void convertSphereMapToCubeMap(unsigned int hdrTexture);
+//    void createIrradianceMap();
+//    void createPrefilterMap();
+//    void generateBRDFLUTTexture();
 };
 
 #endif // SKYBOX_H

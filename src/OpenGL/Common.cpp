@@ -54,7 +54,7 @@ std::string toString(ShaderFactoryType shaderFactoryType) {
         CASE_STR(ShaderFactoryType::SHADER_NORMAL_VISUALIZATION);
 
         CASE_STR(ShaderFactoryType::SHADER_BLOOM);
-        CASE_STR(ShaderFactoryType::SHADER_FINAL);
+        CASE_STR(ShaderFactoryType::SHADER_POST_PROCESSING);
 
         CASE_STR(ShaderFactoryType::SHADER_GEOMETRY);
         CASE_STR(ShaderFactoryType::SHADER_DEFERRED_LIGHTING);

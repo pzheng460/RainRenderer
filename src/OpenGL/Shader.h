@@ -102,6 +102,6 @@ private:
 
 class ShaderFactory {
 public:
-    static Shader createShader(ShaderFactoryType shaderFactoryType);
+    static Shader* createShader(ShaderFactoryType shaderFactoryType);
 };
 #endif // SHADER_H

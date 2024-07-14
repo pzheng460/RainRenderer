@@ -145,107 +145,107 @@ void Shader::checkCompileErrors(GLuint shader, const std::string &type) {
     }
 }
 
-Shader ShaderFactory::createShader(ShaderFactoryType shaderFactoryType) {
-    Shader shader;
+Shader* ShaderFactory::createShader(ShaderFactoryType shaderFactoryType) {
+    Shader* shader = nullptr;
     if (shaderFactoryType == ShaderFactoryType::SHADER_LIGHT)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/light_cube.vs"), FileSystem::getPath("src/OpenGL/shaders/light_cube.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/light_cube.vs"), FileSystem::getPath("src/OpenGL/shaders/light_cube.fs"));
     }
 
     else if (shaderFactoryType == ShaderFactoryType::SHADER_SKYBOX_CUBE_MAP)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/skybox.vs"), FileSystem::getPath("src/OpenGL/shaders/skybox.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/skybox.vs"), FileSystem::getPath("src/OpenGL/shaders/skybox.fs"));
     }
     else if (shaderFactoryType == ShaderFactoryType::SHADER_SKYBOX_SPHERE_MAP)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/background.vs"), FileSystem::getPath("src/OpenGL/shaders/background.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/background.vs"), FileSystem::getPath("src/OpenGL/shaders/background.fs"));
     }
     else if (shaderFactoryType == ShaderFactoryType::SHADER_SPHERE_MAP_TO_CUBE_MAP)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs"), FileSystem::getPath("src/OpenGL/shaders/equirectangular_to_cubemap.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs"), FileSystem::getPath("src/OpenGL/shaders/equirectangular_to_cubemap.fs"));
     }
     else if (shaderFactoryType == ShaderFactoryType::SHADER_IRRADIANCE_MAP)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs"), FileSystem::getPath("src/OpenGL/shaders/irradiance_convolution.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs"), FileSystem::getPath("src/OpenGL/shaders/irradiance_convolution.fs"));
     }
     else if (shaderFactoryType == ShaderFactoryType::SHADER_PREFILTER_MAP)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs"), FileSystem::getPath("src/OpenGL/shaders/prefilter.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/cubemap.vs"), FileSystem::getPath("src/OpenGL/shaders/prefilter.fs"));
     }
     else if (shaderFactoryType == ShaderFactoryType::SHADER_BRDF_LUT)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/brdf.vs"), FileSystem::getPath("src/OpenGL/shaders/brdf.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/brdf.vs"), FileSystem::getPath("src/OpenGL/shaders/brdf.fs"));
     }
 
     else if (shaderFactoryType == ShaderFactoryType::SHADER_SHADOW_MAP)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/shadow_mapping_depth.vs"), FileSystem::getPath("src/OpenGL/shaders/shadow_mapping_depth.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/shadow_mapping_depth.vs"), FileSystem::getPath("src/OpenGL/shaders/shadow_mapping_depth.fs"));
     }
     else if (shaderFactoryType == ShaderFactoryType::SHADER_SHADOW_MAP_DEBUG)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.vs"), FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.vs"), FileSystem::getPath("src/OpenGL/shaders/debug_quad_depth.fs"));
     }
 
     else if (shaderFactoryType == ShaderFactoryType::SHADER_BASIC)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs"), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/model_loading.vs"), FileSystem::getPath("src/OpenGL/shaders/model_loading.fs"));
     }
     else if (shaderFactoryType == ShaderFactoryType::SHADER_PHONG)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/phong.vs"), FileSystem::getPath("src/OpenGL/shaders/phong.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/phong.vs"), FileSystem::getPath("src/OpenGL/shaders/phong.fs"));
     }
     else if (shaderFactoryType == ShaderFactoryType::SHADER_BLINN_PHONG)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/blinn_phong.vs"), FileSystem::getPath("src/OpenGL/shaders/blinn_phong.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/blinn_phong.vs"), FileSystem::getPath("src/OpenGL/shaders/blinn_phong.fs"));
     }
     else if (shaderFactoryType == ShaderFactoryType::SHADER_DEPTH_TESTING)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/depth_testing.vs"), FileSystem::getPath("src/OpenGL/shaders/depth_testing.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/depth_testing.vs"), FileSystem::getPath("src/OpenGL/shaders/depth_testing.fs"));
     }
     else if (shaderFactoryType == ShaderFactoryType::SHADER_ENVIRONMENT_MAPPING)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/environment_mapping.vs"), FileSystem::getPath("src/OpenGL/shaders/environment_mapping.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/environment_mapping.vs"), FileSystem::getPath("src/OpenGL/shaders/environment_mapping.fs"));
     }
     else if (shaderFactoryType == ShaderFactoryType::SHADER_PBR)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/pbr.vs"), FileSystem::getPath("src/OpenGL/shaders/pbr.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/pbr.vs"), FileSystem::getPath("src/OpenGL/shaders/pbr.fs"));
     }
     else if (shaderFactoryType == ShaderFactoryType::SHADER_NORMAL_VISUALIZATION)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/normal_visualization.vs"), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.fs"), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.gs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/normal_visualization.vs"), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.fs"), FileSystem::getPath("src/OpenGL/shaders/normal_visualization.gs"));
     }
 
     else if (shaderFactoryType == ShaderFactoryType::SHADER_BLOOM)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/blur.vs"), FileSystem::getPath("src/OpenGL/shaders/blur.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/blur.vs"), FileSystem::getPath("src/OpenGL/shaders/blur.fs"));
     }
-    else if (shaderFactoryType == ShaderFactoryType::SHADER_FINAL)
+    else if (shaderFactoryType == ShaderFactoryType::SHADER_POST_PROCESSING)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/final.vs"), FileSystem::getPath("src/OpenGL/shaders/final.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/final.vs"), FileSystem::getPath("src/OpenGL/shaders/final.fs"));
     }
 
     else if (shaderFactoryType == ShaderFactoryType::SHADER_GEOMETRY)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/g_buffer.vs"), FileSystem::getPath("src/OpenGL/shaders/g_buffer.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/g_buffer.vs"), FileSystem::getPath("src/OpenGL/shaders/g_buffer.fs"));
     }
     else if (shaderFactoryType == ShaderFactoryType::SHADER_DEFERRED_LIGHTING)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/deferred_shading.vs"), FileSystem::getPath("src/OpenGL/shaders/deferred_shading.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/deferred_shading.vs"), FileSystem::getPath("src/OpenGL/shaders/deferred_shading.fs"));
     }
 
     else if (shaderFactoryType == ShaderFactoryType::SHADER_SSAO)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/ssao.vs"), FileSystem::getPath("src/OpenGL/shaders/ssao.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/ssao.vs"), FileSystem::getPath("src/OpenGL/shaders/ssao.fs"));
     }
     else if (shaderFactoryType == ShaderFactoryType::SHADER_SSAO_BLUR)
     {
-        shader = Shader(FileSystem::getPath("src/OpenGL/shaders/ssao.vs"), FileSystem::getPath("src/OpenGL/shaders/ssao_blur.fs"));
+        shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/ssao.vs"), FileSystem::getPath("src/OpenGL/shaders/ssao_blur.fs"));
     }
     else
     {
         std::cout << "ERROR::SHADER_FACTORY::SHADER_TYPE_NOT_FOUND" << std::endl;
     }
 
-    shader.shaderFactoryType = shaderFactoryType;
+    if (shader != nullptr) shader->shaderFactoryType = shaderFactoryType;
     return shader;
 }

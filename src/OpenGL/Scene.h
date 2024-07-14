@@ -16,24 +16,19 @@ class Scene {
 public:
     Scene() = default;
 
-    void draw(Shader& shader, bool drawFloor = true, bool setTexture = false);
-
     // Add objects and lights to the scene
-    void addObject(std::unique_ptr<Object>&& object);
+    void addObject(const Object& object);
     void addLight(const Light& light);
 
     void setSkybox(const Skybox& skybox);
     void setFloor(const Object& floor);
 
     // Object management
-    Skybox& getSkybox();
-    std::vector<std::unique_ptr<Object>>& getObjects();
-    std::vector<Light>& getLights();
-
     std::vector<std::unique_ptr<Object>> objects;
-    std::vector<Light> lights;
-    Object floor;
-    Skybox skybox;
+    std::vector<std::unique_ptr<Light>> lights;
+    std::unique_ptr<Object> floor;
+    std::unique_ptr<Skybox> skybox;
+    std::shared_ptr<Camera> camera = std::make_shared<Camera>(glm::vec3(0.0f, 10.0f, 30.0f));
 };
 
 #endif // SCENE_H

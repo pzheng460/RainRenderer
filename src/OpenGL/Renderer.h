@@ -16,94 +16,123 @@
 #include "Shader.h"
 #include "Scene.h"
 #include "GUI.h"
-#include "SSAO.h"
+#include "Renderer/SSAO/SSAO.h"
 
 #include <random>
 
 class Renderer {
 public:
-    Renderer() = default;
-    Renderer(int width, int height, std::shared_ptr<GUI>& gui, Scene& scene) :
-            width(width), height(height), gui(gui) {
-        for (int i = 0; i < scene.lights.size(); ++i) {
-            shadowMapFrameBuffers.emplace_back(FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_SHADOW_MAP));
-        }
-        for (int i = 0; i < 2; ++i) {
-            pingPongFrameBuffers.emplace_back(FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_PING_PONG));
-        }
-    }
+    Renderer(int width, int height, GUI& gui, Scene& scene);
     ~Renderer() = default;
 
     void init();
     void reset();
-    void draw(Scene& scene);
-    void forwardRendering(Scene& scene);
-    void deferredRendering(Scene& scene);
+    void draw();
 
-    void gaussianBlur();
+    void setSize(int newWidth, int newHeight);
+private:
+    void forwardRendering();
+    void deferredRendering();
 
     void faceCulling() const;
     void MSAA() const;
     void gammaCorrection() const;
 
-    void setSize(int newWidth, int newHeight) {
-        width = newWidth;
-        height = newHeight;
-    }
-
-    FrameBuffer& getMainMSAAFrameBuffer() {
-        return mainMSAAFrameBuffer;
-    }
-
-    FrameBuffer& getIntermediateFrameBuffer() {
-        return intermediateFrameBuffer;
-    }
-
-    std::vector<FrameBuffer>& getPingPongFrameBuffers() {
-        return pingPongFrameBuffers;
-    }
-private:
-    // Main Shader
-    Shader mainShader;
-
     // GUI
-    std::shared_ptr<GUI> gui;
-
     int width, height;
+    GUI& gui;
+    Scene& scene;
 
-    bool firstIteration = true;
+    std::unique_ptr<Object> screenQuad;
+
+    // Shared FrameBuffers
+    std::shared_ptr<FrameBuffer> frameBufferDefault;
+    std::shared_ptr<FrameBuffer> frameBufferMSAA;
+    std::shared_ptr<FrameBuffer> frameBufferIntermediate;
+    std::shared_ptr<FrameBuffer> frameBufferGeometry;
+    std::shared_ptr<FrameBuffer> frameBufferSSAO;
+    std::shared_ptr<FrameBuffer> frameBufferSSAOBlur;
+    std::vector<std::shared_ptr<FrameBuffer>> frameBufferShadowMaps;
+    std::vector<std::shared_ptr<FrameBuffer>> frameBufferBlooms;
+
+    // Skybox
+    std::shared_ptr<Shader> shaderSkyboxCubeMap;
+    std::shared_ptr<Shader> shaderSkyboxSphereMap;
+    void renderSkybox();
+
+    std::shared_ptr<Shader> shaderSkyboxSphereMapToCubeMap;
+    void renderSkyboxSphereMapToCubeMap();
+    std::shared_ptr<Shader> shaderIrradiance;
+    void renderIrradiance();
+    std::shared_ptr<Shader> shaderPrefilter;
+    void renderPrefilter();
+    std::shared_ptr<Shader> shaderBRDFLUT;
+    void renderBRDFLUT();
+
+    // Light
+    std::shared_ptr<Shader> shaderLight;
+    void renderLight();
 
     // Shadow Map
-    Shader ShaderShadowMap = ShaderFactory::createShader(ShaderFactoryType::SHADER_SHADOW_MAP);
-    Shader shaderShadowMapDebug = ShaderFactory::createShader(ShaderFactoryType::SHADER_SHADOW_MAP_DEBUG);
-    std::vector<FrameBuffer> shadowMapFrameBuffers;
+    std::shared_ptr<Shader> shaderShadowMap;
+    void renderShadowMap();
+    std::shared_ptr<Shader> shaderShadowMapDebug;
+    void renderShadowMapDebug();
     const int SHADOW_WIDTH = 2560, SHADOW_HEIGHT = 1440;
 
-    // Main FrameBuffer
-    FrameBuffer mainMSAAFrameBuffer = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_MSAA);
-    FrameBuffer intermediateFrameBuffer = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_INTERMEDIATE);
+    // Basic
+    std::shared_ptr<Shader> shaderBasic;
+    void renderBasic();
+
+    // Phong
+    std::shared_ptr<Shader> shaderPhong;
+    void renderPhong();
+
+    // Blinn-Phong
+    std::shared_ptr<Shader> shaderBlinnPhong;
+    void renderBlinnPhong();
+
+    // Depth Testing
+    std::shared_ptr<Shader> shaderDepthTesting;
+    void renderDepthTesting();
+
+    // Environment Mapping
+    std::shared_ptr<Shader> shaderEnvironmentMapping;
+    void renderEnvironmentMapping();
+
+    // PBR
+    std::shared_ptr<Shader> shaderPBR;
+    void renderPBR();
 
     // Normal Visualization
-    Shader shaderNormalVisualization = ShaderFactory::createShader(ShaderFactoryType::SHADER_NORMAL_VISUALIZATION);
+    std::shared_ptr<Shader> shaderNormalVisualization;
+    void renderNormalVisualization();
 
     // Bloom
-    Shader shaderBloom = ShaderFactory::createShader(ShaderFactoryType::SHADER_BLOOM);
-    std::vector<FrameBuffer> pingPongFrameBuffers;
-    bool horizontal = true, first_iteration = true;
+    std::shared_ptr<Shader> shaderBloom;
+    void renderBloom();
+    bool horizontal = true;
     unsigned int amount = 10;
 
     // G-Buffer
-    Shader gFrameBufferShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_GEOMETRY);
-    FrameBuffer gFrameBuffer = FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_GEOMETRY);
+    std::shared_ptr<Shader> shaderGeometry;
+    void renderGeometry();
 
     // SSAO
-    SSAO ssao = SSAO(gui->getCamera(), width, height, gFrameBuffer);
+    std::shared_ptr<Shader> shaderSSAO;
+    void renderSSAO();
+    SSAO ssao = SSAO();
+
+    std::shared_ptr<Shader> shaderSSAOBlur;
+    void renderSSAOBlur();
 
     // Deferred lighting
-    Shader deferredLightingShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_DEFERRED_LIGHTING);
+    std::shared_ptr<Shader> shaderDeferredLighting;
+    void renderDeferredLighting();
 
-    // Final
-    Shader finalShader = ShaderFactory::createShader(ShaderFactoryType::SHADER_FINAL);
+    // Post Processing
+    std::shared_ptr<Shader> shaderPostProcessing;
+    void renderPostPossing();
 };
 
 #endif // RENDERER_H

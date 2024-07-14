@@ -1,9 +1,15 @@
 #include "MainWindow.h"
 
+bool MainWindow::firstMouse = true;
+float MainWindow::lastX = (float) SCR_WIDTH / 2.0;
+float MainWindow::lastY = (float) SCR_HEIGHT / 2.0;
 std::shared_ptr<GUI> MainWindow::gui = nullptr;
+std::shared_ptr<Camera> MainWindow::camera = nullptr;
 
 MainWindow::MainWindow(unsigned int width, unsigned int height, const std::string& title)
-        : width(width), height(height), title(title), window(nullptr) {}
+        : width(width)
+        , height(height)
+        , title(title) {}
 
 MainWindow::~MainWindow() {
     // glfw: terminate, clearing all previously allocated GLFW resources. 清理所有之前分配的GLFW资源
@@ -138,11 +144,10 @@ void MainWindow::framebuffer_size_callback(GLFWwindow* window, int width, int he
     glViewport(0, 0, width, height);
 }
 
-
 // whenever the mouse moves, this callback is called
 void MainWindow::mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-    if (!gui->IsControlActive())
+    if (!gui->controlActive)
     {
         return;
     }
@@ -162,16 +167,16 @@ void MainWindow::mouse_callback(GLFWwindow* window, double xposIn, double yposIn
     lastX = xpos;
     lastY = ypos;
 
-    gui->getCamera().ProcessMouseMovement(xoffset, yoffset);
+    camera->ProcessMouseMovement(xoffset, yoffset);
 }
 
 // whenever the mouse scroll wheel scrolls, this callback is called
 void MainWindow::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    if (!gui->IsControlActive()) {
+    if (!gui->controlActive) {
         return;
     }
-    gui->getCamera().ProcessMouseScroll(static_cast<float>(yoffset));
+    camera->ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
@@ -182,7 +187,7 @@ void MainWindow::processInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
 
     // 在函数或方法的开始位置初始化或更新光标状态
-    if (gui->IsControlActive()) {
+    if (gui->controlActive) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     } else {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -192,7 +197,7 @@ void MainWindow::processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         if (!spaceKeyPressed) {
             gui->ToggleControl();  // 切换控制状态
-            if (gui->IsControlActive()) {
+            if (gui->controlActive) {
                 // 禁用光标
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             } else {
@@ -205,15 +210,15 @@ void MainWindow::processInput(GLFWwindow *window)
         spaceKeyPressed = false;
     }
 
-    if (gui->IsControlActive()) {
+    if (gui->controlActive) {
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            gui->getCamera().ProcessKeyboard(Camera_Movement::FORWARD, deltaTime);
+            camera->ProcessKeyboard(Camera_Movement::FORWARD, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            gui->getCamera().ProcessKeyboard(Camera_Movement::BACKWARD, deltaTime);
+            camera->ProcessKeyboard(Camera_Movement::BACKWARD, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            gui->getCamera().ProcessKeyboard(Camera_Movement::LEFT, deltaTime);
+            camera->ProcessKeyboard(Camera_Movement::LEFT, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            gui->getCamera().ProcessKeyboard(Camera_Movement::RIGHT, deltaTime);
+            camera->ProcessKeyboard(Camera_Movement::RIGHT, deltaTime);
     }
 }
 
