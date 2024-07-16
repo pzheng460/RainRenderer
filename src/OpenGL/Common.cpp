@@ -35,8 +35,8 @@ std::string toString(ShaderFactoryType shaderFactoryType) {
     switch (shaderFactoryType) {
         CASE_STR(ShaderFactoryType::SHADER_LIGHT);
 
-        CASE_STR(ShaderFactoryType::SHADER_SKYBOX_CUBE_MAP);
-        CASE_STR(ShaderFactoryType::SHADER_SKYBOX_SPHERE_MAP);
+        CASE_STR(ShaderFactoryType::SHADER_SKYBOX);
+        CASE_STR(ShaderFactoryType::SHADER_SKYBOX_HDR);
         CASE_STR(ShaderFactoryType::SHADER_SPHERE_MAP_TO_CUBE_MAP);
         CASE_STR(ShaderFactoryType::SHADER_IRRADIANCE_MAP);
         CASE_STR(ShaderFactoryType::SHADER_PREFILTER_MAP);

@@ -67,7 +67,9 @@ enum class TextureType {
 
 enum class TextureFactoryType {
     TEXTURE_2D_LOADED,
+    TEXTURE_2D_HDR_LOADED,
     TEXTURE_CUBE_LOADED,
+    TEXTURE_CUBE_MAP_SKYBOX,
     TEXTURE_COMMON_COLOR_ATTACHMENT,
     TEXTURE_COMMON_DEPTH_ATTACHMENT,
     TEXTURE_MSAA_COLOR_ATTACHMENT,
@@ -76,6 +78,9 @@ enum class TextureFactoryType {
     TEXTURE_GEOMETRY_ALBEDO_SPEC_COLOR_ATTACHMENT,
     TEXTURE_SSAO_COLOR_ATTACHMENT,
     TEXTURE_SSAO_NOISE,
+    TEXTURE_IRRADIANCE,
+    TEXTURE_PREFILTER,
+    TEXTURE_BRDF_LUT,
 };
 
 std::string toString(TextureFactoryType textureFactoryType);
@@ -102,6 +107,7 @@ enum class RenderBufferObjectType {
 enum class RenderBufferObjectFactoryType {
     RENDER_BUFFER_OBJECT_DEPTH,
     RENDER_BUFFER_OBJECT_DEPTH_MULTI_SAMPLE,
+    RENDER_BUFFER_OBJECT_DEPTH_SKYBOX,
 };
 
 enum class FrameBufferFactoryType {
@@ -113,6 +119,7 @@ enum class FrameBufferFactoryType {
     FRAME_BUFFER_GEOMETRY,
     FRAME_BUFFER_SSAO,
     FRAME_BUFFER_SSAO_BLUR,
+    FRAME_BUFFER_SKYBOX_CAPTURE,
 };
 
 std::string toString(FrameBufferFactoryType frameBufferFactoryType);
@@ -120,8 +127,8 @@ std::string toString(FrameBufferFactoryType frameBufferFactoryType);
 enum class ShaderFactoryType {
     SHADER_LIGHT,
 
-    SHADER_SKYBOX_CUBE_MAP,
-    SHADER_SKYBOX_SPHERE_MAP,
+    SHADER_SKYBOX,
+    SHADER_SKYBOX_HDR,
     SHADER_SPHERE_MAP_TO_CUBE_MAP,
     SHADER_IRRADIANCE_MAP,
     SHADER_PREFILTER_MAP,

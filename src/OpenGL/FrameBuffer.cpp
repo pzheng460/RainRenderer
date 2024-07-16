@@ -2,12 +2,12 @@
 #include <iostream>
 
 FrameBuffer::FrameBuffer() {
-    framebuffer = 0;
+    framebufferID = 0;
 }
 
 FrameBuffer::FrameBuffer(int numOfColorTextureAttachments, int numOfDepthTextureAttachments, int numOfRenderBufferObjectDepth) :
     numOfColorTextureAttachments(numOfColorTextureAttachments), numOfDepthTextureAttachments(numOfDepthTextureAttachments), numOfRenderBufferObjectDepth(numOfRenderBufferObjectDepth) {
-    glGenFramebuffers(1, &framebuffer);
+    glGenFramebuffers(1, &framebufferID);
     for (int i = 0; i < numOfColorTextureAttachments; i++) {
         auto textureColorBufferPtr = TextureFactory::createTexture(TextureFactoryType::TEXTURE_COMMON_COLOR_ATTACHMENT);
         textureColorBuffers.push_back(std::shared_ptr<Texture>(textureColorBufferPtr));
@@ -27,42 +27,59 @@ FrameBuffer::FrameBuffer(int numOfColorTextureAttachments, int numOfDepthTexture
 void FrameBuffer::setSize(int newWidth, int newHeight) {
     width = newWidth;
     height = newHeight;
+}
+
+void FrameBuffer::setAllSizes(int newWidth, int newHeight) {
+    setSize(newWidth, newHeight);
 
     // create floating point color buffer 创建浮点颜色缓冲区
     for (int i = 0; i < numOfColorTextureAttachments; i++) {
-        textureColorBuffers[i]->setSize(width, height);
+        textureColorBuffers[i]->setSize(newWidth, newHeight);
     }
     // create depth texture 创建深度纹理
     if (numOfDepthTextureAttachments > 0) {
-        textureDepthBuffer->setSize(width, height);
+        textureDepthBuffer->setSize(newWidth, newHeight);
     }
     // create depth buffer (renderbuffer) 创建深度缓冲区（渲染缓冲区）
     if (numOfRenderBufferObjectDepth > 0) {
-        rboDepth->setSize(width, height);
+        rboDepth->setSize(newWidth, newHeight);
     }
 }
 
 void FrameBuffer::init() {
-    bind();
-
     // create floating point color buffer 创建浮点颜色缓冲区
     for (int i = 0; i < numOfColorTextureAttachments; i++) {
-        textureColorBuffers[i]->init(nullptr);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, textureColorBuffers[i]->target, textureColorBuffers[i]->textureID, 0);
+        if (textureColorBuffers[i]->textureType == TextureType::TEXTURE_2D)
+        {
+            dynamic_cast<Texture2D*>(textureColorBuffers[i].get())->init();
+        }
+        else if (textureColorBuffers[i]->textureType == TextureType::TEXTURE_2D_MULTISAMPLE)
+        {
+            dynamic_cast<Texture2DMultiSample*>(textureColorBuffers[i].get())->init();
+        }
+        else if (textureColorBuffers[i]->textureType == TextureType::TEXTURE_CUBE_MAP)
+        {
+            dynamic_cast<TextureCubeMap*>(textureColorBuffers[i].get())->init();
+        }
+
+        if (textureColorBuffers[i]->textureType != TextureType::TEXTURE_CUBE_MAP) {
+            setColorTextureAttachment(i); // In default, we only set the 2d texture attachment
+        }
     }
 
     // create depth texture 创建深度纹理
     if (numOfDepthTextureAttachments > 0) {
-        textureDepthBuffer->init(nullptr);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureDepthBuffer->target, textureDepthBuffer->textureID, 0);
+        dynamic_cast<Texture2D*>(textureDepthBuffer.get())->init();
+        setDepthTextureAttachment();
     }
 
     // create depth buffer (renderbuffer) 创建深度缓冲区（渲染缓冲区）
     if (numOfRenderBufferObjectDepth > 0) {
         rboDepth->init();
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth->rbo);
+        setRenderBufferObjectDepthAttachment();
     }
 
+    bind();
     if (numOfColorTextureAttachments > 0) {
         // 动态设置绘制缓冲区
         std::vector<GLuint> attachments(numOfColorTextureAttachments);
@@ -70,21 +87,16 @@ void FrameBuffer::init() {
             attachments[i] = GL_COLOR_ATTACHMENT0 + i;
         }
         glDrawBuffers(numOfColorTextureAttachments, attachments.data());
-    }
-    else
-    {
+    } else {
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
     }
-
-    // check if frame buffer is complete 检查帧缓冲是否完整
-    checkComplete();
     unbind();
 }
 
 void FrameBuffer::bind()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebufferID);
 }
 
 void FrameBuffer::unbind()
@@ -92,9 +104,11 @@ void FrameBuffer::unbind()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void FrameBuffer::reset()
-{
+void FrameBuffer::setViewPort() const {
     glViewport(0, 0, width, height);
+}
+
+void FrameBuffer::clear() const {
     if (numOfColorTextureAttachments > 0) {
         // 动态设置绘制缓冲区
         std::vector<GLuint> attachments(numOfColorTextureAttachments);
@@ -109,19 +123,42 @@ void FrameBuffer::reset()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
-void FrameBuffer::setColorTextureAttachment(Texture* texture, int i)
-{
-    textureColorBuffers[i] = std::shared_ptr<Texture>(texture);
+void FrameBuffer::reset() {
+    setViewPort();
+    clear();
 }
 
-void FrameBuffer::setDepthTextureAttachment(Texture* texture)
-{
-    textureDepthBuffer = std::shared_ptr<Texture>(texture);
+void FrameBuffer::setColorTextureAttachment(int colorAttachmentIndex, int level) {
+    bind();
+    if (textureColorBuffers[colorAttachmentIndex]->textureType != TextureType::TEXTURE_CUBE_MAP) {
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorAttachmentIndex, textureColorBuffers[colorAttachmentIndex]->target, textureColorBuffers[colorAttachmentIndex]->textureID, level);
+    } else {
+        std::cerr << "Can not set 2D texture with TEXTURE_CUBE_MAP" << std::endl;
+    }
+    checkComplete();
 }
 
-void FrameBuffer::setRenderBufferDepthAttachment(RenderBufferObject* rbo)
+void FrameBuffer::setColorTextureAttachmentCubeFace(int faceIndex, int colorAttachmentIndex, int level)
 {
-    rboDepth = std::shared_ptr<RenderBufferObject>(rbo);
+    bind();
+    if (textureColorBuffers[colorAttachmentIndex]->textureType == TextureType::TEXTURE_CUBE_MAP) {
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorAttachmentIndex, GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex, textureColorBuffers[colorAttachmentIndex]->textureID, level);
+    } else {
+        std::cerr << "Can not set cube face without TEXTURE_CUBE_MAP" << std::endl;
+    }
+    checkComplete();
+}
+
+void FrameBuffer::setDepthTextureAttachment(int level) {
+    bind();
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureDepthBuffer->target, textureDepthBuffer->textureID, level);
+    checkComplete();
+}
+
+void FrameBuffer::setRenderBufferObjectDepthAttachment() {
+    bind();
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth->rboID);
+    checkComplete();
 }
 
 bool FrameBuffer::checkComplete()
@@ -135,8 +172,8 @@ bool FrameBuffer::checkComplete()
 
 void FrameBuffer::transferFrameBuffer(FrameBuffer& dstFrameBuffer, GLenum target, int srcIndex, int dstIndex)
 {
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFrameBuffer.framebuffer);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferID);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFrameBuffer.framebufferID);
 
     if (target == GL_COLOR_BUFFER_BIT)
     {
@@ -211,6 +248,12 @@ FrameBuffer* FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType frameB
             auto textureColorBuffer = TextureFactory::createTexture(TextureFactoryType::TEXTURE_SSAO_COLOR_ATTACHMENT);
             frameBuffer->textureColorBuffers[i] = std::shared_ptr<Texture>(textureColorBuffer);
         }
+    }
+    else if (frameBufferFactoryType == FrameBufferFactoryType::FRAME_BUFFER_SKYBOX_CAPTURE)
+    {
+        frameBuffer = new FrameBuffer(1, 0, 1);
+        auto rboDepthPtr = RenderBufferObjectFactory::createRenderBufferObject(RenderBufferObjectFactoryType::RENDER_BUFFER_OBJECT_DEPTH_SKYBOX);
+        frameBuffer->rboDepth = std::shared_ptr<RenderBufferObject>(rboDepthPtr);
     }
     else
     {

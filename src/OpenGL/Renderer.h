@@ -26,10 +26,10 @@ public:
     ~Renderer() = default;
 
     void init();
-    void reset();
     void draw();
 
     void setSize(int newWidth, int newHeight);
+    void setAllSize(int newWidth, int newHeight);
 private:
     void forwardRendering();
     void deferredRendering();
@@ -52,87 +52,90 @@ private:
     std::shared_ptr<FrameBuffer> frameBufferGeometry;
     std::shared_ptr<FrameBuffer> frameBufferSSAO;
     std::shared_ptr<FrameBuffer> frameBufferSSAOBlur;
+    std::shared_ptr<FrameBuffer> frameBufferSkyboxCapture;
     std::vector<std::shared_ptr<FrameBuffer>> frameBufferShadowMaps;
     std::vector<std::shared_ptr<FrameBuffer>> frameBufferBlooms;
 
     // Skybox
-    std::shared_ptr<Shader> shaderSkyboxCubeMap;
-    std::shared_ptr<Shader> shaderSkyboxSphereMap;
-    void renderSkybox();
+    std::shared_ptr<Shader> shaderSkybox;
+    std::shared_ptr<Shader> shaderSkyboxHDR;
+    void renderSkybox(FrameBuffer* frameBuffer);
+    void renderSkyboxHDR(FrameBuffer* frameBuffer);
 
     std::shared_ptr<Shader> shaderSkyboxSphereMapToCubeMap;
-    void renderSkyboxSphereMapToCubeMap();
+    void renderSkyboxSphereMapToCubeMap(FrameBuffer* frameBuffer);
     std::shared_ptr<Shader> shaderIrradiance;
-    void renderIrradiance();
+    void renderIrradiance(FrameBuffer* frameBuffer);
     std::shared_ptr<Shader> shaderPrefilter;
-    void renderPrefilter();
+    void renderPrefilter(FrameBuffer* frameBuffer);
     std::shared_ptr<Shader> shaderBRDFLUT;
-    void renderBRDFLUT();
+    void renderBRDFLUT(FrameBuffer* frameBuffer);
 
     // Light
     std::shared_ptr<Shader> shaderLight;
-    void renderLight();
+    void renderLight(FrameBuffer* frameBuffer);
 
     // Shadow Map
     std::shared_ptr<Shader> shaderShadowMap;
-    void renderShadowMap();
+    void renderShadowMap(FrameBuffer* frameBuffer, int i);
     std::shared_ptr<Shader> shaderShadowMapDebug;
-    void renderShadowMapDebug();
-    const int SHADOW_WIDTH = 2560, SHADOW_HEIGHT = 1440;
+    void renderShadowMapDebug(FrameBuffer* frameBuffer, int i);
+
+    int shadowWidth = 1024, shadowHeight = 1024;
 
     // Basic
     std::shared_ptr<Shader> shaderBasic;
-    void renderBasic();
+    void renderBasic(FrameBuffer* frameBuffer);
 
     // Phong
     std::shared_ptr<Shader> shaderPhong;
-    void renderPhong();
+    void renderPhong(FrameBuffer* frameBuffer);
 
     // Blinn-Phong
     std::shared_ptr<Shader> shaderBlinnPhong;
-    void renderBlinnPhong();
+    void renderBlinnPhong(FrameBuffer* frameBuffer);
 
     // Depth Testing
     std::shared_ptr<Shader> shaderDepthTesting;
-    void renderDepthTesting();
+    void renderDepthTesting(FrameBuffer* frameBuffer);
 
     // Environment Mapping
     std::shared_ptr<Shader> shaderEnvironmentMapping;
-    void renderEnvironmentMapping();
+    void renderEnvironmentMapping(FrameBuffer* frameBuffer);
 
     // PBR
     std::shared_ptr<Shader> shaderPBR;
-    void renderPBR();
+    void renderPBR(FrameBuffer* frameBuffer);
 
     // Normal Visualization
     std::shared_ptr<Shader> shaderNormalVisualization;
-    void renderNormalVisualization();
+    void renderNormalVisualization(FrameBuffer* frameBuffer);
 
     // Bloom
     std::shared_ptr<Shader> shaderBloom;
-    void renderBloom();
-    bool horizontal = true;
+    void renderBloom(FrameBuffer* frameBuffer0, FrameBuffer* frameBuffer1);
+    bool horizontal = true, first_iteration = true;
     unsigned int amount = 10;
 
     // G-Buffer
     std::shared_ptr<Shader> shaderGeometry;
-    void renderGeometry();
+    void renderGeometry(FrameBuffer* frameBuffer);
 
     // SSAO
     std::shared_ptr<Shader> shaderSSAO;
-    void renderSSAO();
+    void renderSSAO(FrameBuffer* frameBuffer);
     SSAO ssao = SSAO();
 
     std::shared_ptr<Shader> shaderSSAOBlur;
-    void renderSSAOBlur();
+    void renderSSAOBlur(FrameBuffer* frameBuffer);
 
     // Deferred lighting
     std::shared_ptr<Shader> shaderDeferredLighting;
-    void renderDeferredLighting();
+    void renderDeferredLighting(FrameBuffer* frameBuffer);
 
     // Post Processing
     std::shared_ptr<Shader> shaderPostProcessing;
-    void renderPostPossing();
+    void renderPostProcessing(FrameBuffer* frameBuffer);
 };
 
 #endif // RENDERER_H

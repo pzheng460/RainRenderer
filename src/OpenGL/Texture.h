@@ -22,14 +22,17 @@ public:
         glDeleteTextures(1, &textureID);
     }
 
-    virtual void specifyTexture(GLvoid* data) = 0;
-    void init(GLvoid* data);
     void setSize(int newWidth, int newHeight);
     void setBorderColor(float r, float g, float b, float a) {
         borderColor[0] = r;
         borderColor[1] = g;
         borderColor[2] = b;
         borderColor[3] = a;
+    }
+    void setMipMap() const {
+        glBindTexture(target, textureID);
+        glGenerateMipmap(target);
+        glBindTexture(target, 0);
     }
 
     unsigned int textureID;
@@ -51,7 +54,6 @@ public:
 
     float borderColor[4] = { 0.0, 0.0, 0.0, 0.0 };
 
-    std::string path;
     TextureType textureType;
     TextureFactoryType textureFactoryType;
     std::string variableName;
@@ -63,106 +65,42 @@ public:
         textureType = TextureType::TEXTURE_2D;
         target = GL_TEXTURE_2D;
     }
-    void specifyTexture(GLvoid* data) override;
+    void init(GLvoid* data = nullptr);
+    std::string path;
 };
 
-class TextureMultiSample final : public Texture {
+class Texture2DMultiSample : public Texture {
 public:
-    TextureMultiSample() {
+    Texture2DMultiSample() {
         textureType = TextureType::TEXTURE_2D_MULTISAMPLE;
         target = GL_TEXTURE_2D_MULTISAMPLE;
     }
-    void specifyTexture(GLvoid* data) override;
-private:
+    void init();
     int samples = 4;
+};
+
+class TextureCubeMap : public Texture {
+public:
+    TextureCubeMap() {
+        textureType = TextureType::TEXTURE_CUBE_MAP;
+        target = GL_TEXTURE_CUBE_MAP;
+        paths.resize(6);
+    }
+    void init(const std::vector<GLvoid*>& dataSets = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr});
+    std::vector<std::string> paths;
+    std::vector<GLenum> subTargets = {
+        GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+        GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+        GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+        GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+    };
 };
 
 class TextureFactory {
 public:
-    static Texture* createTexture(TextureFactoryType textureFactoryType) {
-        Texture* texture = nullptr;
-        if (textureFactoryType == TextureFactoryType::TEXTURE_2D_LOADED) {
-            texture = new Texture2D();
-
-            texture->type = GL_UNSIGNED_BYTE;
-            texture->minFilter = GL_REPEAT;
-            texture->magFilter = GL_REPEAT;
-            texture->wrapS = GL_LINEAR_MIPMAP_LINEAR;
-            texture->wrapT = GL_LINEAR;
-            texture->generateMipMap = true;
-        } else if (textureFactoryType == TextureFactoryType::TEXTURE_MSAA_COLOR_ATTACHMENT) {
-            texture = new TextureMultiSample();
-
-            texture->internalFormat = GL_RGBA16F;
-        } else if (textureFactoryType == TextureFactoryType::TEXTURE_COMMON_COLOR_ATTACHMENT) {
-            texture = new Texture2D();
-
-            texture->internalFormat = GL_RGBA16F;
-            texture->format = GL_RGBA;
-            texture->type = GL_FLOAT;
-
-            texture->minFilter = GL_LINEAR;
-            texture->magFilter = GL_LINEAR;
-            texture->wrapS = GL_CLAMP_TO_EDGE;
-            texture->wrapT = GL_CLAMP_TO_EDGE;
-        } else if (textureFactoryType == TextureFactoryType::TEXTURE_COMMON_DEPTH_ATTACHMENT) {
-            texture = new Texture2D();
-
-            texture->internalFormat = GL_DEPTH_COMPONENT;
-            texture->format = GL_DEPTH_COMPONENT;
-            texture->type = GL_FLOAT;
-
-            texture->minFilter = GL_NEAREST;
-            texture->magFilter = GL_NEAREST;
-            texture->wrapS = GL_CLAMP_TO_BORDER;
-            texture->wrapT = GL_CLAMP_TO_BORDER;
-            texture->setBorderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        } else if (textureFactoryType == TextureFactoryType::TEXTURE_GEOMETRY_POSITION_COLOR_ATTACHMENT) {
-            texture = new Texture2D();
-
-            texture->internalFormat = GL_RGBA16F;
-            texture->format = GL_RGBA;
-            texture->type = GL_FLOAT;
-
-            texture->minFilter = GL_NEAREST;
-            texture->magFilter = GL_NEAREST;
-            texture->wrapS = GL_CLAMP_TO_EDGE;
-            texture->wrapT = GL_CLAMP_TO_EDGE;
-        } else if (textureFactoryType == TextureFactoryType::TEXTURE_GEOMETRY_NORMAL_COLOR_ATTACHMENT) {
-            texture = new Texture2D();
-
-            texture->internalFormat = GL_RGBA16F;
-            texture->format = GL_RGBA;
-            texture->type = GL_FLOAT;
-        } else if (textureFactoryType == TextureFactoryType::TEXTURE_GEOMETRY_ALBEDO_SPEC_COLOR_ATTACHMENT) {
-            texture = new Texture2D();
-
-            texture->internalFormat = GL_RGBA;
-            texture->format = GL_RGBA;
-            texture->type = GL_UNSIGNED_BYTE;
-        } else if (textureFactoryType == TextureFactoryType::TEXTURE_SSAO_NOISE) {
-            texture = new Texture2D();
-
-            texture->internalFormat = GL_RGB16F;
-            texture->format = GL_RGB;
-            texture->type = GL_FLOAT;
-        } else if (textureFactoryType == TextureFactoryType::TEXTURE_SSAO_COLOR_ATTACHMENT) {
-            texture = new Texture2D();
-
-            texture->internalFormat = GL_RED;
-            texture->format = GL_RED;
-            texture->type = GL_FLOAT;
-
-            texture->minFilter = GL_NEAREST;
-            texture->magFilter = GL_NEAREST;
-            texture->wrapS = GL_CLAMP_TO_EDGE;
-            texture->wrapT = GL_CLAMP_TO_EDGE;
-        } else {
-            std::cerr << "TextureFactoryType not found!" << std::endl;
-        }
-        if (texture != nullptr) texture->textureFactoryType = textureFactoryType;
-        return texture;
-    }
+    static Texture* createTexture(TextureFactoryType textureFactoryType);
 };
 
 #endif // TEXTURE_H

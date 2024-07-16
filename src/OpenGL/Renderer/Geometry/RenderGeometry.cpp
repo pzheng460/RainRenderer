@@ -1,8 +1,8 @@
 #include "../../Renderer.h"
 
-void Renderer::renderGeometry() {
-    frameBufferGeometry->bind();
-    frameBufferGeometry->reset();
+void Renderer::renderGeometry(FrameBuffer* frameBuffer) {
+    frameBuffer->bind();
+    frameBuffer->reset();
         shaderGeometry->use();
 
         shaderGeometry->setBool("invertNormals", false);
@@ -21,5 +21,5 @@ void Renderer::renderGeometry() {
 
             object->draw(shaderGeometry.get());
         }
-    frameBufferGeometry->unbind();
+    frameBuffer->unbind();
 }

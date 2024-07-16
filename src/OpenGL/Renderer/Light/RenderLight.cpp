@@ -1,9 +1,7 @@
 #include "../../Renderer.h"
-#include "../../Object.h"
 
-void Renderer::renderLight() {
-//    frameBufferMSAA->bind();
-//    frameBufferMSAA->reset();
+void Renderer::renderLight(FrameBuffer* frameBuffer) {
+    frameBuffer->bind();
 
     shaderLight->use();
 
@@ -15,5 +13,5 @@ void Renderer::renderLight() {
 
         light->draw();
     }
-//    frameBufferMSAA->unbind();
+    frameBuffer->unbind();
 }

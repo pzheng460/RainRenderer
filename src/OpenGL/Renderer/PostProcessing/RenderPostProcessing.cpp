@@ -1,8 +1,8 @@
 #include "../../Renderer.h"
 
-void Renderer::renderPostPossing() {
-    frameBufferDefault->bind();
-    frameBufferDefault->reset();
+void Renderer::renderPostProcessing(FrameBuffer* frameBuffer) {
+    frameBuffer->bind();
+    frameBuffer->reset();
         shaderPostProcessing->use();
         shaderPostProcessing->setTexture("hdrBuffer", frameBufferIntermediate->textureColorBuffers[0].get());
         shaderPostProcessing->setBool("HDRActive", gui.HDRActive);
@@ -12,5 +12,5 @@ void Renderer::renderPostPossing() {
         shaderPostProcessing->setBool("bloomActive", gui.bloomActive);
 
         screenQuad->draw();
-    frameBufferDefault->unbind();
+    frameBuffer->unbind();
 }

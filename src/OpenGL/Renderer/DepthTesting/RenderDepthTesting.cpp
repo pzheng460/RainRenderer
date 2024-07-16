@@ -1,8 +1,8 @@
 #include "../../Renderer.h"
 
-void Renderer::renderDepthTesting() {
-    frameBufferMSAA->bind();
-    frameBufferMSAA->reset();
+void Renderer::renderDepthTesting(FrameBuffer* frameBuffer) {
+    frameBuffer->bind();
+    frameBuffer->reset();
         shaderDepthTesting->use();
 
         shaderDepthTesting->setMat4("view", scene.camera->getViewMatrix());
@@ -19,5 +19,5 @@ void Renderer::renderDepthTesting() {
 
             object->draw();
         }
-    frameBufferMSAA->unbind();
+    frameBuffer->unbind();
 }

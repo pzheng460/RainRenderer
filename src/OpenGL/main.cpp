@@ -39,25 +39,26 @@ int main()
         return -1;
     }
 
-//    // load skybox 加载天空盒
-//    if (gui.skyboxMode == SkyboxLoadMode::CUBE_MAP) {
-//        Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/skybox.vs"), FileSystem::getPath("src/OpenGL/shaders/skybox.fs"));
-//        std::vector<std::string> faces =
-//                {
-//                        FileSystem::getPath("resources/textures/skybox/right.jpg"),
-//                        FileSystem::getPath("resources/textures/skybox/left.jpg"),
-//                        FileSystem::getPath("resources/textures/skybox/top.jpg"),
-//                        FileSystem::getPath("resources/textures/skybox/bottom.jpg"),
-//                        FileSystem::getPath("resources/textures/skybox/front.jpg"),
-//                        FileSystem::getPath("resources/textures/skybox/back.jpg")
-//                };
-//        Skybox skybox(skyboxShader, faces);
-//        scene.setSkybox(skybox);
-//    } else if (gui.skyboxMode == SkyboxLoadMode::SPHERE_MAP) {
-//        Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/background.vs"), FileSystem::getPath("src/OpenGL/shaders/background.fs"));
-//        Skybox skybox(skyboxShader, FileSystem::getPath("resources/textures/hdr/newport_loft.hdr"));
-//        scene.setSkybox(skybox);
-//    }
+    // load skybox 加载天空盒
+    if (gui->skyboxMode == SkyboxLoadMode::CUBE_MAP)
+    {
+        std::vector<std::string> paths =
+                {
+                        FileSystem::getPath("resources/textures/skybox/right.jpg"),
+                        FileSystem::getPath("resources/textures/skybox/left.jpg"),
+                        FileSystem::getPath("resources/textures/skybox/top.jpg"),
+                        FileSystem::getPath("resources/textures/skybox/bottom.jpg"),
+                        FileSystem::getPath("resources/textures/skybox/front.jpg"),
+                        FileSystem::getPath("resources/textures/skybox/back.jpg")
+                };
+        Skybox skybox(paths);
+        scene.setSkybox(skybox);
+    }
+    else if (gui->skyboxMode == SkyboxLoadMode::SPHERE_MAP)
+    {
+        Skybox skybox(FileSystem::getPath("resources/textures/hdr/newport_loft.hdr"));
+        scene.setSkybox(skybox);
+    }
 
     // load floor 加载地板
     auto floorModel = Model(GeometryType::PLANE);
@@ -67,7 +68,6 @@ int main()
 
     // load PBR Sphere 加载PBR球体
     auto sphereModel = Model(GeometryType::SPHERE);
-    stbi_set_flip_vertically_on_load(true);
     sphereModel.addTexture2D(FileSystem::getPath("resources/textures/pbr/rusted_iron/albedo.png"), PBR_ALBEDO_NAME);
     sphereModel.addTexture2D(FileSystem::getPath("resources/textures/pbr/rusted_iron/normal.png"), PBR_NORMAL_NAME);
     sphereModel.addTexture2D(FileSystem::getPath("resources/textures/pbr/rusted_iron/metallic.png"), PBR_METALLIC_NAME);
@@ -77,16 +77,16 @@ int main()
     scene.addObject(pbrSphere);
 
     // load lights 加载光源
-    auto light0 = Light(glm::vec3(-10.0f,  10.0f, 10.0f), glm::vec3(1.0f));
-//    Light light1(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(1.0f));
-//    Light light2(glm::vec3(-10.0f, -10.0f, 10.0f), glm::vec3(1.0f));
-//    Light light3(glm::vec3(10.0f, -10.0f, -10.0f), glm::vec3(1.0f));
+    Light light0(glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(15.0f));
+    Light light1(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(1.0f));
+    Light light2(glm::vec3(-10.0f, -10.0f, 10.0f), glm::vec3(1.0f));
+    Light light3(glm::vec3(10.0f, -10.0f, -10.0f), glm::vec3(1.0f));
 
 
     scene.addLight(light0);
-//    scene.addLight(light1);
-//    scene.addLight(light2);
-//    scene.addLight(light3);
+    scene.addLight(light1);
+    scene.addLight(light2);
+    scene.addLight(light3);
 
     auto realScreen = mainWindow.reset();
     Renderer renderer(realScreen.first, realScreen.second, *gui, scene);
@@ -103,7 +103,7 @@ int main()
         auto newScreen = mainWindow.reset();
         if (newScreen != realScreen) {
             realScreen = newScreen;
-            renderer.setSize(realScreen.first, realScreen.second);
+            renderer.setAllSize(realScreen.first, realScreen.second);
             renderer.init();
         }
 

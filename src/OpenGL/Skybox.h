@@ -15,37 +15,19 @@
 class Skybox : public Object {
 public:
     Skybox() = default;
-    explicit Skybox(const std::vector<std::string>& faces);
-    explicit Skybox(const std::string& hdrPath);
+    explicit Skybox(const std::vector<std::string>& paths);
+    explicit Skybox(const std::string& path);
 
-//    void draw();
-//    void drawGeometry();
+    void init();
 
-    unsigned int getCubemapTexture() const {
-      return cubemapTexture;
-    }
+    int width = 512, height = 512;
 
-    unsigned int getIrradianceMap() const {
-      return irradianceMap;
-    }
-
-    unsigned int getPrefilterMap() const {
-      return prefilterMap;
-    }
-
-    unsigned int getBRDFLUTTexture() const {
-      return brdfLUTTexture;
-    }
-
-private:
-    unsigned int cubemapTexture;
-
-    unsigned int envCubemap, irradianceMap, prefilterMap, brdfLUTTexture;
+    std::shared_ptr<Texture> cubeMap, sphereMap, irradiance, prefilter, brdfLUT;
 
     // pbr: set up projection and view matrices for capturing data onto the 6 cubemap face directions
     // ----------------------------------------------------------------------------------------------
-    glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-    glm::mat4 captureViews[6] =
+    const glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+    const glm::mat4 captureViews[6] =
             {
                     glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
                     glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
@@ -55,15 +37,7 @@ private:
                     glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
             };
 
-    unsigned int captureFBO, captureRBO;
-//    void loadCubemap(const std::vector<std::string>& faces);
-//
-//    void setupFramebuffers();
-//    void loadSphereMap(const std::string& hdrPath);
-//    void convertSphereMapToCubeMap(unsigned int hdrTexture);
-//    void createIrradianceMap();
-//    void createPrefilterMap();
-//    void generateBRDFLUTTexture();
+    bool initialized = false;
 };
 
 #endif // SKYBOX_H

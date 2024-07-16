@@ -106,6 +106,7 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, c
 
 void Shader::setTexture(const std::string &name, Texture *texture) {
     if (textureNameToUniformLocations.count(name) != 0) {
+        glUniform1i(glGetUniformLocation(ID, name.c_str()), textureNameToUniformLocations[name]); // same to setInt
         glActiveTexture(GL_TEXTURE0 + textureNameToUniformLocations[name]);
         glBindTexture(texture->target, texture->textureID);
     } else {
@@ -152,11 +153,11 @@ Shader* ShaderFactory::createShader(ShaderFactoryType shaderFactoryType) {
         shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/light_cube.vs"), FileSystem::getPath("src/OpenGL/shaders/light_cube.fs"));
     }
 
-    else if (shaderFactoryType == ShaderFactoryType::SHADER_SKYBOX_CUBE_MAP)
+    else if (shaderFactoryType == ShaderFactoryType::SHADER_SKYBOX)
     {
         shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/skybox.vs"), FileSystem::getPath("src/OpenGL/shaders/skybox.fs"));
     }
-    else if (shaderFactoryType == ShaderFactoryType::SHADER_SKYBOX_SPHERE_MAP)
+    else if (shaderFactoryType == ShaderFactoryType::SHADER_SKYBOX_HDR)
     {
         shader = new Shader(FileSystem::getPath("src/OpenGL/shaders/background.vs"), FileSystem::getPath("src/OpenGL/shaders/background.fs"));
     }

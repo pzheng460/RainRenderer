@@ -1,14 +1,14 @@
 #include "../../Renderer.h"
 
-void Renderer::renderShadowMapDebug() {
+void Renderer::renderShadowMapDebug(FrameBuffer* frameBuffer, int i) {
     float near_plane = 1.0f, far_plane = 100.0f;
-    frameBufferDefault->bind();
-    frameBufferDefault->reset();
+    frameBuffer->bind();
+    frameBuffer->reset();
         shaderShadowMapDebug->use();
         shaderShadowMapDebug->setFloat("near_plane", near_plane);
         shaderShadowMapDebug->setFloat("far_plane", far_plane);
-        shaderShadowMapDebug->setTexture("depthMap", frameBufferShadowMaps[0]->textureDepthBuffer.get());
+        shaderShadowMapDebug->setTexture("depthMap", frameBufferShadowMaps[i]->textureDepthBuffer.get());
 
         screenQuad->draw();
-    frameBufferDefault->unbind();
+    frameBuffer->unbind();
 }

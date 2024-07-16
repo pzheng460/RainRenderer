@@ -1,12 +1,12 @@
 #include "../../Renderer.h"
 
-void Renderer::renderSSAOBlur() {
-    frameBufferSSAOBlur->bind();
-    frameBufferSSAOBlur->reset();
+void Renderer::renderSSAOBlur(FrameBuffer* frameBuffer) {
+    frameBuffer->bind();
+    frameBuffer->reset();
         shaderSSAOBlur->use();
 
         shaderSSAOBlur->setTexture("ssaoInput", frameBufferSSAO->textureColorBuffers[0].get());
 
         screenQuad->draw();
-    frameBufferSSAOBlur->unbind();
+    frameBuffer->unbind();
 }

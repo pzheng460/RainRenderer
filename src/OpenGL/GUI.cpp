@@ -92,25 +92,23 @@ void GUI::render(Scene& scene) {
             ImGui::Text("Skybox Load Mode");
             if (ImGui::RadioButton("Cube Map", skyboxMode == SkyboxLoadMode::CUBE_MAP)) {
                 skyboxMode = SkyboxLoadMode::CUBE_MAP;
-//                Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/skybox.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/skybox.fs").c_str());
-//                std::vector<std::string> faces =
-//                        {
-//                                FileSystem::getPath("resources/textures/skybox/right.jpg"),
-//                                FileSystem::getPath("resources/textures/skybox/left.jpg"),
-//                                FileSystem::getPath("resources/textures/skybox/top.jpg"),
-//                                FileSystem::getPath("resources/textures/skybox/bottom.jpg"),
-//                                FileSystem::getPath("resources/textures/skybox/front.jpg"),
-//                                FileSystem::getPath("resources/textures/skybox/back.jpg")
-//                        };
-//                Skybox skybox(skyboxShader, faces);
-//                scene.setSkybox(skybox);
+                std::vector<std::string> paths =
+                        {
+                                FileSystem::getPath("resources/textures/skybox/right.jpg"),
+                                FileSystem::getPath("resources/textures/skybox/left.jpg"),
+                                FileSystem::getPath("resources/textures/skybox/top.jpg"),
+                                FileSystem::getPath("resources/textures/skybox/bottom.jpg"),
+                                FileSystem::getPath("resources/textures/skybox/front.jpg"),
+                                FileSystem::getPath("resources/textures/skybox/back.jpg")
+                        };
+                Skybox skybox(paths);
+                scene.setSkybox(skybox);
             }
             ImGui::SameLine();
             if (ImGui::RadioButton("Sphere Map", skyboxMode == SkyboxLoadMode::SPHERE_MAP)) {
                 skyboxMode = SkyboxLoadMode::SPHERE_MAP;
-//                Shader skyboxShader(FileSystem::getPath("src/OpenGL/shaders/background.vs").c_str(), FileSystem::getPath("src/OpenGL/shaders/background.fs").c_str());
-//                Skybox skybox(skyboxShader, FileSystem::getPath("resources/textures/hdr/newport_loft.hdr"));
-//                scene.setSkybox(skybox);
+                Skybox skybox(FileSystem::getPath("resources/textures/hdr/newport_loft.hdr"));
+                scene.setSkybox(skybox);
             }
         }
         if (!skyBoxActive) { ImGui::EndDisabled(); }

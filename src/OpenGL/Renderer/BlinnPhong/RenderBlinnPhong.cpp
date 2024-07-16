@@ -1,6 +1,6 @@
 #include "../../Renderer.h"
 
-void Renderer::renderBlinnPhong() {
+void Renderer::renderBlinnPhong(FrameBuffer* frameBuffer) {
     frameBufferMSAA->bind();
     frameBufferMSAA->reset();
         shaderBlinnPhong->use();
@@ -41,5 +41,5 @@ void Renderer::renderBlinnPhong() {
             shaderBlinnPhong->setMat4("model", object->getModelMatrix());
             object->draw(shaderBlinnPhong.get());
         }
-    frameBufferMSAA->unbind();
+    frameBuffer->unbind();
 }

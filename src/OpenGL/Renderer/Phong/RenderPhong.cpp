@@ -1,8 +1,8 @@
 #include "../../Renderer.h"
 
-void Renderer::renderPhong() {
-    frameBufferMSAA->bind();
-    frameBufferMSAA->reset();
+void Renderer::renderPhong(FrameBuffer* frameBuffer) {
+    frameBuffer->bind();
+    frameBuffer->reset();
         shaderPhong->use();
 
         for (unsigned int i = 0; i < scene.lights.size(); ++i)
@@ -35,5 +35,5 @@ void Renderer::renderPhong() {
 
             object->draw(shaderPhong.get());
         }
-    frameBufferMSAA->unbind();
+    frameBuffer->unbind();
 }

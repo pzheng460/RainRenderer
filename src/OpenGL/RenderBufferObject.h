@@ -13,17 +13,17 @@
 class RenderBufferObject {
 public:
     RenderBufferObject() {
-        glGenRenderbuffers(1, &rbo);
+        glGenRenderbuffers(1, &rboID);
     }
     virtual ~RenderBufferObject() {
-        glDeleteRenderbuffers(1, &rbo);
+        glDeleteRenderbuffers(1, &rboID);
     }
     virtual void init();
     void setSize(int newWidth, int newHeight) {
         this->width = newWidth;
         this->height = newHeight;
     }
-    unsigned int rbo;
+    unsigned int rboID;
     int width, height;
     GLenum internalFormat;
     RenderBufferObjectType renderBufferObjectType = RenderBufferObjectType::RENDER_BUFFER_OBJECT;
@@ -53,6 +53,11 @@ public:
         {
             renderBufferObject = new RenderBufferObjectMultiSample();
             renderBufferObject->internalFormat = GL_DEPTH24_STENCIL8;
+        }
+        else if (renderBufferObjectFactoryType == RenderBufferObjectFactoryType::RENDER_BUFFER_OBJECT_DEPTH_SKYBOX)
+        {
+            renderBufferObject = new RenderBufferObject();
+            renderBufferObject->internalFormat = GL_DEPTH_COMPONENT24;
         }
         else
         {

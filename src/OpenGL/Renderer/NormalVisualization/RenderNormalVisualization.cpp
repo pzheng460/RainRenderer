@@ -1,7 +1,7 @@
 #include "../../Renderer.h"
 
-void Renderer::renderNormalVisualization() {
-    frameBufferMSAA->bind();
+void Renderer::renderNormalVisualization(FrameBuffer* frameBuffer) {
+    frameBuffer->bind();
         shaderNormalVisualization->use();
 
         shaderNormalVisualization->setMat4("view", scene.camera->getViewMatrix());
@@ -18,5 +18,5 @@ void Renderer::renderNormalVisualization() {
 
             object->draw();
         }
-    frameBufferMSAA->unbind();
+    frameBuffer->unbind();
 }

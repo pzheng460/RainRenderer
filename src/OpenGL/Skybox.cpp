@@ -1,78 +1,24 @@
 #include "Skybox.h"
-#include <stb_image.h>
 
-Skybox::Skybox(const std::vector<std::string>& faces) {
-
+Skybox::Skybox(const std::vector<std::string>& paths) {
+    model = Model(GeometryType::CUBE);
+    cubeMap = std::shared_ptr<Texture>(model.loadTextureCube(paths));
+    init();
 }
 
-Skybox::Skybox(const std::string& hdrPath) {
-
+Skybox::Skybox(const std::string& path) {
+    model = Model(GeometryType::CUBE);
+    sphereMap = std::shared_ptr<Texture>(model.loadTexture2DHDR(path));
+    cubeMap = std::shared_ptr<Texture>(TextureFactory::createTexture(TextureFactoryType::TEXTURE_CUBE_MAP_SKYBOX));
+    init();
 }
 
-//void Skybox::loadCubemap(const std::vector<std::string> &faces) {
-//    stbi_set_flip_vertically_on_load(false);
-//    glGenTextures(1, &cubemapTexture);
-//    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-//
-//    int width, height, nrChannels;
-//    for (unsigned int i = 0; i < faces.size(); i++)
-//    {
-//        unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
-//        if (data)
-//        {
-//            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-//            stbi_image_free(data);
-//        }
-//        else
-//        {
-//            std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
-//            stbi_image_free(data);
-//        }
-//    }
-//    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-//    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-//}
-//
-//void Skybox::setupFramebuffers() {
-//    // setup framebuffer
-//    // ----------------------
-//    glGenFramebuffers(1, &captureFBO);
-//    glGenRenderbuffers(1, &captureRBO);
-//
-//    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-//    glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-//    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-//    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
-//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//}
-//
-//void Skybox::loadSphereMap(const std::string &hdrPath) {
-//    stbi_set_flip_vertically_on_load(true);
-//    int width, height, nrComponents;
-//    float *data = stbi_loadf(hdrPath.c_str(), &width, &height, &nrComponents, 0);
-//    unsigned int hdrTexture;
-//    if (data) {
-//        glGenTextures(1, &hdrTexture);
-//        glBindTexture(GL_TEXTURE_2D, hdrTexture);
-//        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data); // note how we specify the texture's data value to be float
-//
-//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//
-//        stbi_image_free(data);
-//    }
-//    else {
-//        std::cout << "Failed to load HDR image." << std::endl;
-//    }
-//
-//    cubemapTexture = hdrTexture;
-//}
-//
+void Skybox::init() {
+    irradiance = std::shared_ptr<Texture>(TextureFactory::createTexture(TextureFactoryType::TEXTURE_IRRADIANCE));
+    prefilter = std::shared_ptr<Texture>(TextureFactory::createTexture(TextureFactoryType::TEXTURE_PREFILTER));
+    brdfLUT = std::shared_ptr<Texture>(TextureFactory::createTexture(TextureFactoryType::TEXTURE_BRDF_LUT));
+}
+
 //void Skybox::convertSphereMapToCubeMap(unsigned int hdrTexture) {
 //    // pbr: setup cubemap to render to and attach to framebuffer
 //    // ---------------------------------------------------------
@@ -120,7 +66,6 @@ Skybox::Skybox(const std::string& hdrPath) {
 //    skyboxShader.setInt("environmentMap", 0);
 //
 //    // MVP matrices
-//    skyboxShader.setMat4("model", modelMatrix);
 //    skyboxShader.setMat4("view", viewMatrix);
 //    skyboxShader.setMat4("projection", projectionMatrix);
 //
@@ -129,81 +74,7 @@ Skybox::Skybox(const std::string& hdrPath) {
 //    renderCube();
 //    glDepthFunc(GL_LESS); // set depth function back to default
 //}
-//
-//void Skybox::drawGeometry() {
-//    float skyboxVertices[] = {
-//            // positions
-//            -1.0f,  1.0f, -1.0f,
-//            -1.0f, -1.0f, -1.0f,
-//            1.0f, -1.0f, -1.0f,
-//            1.0f, -1.0f, -1.0f,
-//            1.0f,  1.0f, -1.0f,
-//            -1.0f,  1.0f, -1.0f,
-//
-//            -1.0f, -1.0f,  1.0f,
-//            -1.0f, -1.0f, -1.0f,
-//            -1.0f,  1.0f, -1.0f,
-//            -1.0f,  1.0f, -1.0f,
-//            -1.0f,  1.0f,  1.0f,
-//            -1.0f, -1.0f,  1.0f,
-//
-//            1.0f, -1.0f, -1.0f,
-//            1.0f, -1.0f,  1.0f,
-//            1.0f,  1.0f,  1.0f,
-//            1.0f,  1.0f,  1.0f,
-//            1.0f,  1.0f, -1.0f,
-//            1.0f, -1.0f, -1.0f,
-//
-//            -1.0f, -1.0f,  1.0f,
-//            -1.0f,  1.0f,  1.0f,
-//            1.0f,  1.0f,  1.0f,
-//            1.0f,  1.0f,  1.0f,
-//            1.0f, -1.0f,  1.0f,
-//            -1.0f, -1.0f,  1.0f,
-//
-//            -1.0f,  1.0f, -1.0f,
-//            1.0f,  1.0f, -1.0f,
-//            1.0f,  1.0f,  1.0f,
-//            1.0f,  1.0f,  1.0f,
-//            -1.0f,  1.0f,  1.0f,
-//            -1.0f,  1.0f, -1.0f,
-//
-//            -1.0f, -1.0f, -1.0f,
-//            -1.0f, -1.0f,  1.0f,
-//            1.0f, -1.0f, -1.0f,
-//            1.0f, -1.0f, -1.0f,
-//            -1.0f, -1.0f,  1.0f,
-//            1.0f, -1.0f,  1.0f
-//    };
-//
-//    // skybox VAO
-//    unsigned int skyboxVAO, skyboxVBO;
-//    glGenVertexArrays(1, &skyboxVAO);
-//    glGenBuffers(1, &skyboxVBO);
-//    glBindVertexArray(skyboxVAO);
-//    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-//    glEnableVertexAttribArray(0);
-//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-//
-//    // draw skybox as last
-//    glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-//    skyboxShader.use();
-//
-//    // MVP matrices
-//    viewMatrix = glm::mat4(glm::mat3(viewMatrix)); // remove translation from the view matrix
-//    skyboxShader.setMat4("view", viewMatrix);
-//    skyboxShader.setMat4("projection", projectionMatrix);
-//
-//    // skybox cube
-//    glBindVertexArray(skyboxVAO);
-//    glActiveTexture(GL_TEXTURE0);
-//    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-//    glDrawArrays(GL_TRIANGLES, 0, 36);
-//    glBindVertexArray(0);
-//    glDepthFunc(GL_LESS); // set depth function back to default
-//}
-//
+
 //void Skybox::createIrradianceMap() {
 //    // pbr: create an irradiance cubemap, and re-scale capture FBO to irradiance scale.
 //    // --------------------------------------------------------------------------------

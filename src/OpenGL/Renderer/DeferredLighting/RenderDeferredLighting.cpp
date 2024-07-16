@@ -1,8 +1,8 @@
 #include "../../Renderer.h"
 
-void Renderer::renderDeferredLighting() {
-    frameBufferIntermediate->bind();
-    frameBufferIntermediate->reset();
+void Renderer::renderDeferredLighting(FrameBuffer* frameBuffer) {
+    frameBuffer->bind();
+    frameBuffer->reset();
         shaderDeferredLighting->use();
         shaderDeferredLighting->setTexture("gPosition", frameBufferGeometry->textureColorBuffers[0].get());
         shaderDeferredLighting->setTexture("gNormal", frameBufferGeometry->textureColorBuffers[1].get());
@@ -26,5 +26,5 @@ void Renderer::renderDeferredLighting() {
         shaderDeferredLighting->setBool("ssaoActive", gui.SSAOActive);
 
         screenQuad->draw();
-    frameBufferIntermediate->unbind();
+    frameBuffer->unbind();
 }

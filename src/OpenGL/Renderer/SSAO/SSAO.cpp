@@ -16,9 +16,9 @@ void SSAO::init() {
     generateSSAONoise();
 
     Texture* noiseTexturePtr = TextureFactory::createTexture(TextureFactoryType::TEXTURE_SSAO_NOISE);
+    noiseTexturePtr->setSize(4, 4);
+    dynamic_cast<Texture2D*>(noiseTexturePtr)->init(&ssaoNoise[0]);
     noiseTexture = std::shared_ptr<Texture>(noiseTexturePtr);
-    noiseTexture->setSize(4, 4);
-    noiseTexture->init(&ssaoNoise[0]);
 }
 
 void SSAO::generateSampleKernel() {

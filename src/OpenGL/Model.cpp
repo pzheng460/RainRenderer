@@ -119,7 +119,7 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* ma
         // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
         bool skip = false;
         for (unsigned int j = 0; j < textures_loaded.size(); j++) {
-            if (std::strcmp(textures_loaded[j]->path.data(), str.C_Str()) == 0) {
+            if (std::strcmp(dynamic_cast<Texture2D*>(textures_loaded[j].get())->path.data(), str.C_Str()) == 0) {
                 textures.push_back(textures_loaded[j]);
                 skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
                 break;
@@ -141,31 +141,82 @@ std::shared_ptr<Texture> Model::loadTexture2DFromFile(const std::string& filenam
     // replace '\' as '/' 替换路径中的反斜杠为正斜杠
     std::replace(path.begin(), path.end(), '\\', '/');
 
-    return loadTexture(path, TextureFactoryType::TEXTURE_2D_LOADED);
+    return std::shared_ptr<Texture>(loadTexture2D(path));
 }
 
-std::shared_ptr<Texture> Model::loadTexture(const std::string& path, TextureFactoryType textureFactoryType) {
+Texture* Model::loadTexture2D(const std::string& path) {
     // generate texture 创建纹理对象
-    auto textureLoaded = TextureFactory::createTexture(textureFactoryType);
-    textureLoaded->path = path;
+    auto textureLoaded = TextureFactory::createTexture(TextureFactoryType::TEXTURE_2D_LOADED);
+    dynamic_cast<Texture2D*>(textureLoaded)->path = path;
 
     int width, height, nrComponents;
     unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0);
     if (data) {
-        if (nrComponents == 1)
+        if (nrComponents == 1) {
             textureLoaded->format = textureLoaded->internalFormat = GL_RED; // 灰度图
-        else if (nrComponents == 3)
+        } else if (nrComponents == 3) {
             textureLoaded->format = textureLoaded->internalFormat = GL_RGB; // RGB图
-        else if (nrComponents == 4)
+        } else if (nrComponents == 4) {
             textureLoaded->format = textureLoaded->internalFormat = GL_RGBA; // RGBA图（带alpha值的透明通道）
-
+        }
         textureLoaded->setSize(width, height);
-        textureLoaded->init(data);
+        dynamic_cast<Texture2D*>(textureLoaded)->init(data);
     } else {
         std::cout << "Texture failed to load at path: " << path << std::endl;
     }
     // free memory 释放图像数据
     stbi_image_free(data);
 
-    return std::shared_ptr<Texture>(textureLoaded);
+    return textureLoaded;
+}
+
+Texture* Model::loadTexture2DHDR(const std::string& path) {
+    stbi_set_flip_vertically_on_load(true);
+    // generate texture 创建纹理对象
+    auto textureLoaded = TextureFactory::createTexture(TextureFactoryType::TEXTURE_2D_HDR_LOADED);
+    dynamic_cast<Texture2D*>(textureLoaded)->path = path;
+
+    int width, height, nrComponents;
+    float *data = stbi_loadf(path.c_str(), &width, &height, &nrComponents, 0);
+    if (data) {
+        textureLoaded->setSize(width, height);
+        dynamic_cast<Texture2D*>(textureLoaded)->init(data);
+    } else {
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+    }
+    // free memory 释放图像数据
+    stbi_image_free(data);
+
+    return textureLoaded;
+}
+
+Texture* Model::loadTextureCube(const std::vector<std::string>& paths) {
+    stbi_set_flip_vertically_on_load(false);
+    auto textureLoaded = TextureFactory::createTexture(TextureFactoryType::TEXTURE_CUBE_LOADED);
+    dynamic_cast<TextureCubeMap*>(textureLoaded)->paths = paths;
+
+    std::vector<GLvoid*> dataSets;
+    int width, height, nrChannels;
+    for (unsigned int i = 0; i < paths.size(); i++)
+    {
+        unsigned char *data = stbi_load(paths[i].c_str(), &width, &height, &nrChannels, 0);
+        if (data)
+        {
+            dataSets.push_back(data);
+        }
+        else
+        {
+            std::cout << "Cubemap texture failed to load at path: " << paths[i] << std::endl;
+        }
+    }
+
+    textureLoaded->setSize(width, height);
+    dynamic_cast<TextureCubeMap*>(textureLoaded)->init(dataSets);
+
+    for (unsigned int i = 0; i < dataSets.size(); i++)
+    {
+        stbi_image_free(dataSets[i]);
+    }
+
+    return textureLoaded;
 }

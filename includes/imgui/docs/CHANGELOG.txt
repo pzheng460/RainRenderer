@@ -279,7 +279,7 @@ Breaking Changes:
   - If calling ImGui_ImplGlfw_InitXXX with install_callbacks=false: you WILL NEED to register the GLFW callback
     using glfwSetCursorPosCallback() and forward it to the backend function ImGui_ImplGlfw_CursorPosCallback().
 - Backends: SDL: Added SDL_Renderer* parameter to ImGui_ImplSDL2_InitForSDLRenderer(), so backend can call
-  SDL_GetRendererOutputSize() to obtain framebuffer size valid for hi-dpi. (#4927) [@Clownacy]
+  SDL_GetRendererOutputSize() to obtain framebufferID size valid for hi-dpi. (#4927) [@Clownacy]
 - Commented out redirecting functions/enums names that were marked obsolete in 1.69, 1.70, 1.71, 1.72 (March-July 2019)
   - ImGui::SetNextTreeNodeOpen()        -> use ImGui::SetNextItemOpen()
   - ImGui::GetContentRegionAvailWidth() -> use ImGui::GetContentRegionAvail().x
@@ -545,7 +545,7 @@ Other Changes:
 - Backends: OpenGL3: Fixed our custom GL loader conflicting with user using GL3W. (#4445) [@rokups]
 - Backends: WebGPU: Fixed for latest specs. (#4472, #4512) [@Kangz, @bfierz]
 - Backends: SDL_Renderer: Added SDL_Renderer backend compatible with upcoming SDL 2.0.18. (#3926) [@1bsyl]
-- Backends: Metal: Fixed a crash when clipping rect larger than framebuffer is submitted via
+- Backends: Metal: Fixed a crash when clipping rect larger than framebufferID is submitted via
   a direct unclipped PushClipRect() call. (#4464)
 - Backends: OSX: Use mach_absolute_time as CFAbsoluteTimeGetCurrent can jump backwards. (#4557, #4563) [@lfnoise]
 - Backends: All renderers: Normalize clipping rect handling across backends. (#4464)

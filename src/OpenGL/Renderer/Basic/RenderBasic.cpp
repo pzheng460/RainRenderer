@@ -1,8 +1,8 @@
 #include "../../Renderer.h"
 
-void Renderer::renderBasic() {
-    frameBufferMSAA->bind();
-    frameBufferMSAA->reset();
+void Renderer::renderBasic(FrameBuffer* frameBuffer) {
+    frameBuffer->bind();
+    frameBuffer->reset();
         shaderBasic->use();
 
         shaderBasic->setMat4("view", scene.camera->getViewMatrix());
@@ -17,5 +17,5 @@ void Renderer::renderBasic() {
             shaderBasic->setMat4("model", object->getModelMatrix());
             object->draw(shaderBasic.get());
         }
-    frameBufferMSAA->unbind();
+    frameBuffer->unbind();
 }

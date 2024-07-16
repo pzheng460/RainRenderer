@@ -1,19 +1,23 @@
 #include "../../Renderer.h"
 
-void Renderer::renderPBR() {
-    frameBufferMSAA->bind();
-    frameBufferMSAA->reset();
+void Renderer::renderPBR(FrameBuffer* frameBuffer) {
+    frameBuffer->bind();
+    frameBuffer->reset();
         shaderPBR->use();
+//        shaderPBR->setInt("normalMap", 1);
+//        shaderPBR->setInt("metallicMap", 2);
+//        shaderPBR->setInt("roughnessMap", 3);
+//        shaderPBR->setInt("aoMap", 4);
 
-//        shaderPBR->setTexture("irradianceMap", irradianceMap);
-//        shaderPBR->setTexture("prefilterMap", prefilterMap);
-//        shaderPBR->setTexture("brdfLUT", brdfLUTTexture);
+        shaderPBR->setTexture("irradianceMap", scene.skybox->irradiance.get());
+        shaderPBR->setTexture("prefilterMap", scene.skybox->prefilter.get());
+        shaderPBR->setTexture("brdfLUT", scene.skybox->brdfLUT.get());
         for (int i = 0; i < scene.lights.size(); ++i)
         {
             shaderPBR->setVec3("lightPositions[" + std::to_string(i) + "]", scene.lights[i]->position);
             shaderPBR->setVec3("lightColors[" + std::to_string(i) + "]", scene.lights[i]->getColor());
         }
-
+        shaderPBR->setVec3("camPos", scene.camera->Position);
         shaderPBR->setMat4("view", scene.camera->getViewMatrix());
         shaderPBR->setMat4("projection", scene.camera->getProjectionMatrix(width, height));
 
@@ -23,5 +27,5 @@ void Renderer::renderPBR() {
 
             object->draw(shaderPBR.get());
         }
-    frameBufferMSAA->unbind();
+    frameBuffer->unbind();
 }

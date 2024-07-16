@@ -1,15 +1,11 @@
 #include "../../Renderer.h"
 
-void Renderer::renderEnvironmentMapping() {
-    frameBufferDefault->bind();
-    frameBufferDefault->reset();
+void Renderer::renderEnvironmentMapping(FrameBuffer* frameBuffer) {
+    frameBuffer->bind();
+    frameBuffer->reset();
         shaderEnvironmentMapping->use();
 
-        shaderEnvironmentMapping->setInt("skybox", 0);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, scene.skybox->getCubemapTexture());
-
-//        shaderEnvironmentMapping->setTexture("skybox", scene.skybox.getTexture());
+        shaderEnvironmentMapping->setTexture("skybox", scene.skybox->cubeMap.get());
         shaderEnvironmentMapping->setVec3("cameraPos", scene.camera->Position);
 
         shaderEnvironmentMapping->setMat4("view", scene.camera->getViewMatrix());
@@ -20,5 +16,5 @@ void Renderer::renderEnvironmentMapping() {
 
             object->draw();
         }
-    frameBufferDefault->unbind();
+    frameBuffer->unbind();
 }

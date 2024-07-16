@@ -44,11 +44,22 @@ public:
     }
 
     void addTexture2D(const std::string& path, const std::string& variableName) {
-        auto texture = loadTexture(path, TextureFactoryType::TEXTURE_2D_LOADED);
+        auto texture = loadTexture2D(path);
         texture->variableName = variableName;
         // 检测当前mesh的size是否为1，如果是则添加，不然报错
         if (meshes.size() == 1) {
-            meshes[0].textures.push_back(texture);
+            meshes[0].textures.push_back(std::shared_ptr<Texture>(texture));
+        } else {
+            std::cerr << "Error: It is not a common geometry model!" << std::endl;
+        }
+    }
+
+    void addTextureCube(const std::vector<std::string>& paths, const std::string& variableName) {
+        auto texture = loadTextureCube(paths);
+        texture->variableName = variableName;
+        // 检测当前mesh的size是否为1，如果是则添加，不然报错
+        if (meshes.size() == 1) {
+            meshes[0].textures.push_back(std::shared_ptr<Texture>(texture));
         } else {
             std::cerr << "Error: It is not a common geometry model!" << std::endl;
         }
@@ -59,6 +70,10 @@ public:
         for (unsigned int i = 0; i < meshes.size(); i++)
             meshes[i].draw(shader);
     }
+
+    Texture* loadTexture2D(const std::string& path);
+    Texture* loadTexture2DHDR(const std::string& path);
+    Texture* loadTextureCube(const std::vector<std::string>& paths);
 
 private:
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
@@ -72,7 +87,6 @@ private:
     std::vector<std::shared_ptr<Texture>> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& variableName);
 
     std::shared_ptr<Texture> loadTexture2DFromFile(const std::string& filename);
-    std::shared_ptr<Texture> loadTexture(const std::string& path, TextureFactoryType textureFactoryType);
 };
 
 #endif // MODEL_H
