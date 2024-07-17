@@ -3,7 +3,9 @@
 std::string toString(TextureFactoryType textureFactoryType) {
     switch (textureFactoryType) {
         CASE_STR(TextureFactoryType::TEXTURE_2D_LOADED);
+        CASE_STR(TextureFactoryType::TEXTURE_2D_HDR_LOADED);
         CASE_STR(TextureFactoryType::TEXTURE_CUBE_LOADED);
+        CASE_STR(TextureFactoryType::TEXTURE_CUBE_MAP_SKYBOX);
         CASE_STR(TextureFactoryType::TEXTURE_COMMON_COLOR_ATTACHMENT);
         CASE_STR(TextureFactoryType::TEXTURE_COMMON_DEPTH_ATTACHMENT);
         CASE_STR(TextureFactoryType::TEXTURE_MSAA_COLOR_ATTACHMENT);
@@ -12,6 +14,9 @@ std::string toString(TextureFactoryType textureFactoryType) {
         CASE_STR(TextureFactoryType::TEXTURE_GEOMETRY_ALBEDO_SPEC_COLOR_ATTACHMENT);
         CASE_STR(TextureFactoryType::TEXTURE_SSAO_COLOR_ATTACHMENT);
         CASE_STR(TextureFactoryType::TEXTURE_SSAO_NOISE);
+        CASE_STR(TextureFactoryType::TEXTURE_IRRADIANCE);
+        CASE_STR(TextureFactoryType::TEXTURE_PREFILTER);
+        CASE_STR(TextureFactoryType::TEXTURE_BRDF_LUT);
         default:
             return "UNKNOWN";
     }
@@ -22,10 +27,11 @@ std::string toString(FrameBufferFactoryType frameBufferFactoryType) {
         CASE_STR(FrameBufferFactoryType::FRAME_BUFFER_SHADOW_MAP);
         CASE_STR(FrameBufferFactoryType::FRAME_BUFFER_MSAA);
         CASE_STR(FrameBufferFactoryType::FRAME_BUFFER_INTERMEDIATE);
-        CASE_STR(FrameBufferFactoryType::FRAME_BUFFER_PING_PONG);
+        CASE_STR(FrameBufferFactoryType::FRAME_BUFFER_BLOOM);
         CASE_STR(FrameBufferFactoryType::FRAME_BUFFER_GEOMETRY);
         CASE_STR(FrameBufferFactoryType::FRAME_BUFFER_SSAO);
         CASE_STR(FrameBufferFactoryType::FRAME_BUFFER_SSAO_BLUR);
+        CASE_STR(FrameBufferFactoryType::FRAME_BUFFER_SKYBOX_CAPTURE);
         default:
             return "UNKNOWN";
     }

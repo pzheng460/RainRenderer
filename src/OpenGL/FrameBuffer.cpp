@@ -219,7 +219,7 @@ FrameBuffer* FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType frameB
     {
         frameBuffer = new FrameBuffer(2, 0, 1);
     }
-    else if (frameBufferFactoryType == FrameBufferFactoryType::FRAME_BUFFER_PING_PONG)
+    else if (frameBufferFactoryType == FrameBufferFactoryType::FRAME_BUFFER_BLOOM)
     {
         frameBuffer = new FrameBuffer(1, 0, 0);
     }

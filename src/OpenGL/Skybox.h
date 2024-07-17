@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include "Object.h"
+#include "Utils.h"
 
 class Skybox : public Object {
 public:

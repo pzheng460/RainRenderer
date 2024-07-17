@@ -2,13 +2,13 @@
 
 Skybox::Skybox(const std::vector<std::string>& paths) {
     model = Model(GeometryType::CUBE);
-    cubeMap = std::shared_ptr<Texture>(model.loadTextureCube(paths));
+    cubeMap = std::shared_ptr<Texture>(loadTextureCube(paths));
     init();
 }
 
 Skybox::Skybox(const std::string& path) {
     model = Model(GeometryType::CUBE);
-    sphereMap = std::shared_ptr<Texture>(model.loadTexture2DHDR(path));
+    sphereMap = std::shared_ptr<Texture>(loadTexture2DHDR(path));
     cubeMap = std::shared_ptr<Texture>(TextureFactory::createTexture(TextureFactoryType::TEXTURE_CUBE_MAP_SKYBOX));
     init();
 }

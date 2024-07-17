@@ -13,6 +13,7 @@
 #include "Mesh.h"
 #include "Shader.h"
 #include "Geometry.h"
+#include "Utils.h"
 
 #include <string>
 #include <fstream>
@@ -44,7 +45,7 @@ public:
     }
 
     void addTexture2D(const std::string& path, const std::string& variableName) {
-        auto texture = loadTexture2D(path);
+        auto texture = loadTexture2D(path, true);
         texture->variableName = variableName;
         // 检测当前mesh的size是否为1，如果是则添加，不然报错
         if (meshes.size() == 1) {
@@ -70,10 +71,6 @@ public:
         for (unsigned int i = 0; i < meshes.size(); i++)
             meshes[i].draw(shader);
     }
-
-    Texture* loadTexture2D(const std::string& path);
-    Texture* loadTexture2DHDR(const std::string& path);
-    Texture* loadTextureCube(const std::vector<std::string>& paths);
 
 private:
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.

@@ -24,7 +24,7 @@ Renderer::Renderer(int width, int height, GUI& gui, Scene& scene)
         frameBufferShadowMaps.emplace_back(FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_SHADOW_MAP));
     }
     for (int i = 0; i < 2; ++i) {
-        frameBufferBlooms.emplace_back(FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_PING_PONG));
+        frameBufferBlooms.emplace_back(FrameBufferFactory::createFrameBuffer(FrameBufferFactoryType::FRAME_BUFFER_BLOOM));
     }
 
     auto shaderLightPtr = ShaderFactory::createShader(ShaderFactoryType::SHADER_LIGHT);
