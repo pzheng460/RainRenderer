@@ -11,7 +11,7 @@ void Renderer::renderDeferredLighting(FrameBuffer* frameBuffer) {
 
         for (unsigned int i = 0; i < scene.lights.size(); ++i)
         {
-            shaderDeferredLighting->setVec3("lights[" + std::to_string(i) + "].Position", scene.lights[i]->position);
+            shaderDeferredLighting->setVec3("lights[" + std::to_string(i) + "].Position", glm::vec3(scene.camera->getViewMatrix() * glm::vec4(scene.lights[i]->position, 1.0f)));
             shaderDeferredLighting->setVec3("lights[" + std::to_string(i) + "].Color", scene.lights[i]->getColor());
             shaderDeferredLighting->setFloat("lights[" + std::to_string(i) + "].Linear", scene.lights[i]->getLinear());
             shaderDeferredLighting->setFloat("lights[" + std::to_string(i) + "].Quadratic", scene.lights[i]->getQuadratic());

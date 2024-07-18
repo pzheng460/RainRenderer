@@ -137,7 +137,7 @@ void Renderer::draw() {
         renderShadowMap(frameBufferShadowMaps[i].get(), i);
     }
 
-//    renderShadowMapDebug(frameBufferDefault.get(), 0;
+//    renderShadowMapDebug(frameBufferDefault.get(), 0);
 
     if (gui.renderingPath == RenderingPath::FORWARD_RENDERING) {
         forwardRendering();

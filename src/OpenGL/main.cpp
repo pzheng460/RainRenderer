@@ -77,16 +77,16 @@ int main()
     scene.addObject(pbrSphere);
 
     // load lights 加载光源
-    Light light0(glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(15.0f));
+    Light light0(glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(1.0f));
     Light light1(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(1.0f));
     Light light2(glm::vec3(-10.0f, -10.0f, 10.0f), glm::vec3(1.0f));
     Light light3(glm::vec3(10.0f, -10.0f, -10.0f), glm::vec3(1.0f));
 
 
     scene.addLight(light0);
-    scene.addLight(light1);
-    scene.addLight(light2);
-    scene.addLight(light3);
+//    scene.addLight(light1);
+//    scene.addLight(light2);
+//    scene.addLight(light3);
 
     auto realScreen = mainWindow.reset();
     Renderer renderer(realScreen.first, realScreen.second, *gui, scene);

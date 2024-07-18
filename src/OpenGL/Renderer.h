@@ -81,7 +81,7 @@ private:
     std::shared_ptr<Shader> shaderShadowMapDebug;
     void renderShadowMapDebug(FrameBuffer* frameBuffer, int i);
 
-    int shadowWidth = 1024, shadowHeight = 1024;
+    int shadowWidth = 4960, shadowHeight = 4960;
 
     // Basic
     std::shared_ptr<Shader> shaderBasic;

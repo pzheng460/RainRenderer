@@ -5,9 +5,7 @@ void Renderer::renderBlinnPhong(FrameBuffer* frameBuffer) {
     frameBufferMSAA->reset();
         shaderBlinnPhong->use();
 
-        if (gui.shadowActive) {
-            shaderBlinnPhong->setBool("shadowActive", gui.shadowActive);
-        }
+        shaderBlinnPhong->setBool("shadowActive", gui.shadowActive);
 
         for (unsigned int i = 0; i < scene.lights.size(); ++i)
         {
@@ -20,9 +18,9 @@ void Renderer::renderBlinnPhong(FrameBuffer* frameBuffer) {
             shaderBlinnPhong->setVec3("pointLights[" + std::to_string(i) + "].diffuse", scene.lights[i]->getDiffuseColor());
             shaderBlinnPhong->setVec3("pointLights[" + std::to_string(i) + "].specular", scene.lights[i]->getSpecularColor());
 
-            shaderBlinnPhong->setFloat("pointLights[" + std::to_string(i) + "].constant", 1.0f);
-            shaderBlinnPhong->setFloat("pointLights[" + std::to_string(i) + "].linear", 0.09f);
-            shaderBlinnPhong->setFloat("pointLights[" + std::to_string(i) + "].quadratic", 0.032f);
+            shaderBlinnPhong->setFloat("pointLights[" + std::to_string(i) + "].constant", scene.lights[i]->getConstant());
+            shaderBlinnPhong->setFloat("pointLights[" + std::to_string(i) + "].linear", scene.lights[i]->getLinear());
+            shaderBlinnPhong->setFloat("pointLights[" + std::to_string(i) + "].quadratic", scene.lights[i]->getQuadratic());
         }
 
         shaderBlinnPhong->setVec3("viewPos", scene.camera->Position);
