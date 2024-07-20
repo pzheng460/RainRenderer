@@ -182,8 +182,8 @@ void GUI::render(Scene& scene) {
         static char filePath[128] = "";
         ImGui::InputText("File Path", filePath, sizeof(filePath));
         if (ImGui::Button("Open File Dialog")) {
-            const char *filterPatterns[] = {"*.obj", "*.fbx", "*.dae", "*.pmx"};
-            const char *selectedFilePath = tinyfd_openFileDialog("Select Model File", "", 4, filterPatterns, NULL, 0);
+            const char *filterPatterns[] = {"*.obj", "*.fbx", "*.dae", "*.pmx", "*.gltf"};
+            const char *selectedFilePath = tinyfd_openFileDialog("Select Model File", "", 5, filterPatterns, NULL, 0);
             if (selectedFilePath) {
                 strncpy(filePath, selectedFilePath, sizeof(filePath) - 1);
                 filePath[sizeof(filePath) - 1] = '\0'; // 确保字符串以 null 结尾
@@ -213,9 +213,20 @@ void GUI::render(Scene& scene) {
             auto object = scene.objects[i].get();
             ImGui::Text("Object %d", i);
 
+            // Position controls
+            ImGui::Text("Position");
             ImGui::SliderFloat(("PosX##" + std::to_string(i)).c_str(), &object->position.x, -100.0f, 100.0f);
             ImGui::SliderFloat(("PosY##" + std::to_string(i)).c_str(), &object->position.y, -100.0f, 100.0f);
             ImGui::SliderFloat(("PosZ##" + std::to_string(i)).c_str(), &object->position.z, -100.0f, 100.0f);
+
+            // Rotation controls
+            ImGui::Text("Rotation");
+            ImGui::SliderFloat(("RotX##" + std::to_string(i)).c_str(), &object->rotation.x, -180.0f, 180.0f);
+            ImGui::SliderFloat(("RotY##" + std::to_string(i)).c_str(), &object->rotation.y, -180.0f, 180.0f);
+            ImGui::SliderFloat(("RotZ##" + std::to_string(i)).c_str(), &object->rotation.z, -180.0f, 180.0f);
+
+            // Scale controls
+            ImGui::Text("Scale");
             ImGui::SliderFloat(("Scale##" + std::to_string(i)).c_str(), &object->scale, 0.01f, 10.0f);
 
             // delete object 删除物体

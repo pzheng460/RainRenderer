@@ -28,9 +28,9 @@ public:
 
     bool controlActive = false;
 
-    bool skyBoxActive = false;
+    bool skyBoxActive = true;
     bool lightActive = true;
-    bool floorActive = true;
+    bool floorActive = false;
 
     bool normalVisualizationActive = false;
     bool faceCullingActive = false;

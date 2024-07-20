@@ -101,11 +101,31 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<std::shared_ptr<Texture>> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, SPECULAR_NAME);
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     // 3. normal maps
-    std::vector<std::shared_ptr<Texture>> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, NORMAL_NAME);
+    std::vector<std::shared_ptr<Texture>> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, NORMAL_NAME);
     textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
     // 4. height maps
-    std::vector<std::shared_ptr<Texture>> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, HEIGHT_NAME);
+    std::vector<std::shared_ptr<Texture>> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, HEIGHT_NAME);
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+
+    // add PBR textures
+    // 1. albedo maps
+    std::vector<std::shared_ptr<Texture>> albedoMaps = loadMaterialTextures(material, aiTextureType_BASE_COLOR, PBR_ALBEDO_NAME);
+    textures.insert(textures.end(), albedoMaps.begin(), albedoMaps.end());
+    // 2. normal maps
+    std::vector<std::shared_ptr<Texture>> normalMapsPBR = loadMaterialTextures(material, aiTextureType_NORMAL_CAMERA, PBR_NORMAL_NAME);
+    textures.insert(textures.end(), normalMapsPBR.begin(), normalMapsPBR.end());
+    // 3. metallic maps
+    std::vector<std::shared_ptr<Texture>> metallicMaps = loadMaterialTextures(material, aiTextureType_METALNESS, PBR_METALLIC_NAME);
+    textures.insert(textures.end(), metallicMaps.begin(), metallicMaps.end());
+    // 4. roughness maps
+    std::vector<std::shared_ptr<Texture>> roughnessMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE_ROUGHNESS, PBR_ROUGHNESS_NAME);
+    textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
+    // 5. ao maps
+    std::vector<std::shared_ptr<Texture>> aoMaps = loadMaterialTextures(material, aiTextureType_AMBIENT_OCCLUSION, PBR_AO_NAME);
+    textures.insert(textures.end(), aoMaps.begin(), aoMaps.end());
+    // 6. emission maps
+    std::vector<std::shared_ptr<Texture>> emissionMaps = loadMaterialTextures(material, aiTextureType_EMISSIVE, PBR_EMISSION_NAME);
+    textures.insert(textures.end(), emissionMaps.begin(), emissionMaps.end());
 
     // return a mesh object created from the extracted mesh data
     return Mesh(vertices, indices, textures);

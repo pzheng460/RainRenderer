@@ -90,11 +90,12 @@ constexpr const char* SPECULAR_NAME = "material.texture_specular1";
 constexpr const char* NORMAL_NAME = "material.texture_normal1";
 constexpr const char* HEIGHT_NAME = "material.texture_height1";
 
-constexpr const char* PBR_ALBEDO_NAME = "albedoMap";
-constexpr const char* PBR_NORMAL_NAME = "normalMap";
-constexpr const char* PBR_METALLIC_NAME = "metallicMap";
-constexpr const char* PBR_ROUGHNESS_NAME = "roughnessMap";
-constexpr const char* PBR_AO_NAME = "aoMap";
+constexpr const char* PBR_ALBEDO_NAME = "material.albedoMap";
+constexpr const char* PBR_NORMAL_NAME = "material.normalMap";
+constexpr const char* PBR_METALLIC_NAME = "material.metallicMap";
+constexpr const char* PBR_ROUGHNESS_NAME = "material.roughnessMap";
+constexpr const char* PBR_AO_NAME = "material.aoMap";
+constexpr const char* PBR_EMISSION_NAME = "material.emissionMap";
 constexpr const char* PBR_IRRADIANCE_NAME = "irradianceMap";
 constexpr const char* PBR_PREFILTER_NAME = "prefilterMap";
 constexpr const char* PBR_BRDF_LUT_NAME = "brdfLUT";

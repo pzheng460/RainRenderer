@@ -1,15 +1,19 @@
 #version 330 core
 out vec4 FragColor;
+
+// material parameters
+struct Material {
+    sampler2D albedoMap;
+    sampler2D metallicMap;
+    sampler2D normalMap;
+    sampler2D roughnessMap;
+    sampler2D aoMap;
+    sampler2D emissionMap;
+};
+
 in vec2 TexCoords;
 in vec3 WorldPos;
 in vec3 Normal;
-
-// material parameters
-uniform sampler2D albedoMap;
-uniform sampler2D normalMap;
-uniform sampler2D metallicMap;
-uniform sampler2D roughnessMap;
-uniform sampler2D aoMap;
 
 // IBL
 uniform samplerCube irradianceMap;
@@ -23,6 +27,8 @@ uniform vec3 lightColors[4];
 uniform vec3 camPos;
 
 const float PI = 3.14159265359;
+
+uniform Material material;
 // ----------------------------------------------------------------------------
 // Easy trick to get tangent-normals to world-space to keep PBR code simplified.
 // Don't worry if you don't get what's going on; you generally want to do normal 
@@ -30,7 +36,7 @@ const float PI = 3.14159265359;
 // technique somewhere later in the normal mapping tutorial.
 vec3 getNormalFromMap()
 {
-    vec3 tangentNormal = texture(normalMap, TexCoords).xyz * 2.0 - 1.0;
+    vec3 tangentNormal = texture(material.normalMap, TexCoords).xyz * 2.0 - 1.0;
 
     vec3 Q1  = dFdx(WorldPos);
     vec3 Q2  = dFdy(WorldPos);
@@ -93,10 +99,11 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 void main()
 {		
     // material properties
-    vec3 albedo = pow(texture(albedoMap, TexCoords).rgb, vec3(2.2));
-    float metallic = texture(metallicMap, TexCoords).r;
-    float roughness = texture(roughnessMap, TexCoords).r;
-    float ao = texture(aoMap, TexCoords).r;
+    vec3 albedo = pow(texture(material.albedoMap, TexCoords).rgb, vec3(2.2));
+    vec3 emission = texture(material.emissionMap, TexCoords).rgb;
+    float metallic = texture(material.metallicMap, TexCoords).r;
+    float roughness = texture(material.roughnessMap, TexCoords).r;
+    float ao = texture(material.aoMap, TexCoords).r;
        
     // input lighting data
     vec3 N = getNormalFromMap();
@@ -110,6 +117,7 @@ void main()
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
+    Lo += emission;
     for(int i = 0; i < 4; ++i) 
     {
         // calculate per-light radiance

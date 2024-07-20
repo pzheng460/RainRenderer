@@ -82,7 +82,6 @@ int main()
     Light light2(glm::vec3(-10.0f, -10.0f, 10.0f), glm::vec3(1.0f));
     Light light3(glm::vec3(10.0f, -10.0f, -10.0f), glm::vec3(1.0f));
 
-
     scene.addLight(light0);
 //    scene.addLight(light1);
 //    scene.addLight(light2);

@@ -71,6 +71,9 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightPos, sampler2D shadowMap);
 
+vec3 DIFFUSE = texture(material.texture_diffuse1, TexCoords).rgb;
+vec3 SPECULAR = texture(material.texture_specular1, TexCoords).rgb == vec3(0.0) ? DIFFUSE : texture(material.texture_specular1, TexCoords).rgb;
+
 void main()
 {
     // properties
@@ -135,10 +138,11 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     // attenuation
     float distance = length(light.position - fragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+
     // combine results
-    vec3 ambient = light.ambient * vec3(texture(material.texture_diffuse1, TexCoords));
-    vec3 diffuse = light.diffuse * diff * vec3(texture(material.texture_diffuse1, TexCoords));
-    vec3 specular = light.specular * spec * vec3(texture(material.texture_specular1, TexCoords));
+    vec3 ambient = light.ambient * DIFFUSE;
+    vec3 diffuse = light.diffuse * diff * DIFFUSE;
+    vec3 specular = light.specular * spec * SPECULAR;
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;

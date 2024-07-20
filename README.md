@@ -1,8 +1,56 @@
 # Rein Renderer
-This renderer is based on Learn OpenGL [https://learnopengl.com](https://learnopengl.com). 
+This renderer is written in C++ based on OpenGL, which is used for my own Computer Graphic's study.
 
-## Design Disciplines
-- Every polymorphic class should have an enum class for type identification.
+## Features
+
+- Forward Rendering
+  - MSAA
+  - Depth testing
+  - Shadow mapping
+  - Phong reflection model
+  - Blinn–Phong reflection model
+  - Environment mapping
+  - Physically based rendering (PBR)
+  - Image-based lighting (IBL)
+- Deferred Rendering
+  - Blinn–Phong reflection model
+  - SSAO
+- Cube-mapped skybox and sphere-mapped skybox
+- Tangent space normal mapping
+- Back-face culling
+- Orbital camera controls
+- Object controls
+- Gamma correction
+- HDR
+- Bloom
+
+## Load Models
+
+This part is supported by `imgui` and `tinyfiledialogs`. 
+
+- If you directly press the `Load Model` button, the renderer will load the a default miku model.
+- Load your own models:
+  1. put your model file `./obj` , `./fbx`, `.dae`, or `./pmx` in the directory `resources/objects` .
+  2. Press `Open File Dialog` button and find your own model file.
+  3. Press the `Load Model` button, the renderer will load the your desired model.
+
+## Major Classes
+- `Renderer` : It is a major class for rendering part, including all the shared shaders and frame buffers.
+- `Shader` : It is a class for compiling the shaders for our renderer, including the functions to set the shader.
+- `FrameBuffer` : It is a class for establishing frame buffers , including sub-color textures, sub-depth texture, sub-render buffer objects.
+- `Object` : It is a class for creating all the objects in the renderer, including the models (meshes) and their position.
+- `Texture` : It is a class for creating all the kinds of textures in our renderer.
+- `Skybox` : It is a class for creating skybox and IBL part.
+- `Scene` : It is a class for managing the major contents in our renderer, such as objects, floor, skybox, lights, camera, etc.
+
+## Third Party Libraries
+
+- `assimp` https://github.com/assimp/assimp
+- `glfw` https://github.com/glfw/glfw
+- `glm` https://github.com/g-truc/glm
+- `imgui` https://github.com/ocornut/imgui
+- `stb_image` https://github.com/nothings/stb
+- `tinyfiledialogs` [native-toolkit/libtinyfiledialogs (github.com)](https://github.com/native-toolkit/libtinyfiledialogs?tab=readme-ov-file)
 
 ## Windows building
 All relevant libraries are found in /libs and all DLLs found in /dlls (pre-)compiled for Windows. 
@@ -46,7 +94,6 @@ cd xcode
 cmake -G Xcode ..
 ```
 
-## Glitter
-Polytonic created a project called [Glitter](https://github.com/Polytonic/Glitter) that is a dead-simple boilerplate for OpenGL. 
-Everything you need to run a single LearnOpenGL Project (including all libraries) and just that; nothing more. 
-Perfect if you want to follow along with the chapters, without the hassle of having to manually compile and link all third party libraries!
+## Reference
+
+Special thanks to Learn OpenGL [https://learnopengl.com](https://learnopengl.com) for their invaluable tutorials and assistance.

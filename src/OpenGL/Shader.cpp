@@ -1,16 +1,18 @@
 #include "Shader.h"
 
 Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath) {
-    textureNameToUniformLocations[DIFFUSE_NAME] = 0;
-    textureNameToUniformLocations[SPECULAR_NAME] = 1;
-    textureNameToUniformLocations[NORMAL_NAME] = 2;
-    textureNameToUniformLocations[HEIGHT_NAME] = 3;
+    textureNameToSlot[DIFFUSE_NAME] = 0;
+    textureNameToSlot[SPECULAR_NAME] = 1;
+    textureNameToSlot[NORMAL_NAME] = 2;
+    textureNameToSlot[HEIGHT_NAME] = 3;
 
-    textureNameToUniformLocations[PBR_ALBEDO_NAME] = 0;
-    textureNameToUniformLocations[PBR_NORMAL_NAME] = 1;
-    textureNameToUniformLocations[PBR_METALLIC_NAME] = 2;
-    textureNameToUniformLocations[PBR_ROUGHNESS_NAME] = 3;
-    textureNameToUniformLocations[PBR_AO_NAME] = 4;
+    textureNameToSlot[PBR_ALBEDO_NAME] = 0;
+    textureNameToSlot[PBR_METALLIC_NAME] = 1;
+    textureNameToSlot[PBR_NORMAL_NAME] = 2;
+    textureNameToSlot[PBR_ROUGHNESS_NAME] = 3;
+    textureNameToSlot[PBR_AO_NAME] = 4;
+    textureNameToSlot[PBR_EMISSION_NAME] = 5;
+
     // 1. retrieve the vertex/fragment source code from filePath 从文件路径检索顶点/片段源代码
     std::string vertexCode;
     std::string fragmentCode;
@@ -97,6 +99,11 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, c
     // check for linking errors 检查链接错误
     checkCompileErrors(ID, "PROGRAM");
 
+    use();
+    for (auto& [name, slot] : textureNameToSlot) {
+        glUniform1i(glGetUniformLocation(ID, name.c_str()), slot);
+    }
+
     // delete the shaders as they're linked into our program now and no longer necessary 删除着色器，因为它们现在已经链接到我们的程序中，不再需要
     glDeleteShader(vertex);
     glDeleteShader(fragment);
@@ -105,9 +112,9 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, c
 }
 
 void Shader::setTexture(const std::string &name, Texture *texture) {
-    if (textureNameToUniformLocations.count(name) != 0) {
-        glUniform1i(glGetUniformLocation(ID, name.c_str()), textureNameToUniformLocations[name]); // same to setInt
-        glActiveTexture(GL_TEXTURE0 + textureNameToUniformLocations[name]);
+    if (textureNameToSlot.count(name) != 0) {
+//        glUniform1i(glGetUniformLocation(ID, name.c_str()), textureNameToSlot[name]); // same to setInt
+        glActiveTexture(GL_TEXTURE0 + textureNameToSlot[name]);
         glBindTexture(texture->target, texture->textureID);
     } else {
         GLint location = glGetUniformLocation(ID, name.c_str());
@@ -115,7 +122,7 @@ void Shader::setTexture(const std::string &name, Texture *texture) {
             glActiveTexture(GL_TEXTURE0 + lastBindingIndex);
             glUniform1i(location, lastBindingIndex);
             glBindTexture(texture->target, texture->textureID);
-            textureNameToUniformLocations[name] = lastBindingIndex;
+            textureNameToSlot[name] = lastBindingIndex;
             lastBindingIndex++;
         } else {
             std::cout << "Texture " << name << " can not be found in shader: " << toString(shaderFactoryType) << std::endl;

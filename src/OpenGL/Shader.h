@@ -92,8 +92,8 @@ public:
     void setTexture(const std::string &name, Texture* texture);
 
 private:
-    int lastBindingIndex = 5;
-    std::map<std::string, int> textureNameToUniformLocations;
+    int lastBindingIndex = 6;
+    std::unordered_map<std::string, int> textureNameToSlot;
 
     // utility function for checking shader compilation/linking errors.
     // ------------------------------------------------------------------------
