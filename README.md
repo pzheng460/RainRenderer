@@ -1,6 +1,16 @@
 # Rein Renderer
 This renderer is written in C++ based on OpenGL, which is used for my own Computer Graphic's study.
 
+## Example Images
+
+![PBR_example.jpg](images/PBR_example.jpg)
+
+*PBR*
+
+![showcase](images/showcase.gif)
+
+*Guidance*
+
 ## Features
 
 - Forward Rendering
@@ -35,6 +45,7 @@ This part is supported by `imgui` and `tinyfiledialogs`.
   3. Press the `Load Model` button, the renderer will load the your desired model.
 
 ## Major Classes
+
 - `Renderer` : It is a major class for rendering part, including all the shared shaders and frame buffers.
 - `Shader` : It is a class for compiling the shaders for our renderer, including the functions to set the shader.
 - `FrameBuffer` : It is a class for establishing frame buffers , including sub-color textures, sub-depth texture, sub-render buffer objects.

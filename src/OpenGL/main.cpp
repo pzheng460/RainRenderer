@@ -67,14 +67,14 @@ int main()
     scene.setFloor(floor);
 
     // load PBR Sphere 加载PBR球体
-    auto sphereModel = Model(GeometryType::SPHERE);
-    sphereModel.addTexture2D(FileSystem::getPath("resources/textures/pbr/rusted_iron/albedo.png"), PBR_ALBEDO_NAME);
-    sphereModel.addTexture2D(FileSystem::getPath("resources/textures/pbr/rusted_iron/normal.png"), PBR_NORMAL_NAME);
-    sphereModel.addTexture2D(FileSystem::getPath("resources/textures/pbr/rusted_iron/metallic.png"), PBR_METALLIC_NAME);
-    sphereModel.addTexture2D(FileSystem::getPath("resources/textures/pbr/rusted_iron/roughness.png"), PBR_ROUGHNESS_NAME);
-    sphereModel.addTexture2D(FileSystem::getPath("resources/textures/pbr/rusted_iron/ao.png"), PBR_AO_NAME);
-    auto pbrSphere = Object(sphereModel);
-    scene.addObject(pbrSphere);
+//    auto sphereModel = Model(GeometryType::SPHERE);
+//    sphereModel.addTexture2D(FileSystem::getPath("resources/textures/pbr/rusted_iron/albedo.png"), PBR_ALBEDO_NAME);
+//    sphereModel.addTexture2D(FileSystem::getPath("resources/textures/pbr/rusted_iron/normal.png"), PBR_NORMAL_NAME);
+//    sphereModel.addTexture2D(FileSystem::getPath("resources/textures/pbr/rusted_iron/metallic.png"), PBR_METALLIC_NAME);
+//    sphereModel.addTexture2D(FileSystem::getPath("resources/textures/pbr/rusted_iron/roughness.png"), PBR_ROUGHNESS_NAME);
+//    sphereModel.addTexture2D(FileSystem::getPath("resources/textures/pbr/rusted_iron/ao.png"), PBR_AO_NAME);
+//    auto pbrSphere = Object(sphereModel);
+//    scene.addObject(pbrSphere);
 
     // load lights 加载光源
     Light light0(glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(1.0f));
