@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.0)
 cmake_policy(VERSION 3.0)
 
-project(ReinRenderer)
+project(RainRenderer)
 
 set(CMAKE_CXX_STANDARD 17) # this does nothing for MSVC, use target_compile_options below
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -62,7 +62,7 @@ else()
   set(LIBS )
 endif(WIN32)
 
-set(ReinRenderer
+set(RainRenderer
     OpenGL
 )
 
@@ -170,8 +170,8 @@ function(create_project_from_sources chapter demo)
 endfunction()
 
 # then create a project file per directory
-foreach(REINRENDERER ${ReinRenderer})
-    create_project_from_sources(${REINRENDERER} "")
-endforeach(REINRENDERER)
+foreach(RAINRENDERER ${RainRenderer})
+    create_project_from_sources(${RAINRENDERER} "")
+endforeach(RAINRENDERER)
 
 include_directories(${CMAKE_SOURCE_DIR}/includes)

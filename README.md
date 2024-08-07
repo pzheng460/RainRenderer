@@ -2,15 +2,48 @@
 
 This renderer is written in C++ based on OpenGL, which is used for my own Computer Graphic's study.
 
-## Example Images
+- C++
+- OpenGL
+- Rasterization
+- GPU
 
-![PBR_example.jpg](images/PBR_example.jpg)
+## Example Images
 
 *PBR*
 
-![showcase](images/showcase.gif)
+![PBR_example.jpg](images/PBR_example.jpg)
 
-*Guidance*
+*Phong*
+
+![Phong_example.jpg](images/Phong_example.jpg)
+
+*Blinn-Phong*
+
+![Blinn_Phong_example.jpg](images/Blinn_Phong_example.jpg)
+
+*Environment Mapping*
+
+![environment_mapping_example.jpg](images/environment_mapping_example.jpg)
+
+*depth testing*
+
+![depth_testing_example.jpg](images/depth_testing_example.jpg)
+
+*Shadow Mapping*
+
+![shadow_mapping_example.jpg](images/shadow_mapping_example.jpg)
+
+*SSAO*
+
+![SSAO_example.jpg](images/SSAO_example.jpg)
+
+*bloom*
+
+![bloom_example.jpg](images/bloom_example.jpg)
+
+*Demo Video*
+
+![showcase](images/showcase.gif)
 
 ## Features
 
