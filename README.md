@@ -1,4 +1,5 @@
-# Rein Renderer
+# Rain Renderer
+
 This renderer is written in C++ based on OpenGL, which is used for my own Computer Graphic's study.
 
 ## Example Images
