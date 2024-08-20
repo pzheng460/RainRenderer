@@ -33,7 +33,7 @@ int main()
     MainWindow::gui = gui;
 
     // bind GUI to Window 绑定GUI到Window
-    MainWindow mainWindow(SCR_WIDTH, SCR_HEIGHT, "Rein Renderer GL");
+    MainWindow mainWindow(SCR_WIDTH, SCR_HEIGHT, "Rain Renderer");
 
     if (!mainWindow.init()) {
         return -1;
